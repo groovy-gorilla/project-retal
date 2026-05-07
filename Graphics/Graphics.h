@@ -9,7 +9,7 @@ public:
     void Initialize(Window& window, ApplicationDesc& desc);
     void Shutdown(ApplicationDesc& desc);
 
-    void DrawFrame(Window& window, ApplicationDesc& desc);
+    void Render(ApplicationDesc& desc);
 
     void RecreateSwapchain(Window& window);
 

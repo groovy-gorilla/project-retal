@@ -1,21 +1,20 @@
 #pragma once
 
 #include "../../Engine/Core/Window.h"
-#include "VulkanInstance.h"
-#include "VulkanDebug.h"
-#include "VulkanSurface.h"
-
-
-#include "VulkanPhysicalDevice.h"
-#include "VulkanDevice.h"
-#include "VulkanSwapchain.h"
-#include "Scene/VulkanSceneRenderPass.h"
-#include "Screen/VulkanScreenRenderPass.h"
-#include "VulkanCommandPool.h"
-#include "VulkanCommandBuffers.h"
-#include "Scene/VulkanScenePipeline.h"
-#include "Scene/VulkanSceneResources.h"
-#include "VulkanSampler.h"
+#include "Core/VulkanInstance.h"
+#include "Core/VulkanDebug.h"
+#include "Core/VulkanSurface.h"
+#include "Core/VulkanPhysicalDevice.h"
+#include "Core/VulkanDevice.h"
+#include "Core/VulkanSwapchain.h"
+#include "SceneRendering/VulkanSceneRenderPass.h"
+#include "PostRendering/VulkanPostRenderPass.h"
+#include "SceneRendering/VulkanScenePipeline.h"
+#include "SceneRendering/VulkanSceneResources.h"
+#include "PostRendering/VulkanPostResources.h"
+#include "Core/VulkanCommands.h"
+#include "Core/VulkanSync.h"
+#include "Core/VulkanQueues.h"
 
 struct ViewportRect {
     float x;
@@ -28,22 +27,12 @@ struct ViewportRect {
 class VulkanRenderer {
 public:
     void Initialize(Window& window, ApplicationDesc& desc);
-    void Shutdown();
+    void Shutdown(ApplicationDesc& desc);
 
-    void SetMSAA(VkSampleCountFlagBits msaa);
-
-
-
-
-// TEGO JESZCZE NIE MA:
-    void RecreateSwapchain(Window& window);
-    ViewportRect CalculateViewport(int width, int height, const ApplicationDesc& desc);
     void RecordCommandBuffer(uint32_t imageIndex, ApplicationDesc& desc);
-    void DrawFrame(Window& window, ApplicationDesc& desc);
-    void CreateSyncObjects(ApplicationDesc& desc);
-    void CreateDescriptorPool();
-    void CreateDescriptorSet();
-    void UpdateDescriptorSet();
+
+    void Render(ApplicationDesc& desc);
+
 
 
 
@@ -62,38 +51,14 @@ private:
     VulkanScenePipeline m_scenePipeline;
 
     // SCREEN
-    VulkanScreenRenderPass m_screenRenderPass;
-    //VulkanScreenResources m_screenResources;
-    //VulkanScreenPipeline m_screenPipeline;
+    VulkanPostRenderPass m_postRenderPass;
+    VulkanPostResources m_postResources;
 
-
-
-
-    VkQueue m_graphicsQueue = VK_NULL_HANDLE;
-    VkQueue m_presentQueue = VK_NULL_HANDLE;
+    VulkanCommands m_commands;
+    VulkanSync m_sync;
+    VulkanQueues m_queues;
 
     VkDebugUtilsMessengerEXT m_debugMessenger = VK_NULL_HANDLE;
-
-
-
-
-
-
-
-
-// TEGO JESZCZE NIE MA:
-    VulkanCommandPool m_commandPool;
-    VulkanCommandBuffers m_commandBuffers;
-
-    VkDescriptorPool m_descriptorPool;
-    VkDescriptorSet m_descriptorSet;
-    VulkanSampler m_sampler;
-    std::vector<VkSemaphore> m_imageAvailableSemaphores;
-    std::vector<VkSemaphore> m_renderFinishedSemaphores;
-    std::vector<VkFence> m_fences;
-    size_t m_currentFrame = 0;
-
-
 
 
 };

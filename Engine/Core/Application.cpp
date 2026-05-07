@@ -46,13 +46,13 @@ void Application::Run() {
         //    m_graphics.RecreateSwapchain(m_window);
         //}
 
-        //m_graphics.DrawFrame(m_window, m_desc);
+        m_graphics.Render(m_desc);
 
-        //if (m_pendingFullscreen) {
-        //    SDL_SetWindowFullscreenMode(m_window.GetHandle(), m_display.GetDisplayNativeMode());
-        //    SDL_SetWindowFullscreen(m_window.GetHandle(), m_desc.fullscreen);
-        //    m_pendingFullscreen = false;
-        //}
+        if (m_pendingFullscreen) {
+            SDL_SetWindowFullscreenMode(m_window.GetHandle(), m_display.GetDisplayNativeMode());
+            SDL_SetWindowFullscreen(m_window.GetHandle(), m_desc.fullscreen);
+            m_pendingFullscreen = false;
+        }
 
         m_input.BeginFrame();
 
@@ -185,4 +185,3 @@ void Application::SetResolution(const Mode& res) {
     //m_graphics.GetRenderer().RecreateSwapchain(m_window);
 
 }
-

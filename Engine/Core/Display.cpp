@@ -17,15 +17,15 @@ void Display::Initialize() {
     }
 
     // Tworzy listę informacji o monitorze
-    m_displayInfo.id = displays[0];                                                                         // Wybiera główny monitor (SDL_GetPrimaryDisplay często nie działa prawidłowo)
-    m_displayInfo.name = SDL_GetDisplayName(displays[0]);                                                   // Pobiera nazwę monitora
+    m_curretnDisplayInfo.id = displays[0];                                                                         // Wybiera główny monitor (SDL_GetPrimaryDisplay często nie działa prawidłowo)
+    m_curretnDisplayInfo.name = SDL_GetDisplayName(displays[0]);                                                   // Pobiera nazwę monitora
 
     int count = 0;
     SDL_DisplayMode** modes = SDL_GetFullscreenDisplayModes(displays[0], &count);         // Pobiera tryby monitora i ich ilość
-    m_displayInfo.displayModes.resize(count);
-    for (int i = 0; i < m_displayInfo.displayModes.size(); i++) {
-        m_displayInfo.displayModes[i].width = modes[i]->w;
-        m_displayInfo.displayModes[i].height = modes[i]->h;
+    m_curretnDisplayInfo.displayModes.resize(count);
+    for (int i = 0; i < m_curretnDisplayInfo.displayModes.size(); i++) {
+        m_curretnDisplayInfo.displayModes[i].width = modes[i]->w;
+        m_curretnDisplayInfo.displayModes[i].height = modes[i]->h;
     }
 
     m_nativeMode = modes[0];                                                                                // Ustawia tryb natywny
@@ -80,7 +80,7 @@ void Display::Initialize() {
     };
 
     // Tworzymy kopię listy trybów monitora
-    std::vector<Mode> modeCopy = m_displayInfo.displayModes;
+    std::vector<Mode> modeCopy = m_curretnDisplayInfo.displayModes;
 
     // Wrzucamy listę trybów domyślnych do listy głównej trybów
     for (const auto& videoMode : videoModes) {
@@ -96,7 +96,7 @@ void Display::Initialize() {
 
         if (!found) {
             if (videoMode.width < modeCopy[0].width && videoMode.height < modeCopy[0].height) {     // pomija większe niż natywna
-                m_displayInfo.displayModes.push_back(videoMode);
+                m_curretnDisplayInfo.displayModes.push_back(videoMode);
             }
         }
 
@@ -115,7 +115,7 @@ void Display::Initialize() {
         {5.0f/4.0f, "(5:4)"}
     };
 
-    for (auto& mode : m_displayInfo.displayModes) {
+    for (auto& mode : m_curretnDisplayInfo.displayModes) {
         float ratio = static_cast<float>(mode.width) / mode.height;
 
         float bestDiff = std::numeric_limits<float>::max();
@@ -135,19 +135,19 @@ void Display::Initialize() {
 
 
     // Sortujemy listę od największej
-    std::sort(m_displayInfo.displayModes.begin(),
-              m_displayInfo.displayModes.end(),
+    std::sort(m_curretnDisplayInfo.displayModes.begin(),
+              m_curretnDisplayInfo.displayModes.end(),
               [](const Mode& a, const Mode& b) {
                   if (a.width != b.width) return a.width > b.width;
                   return a.height > b.height;
               });
 
     // Oznaczamy tryb natywnej rozdzielczości
-    m_displayInfo.displayModes[0].ratio += " (native)";
+    m_curretnDisplayInfo.displayModes[0].ratio += " (native)";
 
-    std::cout << "[Monitor] " << m_displayInfo.name << std::endl;
-    for (int i = 0; i < m_displayInfo.displayModes.size(); i++) {
-        std::cout << "[Display] " << m_displayInfo.displayModes[i].width << "x" << m_displayInfo.displayModes[i].height << " " << m_displayInfo.displayModes[i].ratio << std::endl;
+    std::cout << "[Monitor] " << m_curretnDisplayInfo.name << std::endl;
+    for (int i = 0; i < m_curretnDisplayInfo.displayModes.size(); i++) {
+        std::cout << "[Display] " << m_curretnDisplayInfo.displayModes[i].width << "x" << m_curretnDisplayInfo.displayModes[i].height << " " << m_curretnDisplayInfo.displayModes[i].ratio << std::endl;
     }
 
 
@@ -156,21 +156,25 @@ void Display::Initialize() {
 }
 
 const DisplayInfo& Display::GetPrimaryDisplay() const {
-    return m_displayInfo;
+    return m_curretnDisplayInfo;
 }
 
 std::vector<Mode> Display::GetDisplayModes() const {
-    return m_displayInfo.displayModes;
+    return m_curretnDisplayInfo.displayModes;
 }
 
 const SDL_DisplayMode* Display::GetDisplayNativeMode() {
     return m_nativeMode;
 }
 
+const SDL_DisplayMode* Display::GetCurrentDisplayMode() {
+    return SDL_GetCurrentDisplayMode(m_curretnDisplayInfo.id);
+}
+
 float Display::GetScaling() {
-    const SDL_DisplayMode* mcurr = SDL_GetCurrentDisplayMode(m_displayInfo.id);
+    const SDL_DisplayMode* mcurr = SDL_GetCurrentDisplayMode(m_curretnDisplayInfo.id);
     if (!mcurr) { return 1.0f; }
-    float scaling = static_cast<float>(m_displayInfo.displayModes[0].width) / mcurr->w;
+    float scaling = static_cast<float>(m_curretnDisplayInfo.displayModes[0].width) / mcurr->w;
     std::cout << "Scaling: " << scaling << std::endl;
     return scaling;
 }

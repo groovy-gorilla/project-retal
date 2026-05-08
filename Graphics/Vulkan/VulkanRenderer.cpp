@@ -8,11 +8,16 @@
 #include "../../Engine/Core/Error/ErrorDialog.h"
 #include "Utils/VulkanUtils.h"
 
-void VulkanRenderer::Initialize(Window& window, ApplicationDesc& desc) {
+void VulkanRenderer::Initialize(Display& display, Window& window, ApplicationDesc& desc) {
 
-    VkExtent2D extent;
-    extent.width = static_cast<uint32_t>(desc.WIDTH);
-    extent.height = static_cast<uint32_t>(desc.HEIGHT);
+    // ROZDZIELCZOŚĆ RENDERINGU
+    m_renderExtent = window.GetRenderExtent(desc);
+
+    // ROZDZIELCZOŚĆ OKNA
+    m_windowExtent = window.GetWindowExtent(display, desc);
+
+    std::cout << "Rendering resolution: " << m_renderExtent.width << "x" << m_renderExtent.height << std::endl;
+    std::cout << "Window resolution: " << m_windowExtent.width << "x" << m_windowExtent.height << std::endl;
 
     // CORE
     m_instance.Create(desc);
@@ -22,23 +27,33 @@ void VulkanRenderer::Initialize(Window& window, ApplicationDesc& desc) {
     m_physicalDevice.CreateSupportedSampleCounts();
     m_device.Create(m_physicalDevice.Get(), m_physicalDevice.GetGraphicsQueueFamily(), m_physicalDevice.GetPresentQueueFamily());
 
-    VkExtent2D screenExtent;
-    screenExtent.width = 3440;
-    screenExtent.height = 1440;
-
     m_queues.Create(m_device.Get(), m_physicalDevice.GetGraphicsQueueFamily(), m_physicalDevice.GetPresentQueueFamily());
-    m_swapchain.Create(m_physicalDevice.Get(), m_device.Get(), m_surface.Get(), screenExtent, m_physicalDevice.GetGraphicsQueueFamily(), m_physicalDevice.GetPresentQueueFamily());
+    m_swapchain.Create(m_physicalDevice.Get(), m_device.Get(), m_surface.Get(), m_windowExtent, m_physicalDevice.GetGraphicsQueueFamily(), m_physicalDevice.GetPresentQueueFamily());
     m_commands.Create(m_device.Get(), m_physicalDevice.GetGraphicsQueueFamily(), static_cast<uint32_t>(m_swapchain.GetImages().size()));
     m_sync.Create(m_device.Get(), desc.MAX_FRAMES_IN_FLIGHT);
 
     // SCENE
     m_sceneRenderPass.Create(m_device.Get(), m_swapchain.GetImageFormat(), FindDepthFormat(m_physicalDevice.Get()), desc.AA_MODE, desc.MSAA_SAMPLES);
-    m_sceneResources.Create(m_physicalDevice.Get(), m_device.Get(), extent, m_swapchain.GetImageFormat(), FindDepthFormat(m_physicalDevice.Get()), desc.AA_MODE, desc.MSAA_SAMPLES, desc.SSAA_SCALE, desc.FILTER, m_sceneRenderPass.Get());
+    m_sceneResources.Create(m_physicalDevice.Get(), m_device.Get(), m_renderExtent, m_swapchain.GetImageFormat(), FindDepthFormat(m_physicalDevice.Get()), desc.AA_MODE, desc.MSAA_SAMPLES, desc.SSAA_SCALE, desc.FILTER, m_sceneRenderPass.Get());
     m_scenePipeline.Create(m_device.Get(), m_sceneRenderPass.Get(), desc.AA_MODE, desc.MSAA_SAMPLES);
 
     // POST
-    m_postRenderPass.Create(m_device.Get(), m_swapchain.GetExtent(), m_swapchain.GetImageFormat(), m_sceneResources.GetOutputColor(), m_sceneResources.GetOutputDepth());
-    m_postResources.Create(m_device.Get(), m_postRenderPass.Get(), m_swapchain.GetExtent(), m_swapchain.GetImageViews());
+    RenderTarget* postColor = &m_sceneResources.SceneColor;
+    switch (desc.AA_MODE) {
+        case AntiAliasing::MSAA:
+        case AntiAliasing::MSAA_TAA:
+            postColor = &m_sceneResources.ResolveColor;
+            break;
+        case AntiAliasing::SSAA:
+        case AntiAliasing::SSAA_TAA:
+            postColor = &m_sceneResources.FinalColor;
+            break;
+        default:
+            break;
+    }
+    m_ssaaRenderPass.Create(m_device.Get(), m_renderExtent, m_swapchain.GetImageFormat(), m_sceneResources.SceneColor, m_sceneResources.SceneDepth, m_sceneResources.FinalColor);
+    m_postRenderPass.Create(m_device.Get(), m_windowExtent, m_swapchain.GetImageFormat(), *postColor, m_sceneResources.ResolveDepth);
+    m_postResources.Create(m_device.Get(), m_postRenderPass.Get(), m_windowExtent, m_swapchain.GetImageViews());
 
 }
 
@@ -48,8 +63,9 @@ void VulkanRenderer::Shutdown(ApplicationDesc& desc) {
 
     m_postResources.Destroy(m_device.Get());
     m_postRenderPass.Destroy(m_device.Get());
+    m_ssaaRenderPass.Destroy(m_device.Get());
     m_scenePipeline.Destroy(m_device.Get());
-    m_sceneResources.Destroy(m_device.Get(), desc.AA_MODE);
+    m_sceneResources.Destroy(m_device.Get());
     m_sceneRenderPass.Destroy(m_device.Get());
     m_sync.Destroy(m_device.Get());
     m_commands.Destroy(m_device.Get());
@@ -85,6 +101,11 @@ void VulkanRenderer::RecordCommandBuffer(uint32_t imageIndex, ApplicationDesc& d
     vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 
     m_sceneRenderPass.End(commandBuffer);
+
+    // SSAA PASS
+    if (desc.AA_MODE == AntiAliasing::SSAA || desc.AA_MODE == AntiAliasing::SSAA_TAA) {
+        m_ssaaRenderPass.Render(commandBuffer, m_renderExtent);
+    }
 
     // POST PASS
     m_postRenderPass.Render(commandBuffer, m_postResources.GetFramebuffer(imageIndex), m_swapchain.GetExtent());
@@ -146,6 +167,5 @@ void VulkanRenderer::Render(ApplicationDesc& desc) {
     m_sync.NextFrame(desc.MAX_FRAMES_IN_FLIGHT);
 
 }
-
 
 

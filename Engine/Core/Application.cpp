@@ -37,7 +37,7 @@ void Application::Run() {
     actions.Bind("Monitor2", Key::Num2);
 
     // VULKAN
-    m_graphics.Initialize(m_window, m_desc);
+    m_graphics.Initialize(m_display, m_window, m_desc);
 
     while (!m_window.ShouldClose()) {
 

@@ -24,11 +24,12 @@ public:
 
     std::vector<Mode> GetDisplayModes() const;                      // Pobiera tryby monitora
     const SDL_DisplayMode* GetDisplayNativeMode();                  // Pobiera tryb natywny monitora
+    const SDL_DisplayMode* GetCurrentDisplayMode();                 // Pobiera aktualny tryb monitora
 
     float GetScaling();                                             // Pobiera skalowanie
 
 private:
-    DisplayInfo m_displayInfo{};
+    DisplayInfo m_curretnDisplayInfo{};
     SDL_DisplayMode* m_nativeMode = nullptr;
 
 };

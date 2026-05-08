@@ -16,16 +16,16 @@
 Window::Window() = default;
 Window::~Window() = default;
 
-void Window::Create(const ApplicationDesc &desc, Display display) {
-
-    m_scaling = display.GetScaling();
+void Window::Create(ApplicationDesc &desc, Display& display) {
 
     setenv("GTK_THEME", "Adwaita:dark", 1);
 
+    GetWindowExtent(display, desc);
+
     m_window = SDL_CreateWindow(
         desc.TITLE,
-        desc.WIDTH / m_scaling,
-        desc.HEIGHT / m_scaling,
+        desc.WIDTH / display.GetScaling(),
+        desc.HEIGHT / display.GetScaling(),
         SDL_WINDOW_VULKAN
     );
 
@@ -51,14 +51,10 @@ void Window::SetShouldClose(bool value) {
     m_shouldClose = value;
 }
 
-void Window::GetFramebufferSize(int& width, int& height) const {
-    //SDL_GetWindowSizeInPixels(m_window, &width, &height);    // nie jestem pewien czy to jest dobre
-    SDL_GetWindowSize(m_window, &width, &height);
-}
+void Window::SetWindowed(ApplicationDesc& desc, Display& display) {
 
-void Window::SetWindowed(ApplicationDesc& desc, Display display) {
-
-    UpdateSize(desc, display);
+    SDL_SetWindowSize(m_window, desc.WIDTH / display.GetScaling(), desc.HEIGHT / display.GetScaling());
+    SDL_SetWindowPosition(m_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 
     SDL_SetWindowFullscreen(m_window, false);
 
@@ -80,16 +76,30 @@ void Window::SetFullscreen(ApplicationDesc& desc, Uint32 displayID) {
 
 }
 
-void Window::UpdateSize(ApplicationDesc& desc, Display display) {
-
-    m_scaling = display.GetScaling();
-
-    SDL_SetWindowSize(m_window, desc.WIDTH / m_scaling, desc.HEIGHT / m_scaling);
-    SDL_SetWindowPosition(m_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-
-}
-
-
 SDL_Window* Window::GetHandle() const {
     return m_window;
 }
+
+VkExtent2D Window::GetRenderExtent(ApplicationDesc& desc) {
+
+    m_renderExtent.width = desc.WIDTH;
+    m_renderExtent.height = desc.HEIGHT;
+
+    return m_renderExtent;
+
+}
+
+VkExtent2D Window::GetWindowExtent(Display& display, ApplicationDesc& desc) {
+
+    if (desc.FULLSCREEN) {
+        m_windowExtent.width = static_cast<uint32_t>(display.GetCurrentDisplayMode()->w * display.GetScaling());
+        m_windowExtent.height = static_cast<uint32_t>(display.GetCurrentDisplayMode()->h * display.GetScaling());
+    } else {
+        m_windowExtent.width = desc.WIDTH;
+        m_windowExtent.height = desc.HEIGHT;
+    }
+
+    return m_windowExtent;
+
+}
+

@@ -19,22 +19,24 @@ struct ApplicationDesc {
 
     const char* TITLE                   = "Indigo Engine";
 
-    uint32_t WIDTH                      = 320;
-    uint32_t HEIGHT                     = 200;
+    uint32_t WIDTH                      = 800;
+    uint32_t HEIGHT                     = 600;
 
-    bool FULLSCREEN                     = true;
+    bool FULLSCREEN                     = false;
     bool ASPECT_RATIO                   = false;
     bool VSYNC                          = true;
-    TextureFilter FILTER                = TextureFilter::Linear;
+    TextureFilter FILTER                = TextureFilter::Nearest;
     const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
     // AntiAliasing
-    AntiAliasing AA_MODE                = AntiAliasing::None;
+    AntiAliasing AA_MODE                = AntiAliasing::MSAA;
 
     // MSAA
-    VkSampleCountFlagBits MSAA_SAMPLES  = VK_SAMPLE_COUNT_1_BIT;
+    VkSampleCountFlagBits MSAA_SAMPLES  = VK_SAMPLE_COUNT_16_BIT;
 
     // SSAA
-    float SSAA_SCALE                    = 1.0f;     // scale choice: 1.0 - 1.25 - 1.5 - 2.0
+    float SSAA_SCALE                    = 4.0f;     // scale choice: 1.0 - 1.25 - 1.5 - 2.0
+                                                    // UWAGA! Wartości ustawiamy tylko przy AntiAliasing::SSAA lub SSAA_TAA
+                                                    // W pozostałych przypadkach musi być = 1.0f
 
 };

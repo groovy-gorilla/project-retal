@@ -15,6 +15,7 @@
 #include "Core/VulkanCommands.h"
 #include "Core/VulkanSync.h"
 #include "Core/VulkanQueues.h"
+#include "PostProcessPass/VulkanSSAARenderPass.h"
 
 struct ViewportRect {
     float x;
@@ -26,7 +27,7 @@ struct ViewportRect {
 
 class VulkanRenderer {
 public:
-    void Initialize(Window& window, ApplicationDesc& desc);
+    void Initialize(Display& display, Window& window, ApplicationDesc& desc);
     void Shutdown(ApplicationDesc& desc);
 
     void RecordCommandBuffer(uint32_t imageIndex, ApplicationDesc& desc);
@@ -52,6 +53,7 @@ private:
 
     // SCREEN
     VulkanPostRenderPass m_postRenderPass;
+    VulkanSSAARenderPass m_ssaaRenderPass;
     VulkanPostResources m_postResources;
 
     VulkanCommands m_commands;
@@ -59,6 +61,11 @@ private:
     VulkanQueues m_queues;
 
     VkDebugUtilsMessengerEXT m_debugMessenger = VK_NULL_HANDLE;
+
+    // EXTENT
+    VkExtent2D m_renderExtent = {};
+    VkExtent2D m_windowExtent = {};
+
 
 
 };

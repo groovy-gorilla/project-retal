@@ -70,6 +70,8 @@ add_executable(IndigoEngine main.cpp
         Graphics/Vulkan/Core/VulkanQueues.cpp
         Graphics/Vulkan/Resources/VulkanTextureDescriptor.h
         Graphics/Vulkan/Resources/VulkanTextureDescriptor.cpp
+        Graphics/Vulkan/PostProcessPass/VulkanSSAARenderPass.h
+        Graphics/Vulkan/PostProcessPass/VulkanSSAARenderPass.cpp
 )
 
 

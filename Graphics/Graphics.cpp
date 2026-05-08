@@ -1,7 +1,7 @@
 #include "Graphics.h"
 
-void Graphics::Initialize(Window& window, ApplicationDesc& desc) {
-    m_renderer.Initialize(window, desc);
+void Graphics::Initialize(Display& display, Window& window, ApplicationDesc& desc) {
+    m_renderer.Initialize(display, window, desc);
 }
 
 void Graphics::Shutdown(ApplicationDesc& desc) {

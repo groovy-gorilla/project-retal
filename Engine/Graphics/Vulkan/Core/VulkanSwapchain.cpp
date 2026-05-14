@@ -4,12 +4,12 @@
 #include "Debug/ErrorDialog.h"
 #include "Core/ApplicationDesc.h"
 
-void VulkanSwapchain::Create(VkPhysicalDevice physicalDevice, VkDevice device, VkSurfaceKHR surface, VkExtent2D extent, uint32_t graphicsQueueFamily, uint32_t presentQueueFamily, ApplicationDesc& desc) {
+void VulkanSwapchain::Create(VkPhysicalDevice physicalDevice, VkDevice device, VkSurfaceKHR surface, VkExtent2D extent, uint32_t graphicsQueueFamily, uint32_t presentQueueFamily, bool vsync) {
 
     SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport(physicalDevice, surface);
 
     VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat(swapChainSupport.formats);
-    VkPresentModeKHR presentMode = ChooseSwapPresentMode(swapChainSupport.presentModes, desc);
+    VkPresentModeKHR presentMode = ChooseSwapPresentMode(swapChainSupport.presentModes, vsync);
     VkExtent2D ext = ChooseSwapExtent(swapChainSupport.capabilities, extent);
 
     uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
@@ -83,10 +83,10 @@ VkSurfaceFormatKHR VulkanSwapchain::ChooseSwapSurfaceFormat(const std::vector<Vk
 
 }
 
-VkPresentModeKHR VulkanSwapchain::ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& modes, ApplicationDesc& desc) {
+VkPresentModeKHR VulkanSwapchain::ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& modes, bool vsync) {
 
     // VSYNC OFF
-    if (!desc.VSYNC) {
+    if (!vsync) {
         for (const auto& m : modes) {
             if (m == VK_PRESENT_MODE_MAILBOX_KHR)
                 return m;

@@ -5,7 +5,7 @@ struct ApplicationDesc;
 class VulkanInstance {
 public:
 
-    void Create(ApplicationDesc& desc);
+    void Create();
     void Destroy();
 
     [[nodiscard]] VkInstance Get() const;

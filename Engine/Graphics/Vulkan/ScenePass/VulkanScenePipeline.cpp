@@ -86,7 +86,7 @@ void VulkanScenePipeline::Create(VkDevice device, VkRenderPass renderPass, AntiA
     switch (aaMode) {
 
         case AntiAliasing::MSAA:
-        case AntiAliasing::MSAA_TAA:
+        case AntiAliasing::MSAA_SMAA:
              multisampling.rasterizationSamples = samples;
              break;
 
@@ -178,5 +178,4 @@ void VulkanScenePipeline::Bind(VkCommandBuffer commandBuffer) {
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
 
 }
-
 

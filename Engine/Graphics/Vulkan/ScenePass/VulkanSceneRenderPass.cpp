@@ -17,12 +17,12 @@ void VulkanSceneRenderPass::Create(VkDevice device, VkFormat colorFormat, VkForm
 
         case AntiAliasing::None:
         case AntiAliasing::SSAA:
-        case AntiAliasing::SSAA_TAA:
+        case AntiAliasing::SSAA_SMAA:
              CreateNormal(attachments, colorRef, depthRef, colorFormat, depthFormat, subpass);
              break;
 
         case AntiAliasing::MSAA:
-        case AntiAliasing::MSAA_TAA:
+        case AntiAliasing::MSAA_SMAA:
              CreateMSAA(attachments, colorRef, depthRef, resolveRef, depthResolveRef, colorFormat, depthFormat, samples, subpass, depthResolveInfo);
              break;
 
@@ -243,5 +243,4 @@ void VulkanSceneRenderPass::CreateMSAA(std::vector<VkAttachmentDescription2>& at
     }
 
 }
-
 

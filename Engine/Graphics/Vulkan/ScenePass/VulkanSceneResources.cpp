@@ -55,7 +55,7 @@ void VulkanSceneResources::Create(VkPhysicalDevice physicalDevice, VkDevice devi
     switch (desc.AA_MODE) {
 
         case AntiAliasing::MSAA:
-        case AntiAliasing::MSAA_TAA:
+        case AntiAliasing::MSAA_SMAA:
              attachments = {
                 MSAAColor.View,
                 MSAADepth.View,
@@ -74,7 +74,7 @@ void VulkanSceneResources::Create(VkPhysicalDevice physicalDevice, VkDevice devi
 
     switch (desc.AA_MODE) {
         case AntiAliasing::SSAA:
-        case AntiAliasing::SSAA_TAA:
+        case AntiAliasing::SSAA_SMAA:
             m_framebufferExtent = ssaaExtent;
             break;
 

@@ -38,7 +38,7 @@ void Application::Run() {
     while (!m_window.ShouldClose()) {
 
         if (m_pendingFullscreen) {
-            SDL_SetWindowFullscreenMode(m_window.GetHandle(), m_display.GetDisplayNativeMode());
+            SDL_SetWindowFullscreenMode(m_window.GetHandle(), m_display.GetCurrentDisplayMode());
             SDL_SetWindowFullscreen(m_window.GetHandle(), m_desc.FULLSCREEN);
             m_pendingFullscreen = false;
         }
@@ -136,11 +136,11 @@ void Application::Run() {
 
             switch (m_desc.AA_MODE) {
                 case AntiAliasing::SSAA:
-                case AntiAliasing::SSAA_TAA:
+                case AntiAliasing::SSAA_SMAA:
                     postTarget = &m_graphics.GetRenderer().GetSceneResources().FinalColor;
                     break;
                 case AntiAliasing::MSAA:
-                case AntiAliasing::MSAA_TAA:
+                case AntiAliasing::MSAA_SMAA:
                     postTarget = &m_graphics.GetRenderer().GetSceneResources().ResolveColor;
                     break;
                 default:
@@ -148,8 +148,8 @@ void Application::Run() {
                     break;
             }
 
-            m_graphics.GetRenderer().GetPostRenderPass().GetDescriptor().UpdateSampler(m_graphics.GetRenderer().GetDevice(), *postTarget, m_desc.FILTER);
-            m_graphics.GetRenderer().GetSSAARenderPass().GetDescriptor().UpdateSampler(m_graphics.GetRenderer().GetDevice(), m_graphics.GetRenderer().GetSceneResources().SceneColor, m_desc.FILTER);
+            //m_graphics.GetRenderer().GetPostRenderPass().GetDescriptor().UpdateColor(m_graphics.GetRenderer().GetDevice(), *postTarget, m_desc.FILTER);
+            //m_graphics.GetRenderer().GetSSAARenderPass().GetDescriptor().UpdateColor(m_graphics.GetRenderer().GetDevice(), m_graphics.GetRenderer().GetSceneResources().SceneColor, m_desc.FILTER);
 
             continue;
 
@@ -210,13 +210,13 @@ void Application::Run() {
                     m_desc.SSAA_SCALE = 1.0f;
                     break;
                 case AntiAliasing::MSAA:
-                case AntiAliasing::MSAA_TAA:
+                case AntiAliasing::MSAA_SMAA:
                     m_desc.AA_MODE = AntiAliasing::SSAA;
                     m_desc.MSAA_SAMPLES = VK_SAMPLE_COUNT_1_BIT;
                     m_desc.SSAA_SCALE = 2.0f;
                     break;
                 case AntiAliasing::SSAA:
-                case AntiAliasing::SSAA_TAA:
+                case AntiAliasing::SSAA_SMAA:
                     m_desc.AA_MODE = AntiAliasing::None;
                     m_desc.MSAA_SAMPLES = VK_SAMPLE_COUNT_1_BIT;
                     m_desc.SSAA_SCALE = 1.0f;

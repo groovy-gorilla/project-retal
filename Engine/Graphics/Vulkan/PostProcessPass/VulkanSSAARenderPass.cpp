@@ -40,7 +40,7 @@ void VulkanSSAARenderPass::Create(VkDevice device, VkExtent2D extent, VkFormat s
     VK_CHECK(vkCreateRenderPass(device, &renderPassInfo, nullptr, &m_renderPass));
 
     // DESCRIPTOR
-    m_sceneDescriptor.Create(device, sceneColor, sceneDepth, desc.FILTER);
+    m_sceneDescriptor.Create(device, sceneColor, sceneDepth, TextureFilter::Linear);
     m_descriptorSetLayout = m_sceneDescriptor.GetLayout();
 
     // PIPELINE LAYOUT

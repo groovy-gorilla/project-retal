@@ -17,7 +17,7 @@ void VulkanRenderer::Initialize(Display& display, Window& window, ApplicationDes
     std::cout << "Window resolution: " << m_windowExtent.width << "x" << m_windowExtent.height << std::endl;
 
     // CORE
-    m_instance.Create(desc);
+    m_instance.Create();
     m_debug.Create(m_instance.Get());
     m_surface.Create(m_instance.Get(), window.GetHandle());
     m_physicalDevice.Pick(m_instance.Get(), m_surface.Get());
@@ -25,7 +25,7 @@ void VulkanRenderer::Initialize(Display& display, Window& window, ApplicationDes
     m_device.Create(m_physicalDevice.Get(), m_physicalDevice.GetGraphicsQueueFamily(), m_physicalDevice.GetPresentQueueFamily());
 
     m_queues.Create(m_device.Get(), m_physicalDevice.GetGraphicsQueueFamily(), m_physicalDevice.GetPresentQueueFamily());
-    m_swapchain.Create(m_physicalDevice.Get(), m_device.Get(), m_surface.Get(), m_windowExtent, m_physicalDevice.GetGraphicsQueueFamily(), m_physicalDevice.GetPresentQueueFamily(), desc);
+    m_swapchain.Create(m_physicalDevice.Get(), m_device.Get(), m_surface.Get(), m_windowExtent, m_physicalDevice.GetGraphicsQueueFamily(), m_physicalDevice.GetPresentQueueFamily(), desc.VSYNC);
     m_commands.Create(m_device.Get(), m_physicalDevice.GetGraphicsQueueFamily(), static_cast<uint32_t>(m_swapchain.GetImages().size()));
     m_sync.Create(m_device.Get(), desc.MAX_FRAMES_IN_FLIGHT);
 
@@ -38,11 +38,11 @@ void VulkanRenderer::Initialize(Display& display, Window& window, ApplicationDes
     RenderTarget* postColor = &m_sceneResources.SceneColor;
     switch (desc.AA_MODE) {
         case AntiAliasing::MSAA:
-        case AntiAliasing::MSAA_TAA:
+        case AntiAliasing::MSAA_SMAA:
             postColor = &m_sceneResources.ResolveColor;
             break;
         case AntiAliasing::SSAA:
-        case AntiAliasing::SSAA_TAA:
+        case AntiAliasing::SSAA_SMAA:
             postColor = &m_sceneResources.FinalColor;
             break;
         default:
@@ -100,7 +100,7 @@ void VulkanRenderer::RecordCommandBuffer(uint32_t imageIndex, ApplicationDesc& d
     m_sceneRenderPass.End(commandBuffer);
 
     // SSAA PASS
-    if (desc.AA_MODE == AntiAliasing::SSAA || desc.AA_MODE == AntiAliasing::SSAA_TAA) {
+    if (desc.AA_MODE == AntiAliasing::SSAA || desc.AA_MODE == AntiAliasing::SSAA_SMAA) {
         m_ssaaRenderPass.Render(commandBuffer, m_renderExtent);
     }
 
@@ -183,7 +183,7 @@ void VulkanRenderer::RecreateSwapchain(Display& display, Window& window, Applica
     m_swapchain.Destroy(m_device.Get());
 
     // CREATE
-    m_swapchain.Create(m_physicalDevice.Get(), m_device.Get(), m_surface.Get(), m_windowExtent, m_physicalDevice.GetGraphicsQueueFamily(), m_physicalDevice.GetPresentQueueFamily(),desc);
+    m_swapchain.Create(m_physicalDevice.Get(), m_device.Get(), m_surface.Get(), m_windowExtent, m_physicalDevice.GetGraphicsQueueFamily(), m_physicalDevice.GetPresentQueueFamily(), desc.VSYNC);
 
     m_postResources.Create(m_device.Get(), m_postRenderPass.Get(), m_windowExtent, m_swapchain.GetImageViews());
 
@@ -207,7 +207,7 @@ void VulkanRenderer::RecreateRenderer(Display& display, Window& window, Applicat
     m_windowExtent = window.GetWindowExtent(display, desc);
 
     // SWAPCHAIN
-    m_swapchain.Create(m_physicalDevice.Get(), m_device.Get(), m_surface.Get(), m_windowExtent, m_physicalDevice.GetGraphicsQueueFamily(), m_physicalDevice.GetPresentQueueFamily(), desc);
+    m_swapchain.Create(m_physicalDevice.Get(), m_device.Get(), m_surface.Get(), m_windowExtent, m_physicalDevice.GetGraphicsQueueFamily(), m_physicalDevice.GetPresentQueueFamily(), desc.VSYNC);
 
     // SCENE
     m_sceneRenderPass.Create(m_device.Get(), m_swapchain.GetImageFormat(), FindDepthFormat(m_physicalDevice.Get()), desc.AA_MODE, desc.MSAA_SAMPLES);
@@ -222,11 +222,11 @@ void VulkanRenderer::RecreateRenderer(Display& display, Window& window, Applicat
 
     switch (desc.AA_MODE) {
         case AntiAliasing::SSAA:
-        case AntiAliasing::SSAA_TAA:
+        case AntiAliasing::SSAA_SMAA:
             postTarget = &m_sceneResources.FinalColor;
             break;
         case AntiAliasing::MSAA:
-        case AntiAliasing::MSAA_TAA:
+        case AntiAliasing::MSAA_SMAA:
             postTarget = &m_sceneResources.ResolveColor;
             break;
         default:

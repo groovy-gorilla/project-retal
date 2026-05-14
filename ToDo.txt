@@ -4,9 +4,13 @@
 > Font
 > Text
 > FPS
+
 > Input (myszka)
-
-
-
+> kamera
+> ...
 
 > TAA
+
+
+
+

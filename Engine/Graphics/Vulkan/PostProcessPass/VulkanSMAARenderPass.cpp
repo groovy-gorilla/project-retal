@@ -20,7 +20,7 @@ void VulkanSMAARenderPass::Create(VkPhysicalDevice physicalDevice, VkDevice devi
     VkBuffer areaStagingBuffer{};
     VkDeviceMemory areaStagingMemory{};
     VkDeviceSize areaSize = sizeof(areaTexBytes);
-    CreateBuffer(physicalDevice, device, areaSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, areaStagingBuffer, areaStagingMemory);
+    CreateBuffer(device, physicalDevice, areaSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, areaStagingBuffer, areaStagingMemory);
 
     // COPY AREA DATA
     void* data{};
@@ -40,7 +40,7 @@ void VulkanSMAARenderPass::Create(VkPhysicalDevice physicalDevice, VkDevice devi
     VkBuffer searchStagingBuffer{};
     VkDeviceMemory searchStagingMemory{};
     VkDeviceSize searchSize = sizeof(searchTexBytes);
-    CreateBuffer(physicalDevice, device, searchSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, searchStagingBuffer, searchStagingMemory);
+    CreateBuffer(device, physicalDevice, searchSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, searchStagingBuffer, searchStagingMemory);
 
     // COPY SEARCH DATA
     vkMapMemory(device, searchStagingMemory, 0, searchSize, 0, &data);

@@ -18,6 +18,13 @@
 #include "PostProcessPass/VulkanSMAARenderPass.h"
 #include "PostProcessPass/VulkanSSAARenderPass.h"
 
+struct VulkanContext {
+    VkDevice device = VK_NULL_HANDLE;
+    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+    VkCommandPool commandPool = VK_NULL_HANDLE;
+    VkQueue graphicsQueue = VK_NULL_HANDLE;
+};
+
 struct ViewportRect {
     float x;
     float y;
@@ -43,12 +50,15 @@ public:
 
     void TakeScreenshot(uint32_t imageIndex);
 
-    VkDevice GetDevice() { return m_device.Get(); }
+    const VulkanContext& GetContext() const { return m_context; }
+
     VulkanSceneResources& GetSceneResources() { return m_sceneResources; }
     VulkanPostRenderPass& GetPostRenderPass() { return m_postRenderPass; }
     VulkanSSAARenderPass& GetSSAARenderPass() { return m_ssaaRenderPass; }
 
 private:
+    VulkanContext m_context;
+
     VulkanInstance m_instance;
     VulkanDebug m_debug;
     VulkanSurface m_surface;

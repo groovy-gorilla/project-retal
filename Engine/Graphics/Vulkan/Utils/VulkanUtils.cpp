@@ -69,7 +69,7 @@ VkFormat FindDepthFormat(VkPhysicalDevice physicalDevice)
 
 }
 
-void CreateImageResource(VkPhysicalDevice physicalDevice, VkDevice device, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, VkSampleCountFlagBits samples, VkImage& image, VkDeviceMemory& memory) {
+void CreateImageResource(VkDevice device, VkPhysicalDevice physicalDevice, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, VkSampleCountFlagBits samples, VkImage& image, VkDeviceMemory& memory) {
 
     VkImageCreateInfo img{};
     img.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -151,7 +151,7 @@ VkShaderModule CreateShaderModule(VkDevice device, const std::vector<char>& code
 
 }
 
-void CreateBuffer(VkPhysicalDevice physicalDevice, VkDevice device, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& memory) {
+void CreateBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& memory) {
 
     // BUFFER
     VkBufferCreateInfo bufferInfo{};
@@ -201,7 +201,7 @@ VkCommandBuffer BeginSingleTimeCommands(VkDevice device, VkCommandPool commandPo
 
 }
 
-void EndSingleTimeCommands(VkDevice device, VkQueue queue, VkCommandPool commandPool, VkCommandBuffer commandBuffer) {
+void EndSingleTimeCommands(VkDevice device, VkCommandPool commandPool, VkQueue queue, VkCommandBuffer commandBuffer) {
 
     vkEndCommandBuffer(commandBuffer);
 
@@ -258,7 +258,7 @@ void TransitionImageLayout(VkDevice device, VkCommandPool commandPool, VkQueue q
 
     vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 
-    EndSingleTimeCommands(device, queue, commandPool, commandBuffer);
+    EndSingleTimeCommands(device, commandPool, queue, commandBuffer);
 
 }
 
@@ -279,6 +279,23 @@ void CopyBufferToImage(VkDevice device, VkCommandPool commandPool, VkQueue queue
 
     vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
-    EndSingleTimeCommands(device, queue, commandPool, commandBuffer);
+    EndSingleTimeCommands(device, commandPool, queue, commandBuffer);
+
+}
+
+const char* VkFormatToString(VkFormat format) {
+
+    switch (format) {
+        case VK_FORMAT_R8_UNORM: return "VK_FORMAT_R8_UNORM";
+        case VK_FORMAT_R8G8B8A8_UNORM: return "VK_FORMAT_R8G8B8A8_UNORM";
+        case VK_FORMAT_R8G8B8A8_SRGB: return "VK_FORMAT_R8G8B8A8_SRGB";
+        case VK_FORMAT_BC7_UNORM_BLOCK: return "VK_FORMAT_BC7_UNORM_BLOCK";
+        case VK_FORMAT_BC7_SRGB_BLOCK: return "VK_FORMAT_BC7_SRGB_BLOCK";
+        case VK_FORMAT_R16G16B16A16_SFLOAT: return "VK_FORMAT_R16G16B16A16_SFLOAT";
+        case VK_FORMAT_D32_SFLOAT: return "VK_FORMAT_D32_SFLOAT";
+        case VK_FORMAT_D24_UNORM_S8_UINT: return "VK_FORMAT_D24_UNORM_S8_UINT";
+        case VK_FORMAT_B8G8R8A8_SRGB: return "VK_FORMAT_B8G8R8A8_SRGB";
+        default: return "UNKNOWN_FORMAT";
+    }
 
 }

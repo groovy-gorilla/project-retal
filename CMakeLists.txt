@@ -61,7 +61,7 @@ add_executable(TFX main.cpp
         Engine/Graphics/Vulkan/PostProcessPass/VulkanPostRenderPass.h
         Engine/Graphics/Vulkan/Core/VulkanValidation.h
         Engine/Graphics/Vulkan/Core/VulkanValidation.cpp
-        Engine/Graphics/Vulkan/Resources/RenderTarget.h
+        Engine/Graphics/Vulkan/RenderResources/RenderTarget.h
         Engine/Graphics/Vulkan/PostProcessPass/VulkanPostResources.h
         Engine/Graphics/Vulkan/PostProcessPass/VulkanPostResources.cpp
         Engine/Graphics/Vulkan/Core/VulkanCommands.h
@@ -70,8 +70,8 @@ add_executable(TFX main.cpp
         Engine/Graphics/Vulkan/Core/VulkanSync.cpp
         Engine/Graphics/Vulkan/Core/VulkanQueues.h
         Engine/Graphics/Vulkan/Core/VulkanQueues.cpp
-        Engine/Graphics/Vulkan/Resources/VulkanTextureDescriptor.h
-        Engine/Graphics/Vulkan/Resources/VulkanTextureDescriptor.cpp
+        Engine/Graphics/Vulkan/RenderResources/VulkanTextureDescriptor.h
+        Engine/Graphics/Vulkan/RenderResources/VulkanTextureDescriptor.cpp
         Engine/Graphics/Vulkan/PostProcessPass/VulkanSSAARenderPass.h
         Engine/Graphics/Vulkan/PostProcessPass/VulkanSSAARenderPass.cpp
         ThirdParty/stb/stb_image_write.h
@@ -79,9 +79,16 @@ add_executable(TFX main.cpp
         Engine/pch.cpp
         Engine/Graphics/Vulkan/PostProcessPass/VulkanSMAARenderPass.cpp
         Engine/Graphics/Vulkan/PostProcessPass/VulkanSMAARenderPass.h
-        Engine/Graphics/Vulkan/Resources/RenderTarget.cpp
+        Engine/Graphics/Vulkan/RenderResources/RenderTarget.cpp
         Engine/Core/Timer.h
         Engine/Core/Timer.cpp
+        Engine/Graphics/Resources/Texture.h
+        Engine/Graphics/Resources/Texture.cpp
+        Engine/Math/Lina64.h
+        Engine/Graphics/Resources/UIRenderer.h
+        Engine/Graphics/Resources/UIRenderer.cpp
+        Engine/Graphics/Camera/Camera.h
+        Engine/Graphics/Camera/camera.cpp
 )
 
 
@@ -109,6 +116,6 @@ target_precompile_headers(TFX PRIVATE
 )
 
 # compile flags
-target_compile_options(TFX PRIVATE -g -O0)
+target_compile_options(TFX PRIVATE -g -O0 -mavx -mfma)
 
 

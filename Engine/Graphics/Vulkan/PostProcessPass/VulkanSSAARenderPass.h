@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Graphics/Vulkan/Resources/VulkanTextureDescriptor.h"
+#include "Graphics/Vulkan/RenderResources/VulkanTextureDescriptor.h"
 
 struct ApplicationDesc;
 

@@ -30,6 +30,11 @@ void VulkanRenderer::Initialize(Display& display, Window& window, ApplicationDes
     m_commands.Create(m_device.Get(), m_physicalDevice.GetGraphicsQueueFamily(), static_cast<uint32_t>(m_swapchain.GetImages().size()));
     m_sync.Create(m_device.Get(), desc.MAX_FRAMES_IN_FLIGHT);
 
+    // VULKAN CONTEXT
+    m_context.device = m_device.Get();
+    m_context.physicalDevice = m_physicalDevice.Get();
+    m_context.commandPool = m_commands.GetPool();
+    m_context.graphicsQueue = m_queues.GetGraphics();
 
     // SCENE
     m_sceneRenderPass.Create(m_device.Get(), m_hdrFormat, FindDepthFormat(m_physicalDevice.Get()), desc.AA_MODE, desc.MSAA_SAMPLES);
@@ -267,7 +272,7 @@ void VulkanRenderer::TakeScreenshot(uint32_t imageIndex) {
     VkBuffer stagingBuffer{};
     VkDeviceMemory stagingMemory{};
 
-    CreateBuffer(m_physicalDevice.Get(), m_device.Get(), imageSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingMemory);
+    CreateBuffer(m_device.Get(), m_physicalDevice.Get(), imageSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingMemory);
 
     VkCommandBuffer commandBuffer = BeginSingleTimeCommands(m_device.Get(), m_commands.GetPool());
 
@@ -318,7 +323,7 @@ void VulkanRenderer::TakeScreenshot(uint32_t imageIndex) {
 
     vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrierBack);
 
-    EndSingleTimeCommands(m_device.Get(), m_queues.GetGraphics(), m_commands.GetPool(), commandBuffer);
+    EndSingleTimeCommands(m_device.Get(), m_commands.GetPool(), m_queues.GetGraphics(), commandBuffer);
 
     void* data = nullptr;
 

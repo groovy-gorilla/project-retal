@@ -7,7 +7,13 @@ public:
     Bitmap();
     ~Bitmap();
 
-    void Initialize(VkDevice& device, VkPhysicalDevice& physicalDevice, VkCommandPool& commandPool, VkQueue& graphicsQueue, const std::string& filename);
+    void Initialize(
+        VkDevice& device,
+        VkPhysicalDevice& physicalDevice,
+        VkCommandPool& commandPool,
+        VkQueue& graphicsQueue,
+        const std::string& filename);
+
     void Shutdown(VkDevice& device);
 
     Texture& GetTexture();

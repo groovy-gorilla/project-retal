@@ -2,8 +2,8 @@
 
 #include <vulkan/vulkan.h>
 
-#include "Graphics/Vulkan/Resources//VulkanTextureDescriptor.h"
-#include "Graphics/Vulkan/Resources/RenderTarget.h"
+#include "Graphics/Vulkan/RenderResources//VulkanTextureDescriptor.h"
+#include "Graphics/Vulkan/RenderResources/RenderTarget.h"
 
 class ApplicationDesc;
 

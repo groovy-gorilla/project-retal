@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Camera/Camera.h"
+#include "Resources/ImageRenderer.h"
 #include "Vulkan/VulkanRenderer.h"
 
 class Display;
@@ -16,6 +18,10 @@ public:
 
 private:
     VulkanRenderer m_renderer;
+    Camera m_camera;
+    ImageRenderer m_imageRenderer;
+    Image m_image;
+
 
 };
 

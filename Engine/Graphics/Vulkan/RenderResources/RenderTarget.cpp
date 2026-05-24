@@ -91,7 +91,7 @@ void RenderTarget::CreateSamplers(VkDevice device) {
 
 void RenderTarget::CreateImage(VkDevice device, VkPhysicalDevice physicalDevice, VkImageUsageFlags usage, VkSampleCountFlagBits samples) {
 
-    CreateImageResource(physicalDevice, device, m_width, m_height, m_format, usage, samples, m_image, m_memory);
+    CreateImageResource(device, physicalDevice, m_width, m_height, m_format, usage, samples, m_image, m_memory);
 
 }
 

@@ -101,7 +101,7 @@ void Application::Run() {
         }
 
         // RENDER
-        m_graphics.Render(m_graphics.GetRenderer().GetDevice(), m_desc, m_timer.GetDeltaTime());
+        m_graphics.Render(m_graphics.GetRenderer().GetContext().device, m_desc, m_timer.GetDeltaTime());
 
         // PSEUDO - FPS
         float deltaTime = m_timer.GetDeltaTime();

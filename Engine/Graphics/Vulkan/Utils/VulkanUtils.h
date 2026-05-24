@@ -12,8 +12,8 @@ VkFormat FindDepthFormat(
     VkPhysicalDevice physicalDevice);
 
 void CreateImageResource(
-    VkPhysicalDevice physicalDevice,
     VkDevice device,
+    VkPhysicalDevice physicalDevice,
     uint32_t width,
     uint32_t height,
     VkFormat format,
@@ -37,8 +37,8 @@ VkShaderModule CreateShaderModule(
     const std::vector<char>& code);
 
 void CreateBuffer(
-    VkPhysicalDevice physicalDevice,
     VkDevice device,
+    VkPhysicalDevice physicalDevice,
     VkDeviceSize size,
     VkBufferUsageFlags usage,
     VkMemoryPropertyFlags properties,
@@ -51,8 +51,8 @@ VkCommandBuffer BeginSingleTimeCommands(
 
 void EndSingleTimeCommands(
     VkDevice device,
-    VkQueue queue,
     VkCommandPool commandPool,
+    VkQueue queue,
     VkCommandBuffer commandBuffer);
 
 void TransitionImageLayout(
@@ -72,6 +72,8 @@ void CopyBufferToImage(
     uint32_t width,
     uint32_t height);
 
+const char* VkFormatToString(
+    VkFormat format);
 
 
 

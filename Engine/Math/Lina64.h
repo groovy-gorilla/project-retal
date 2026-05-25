@@ -444,7 +444,7 @@ namespace lina {
 
     }
 
-    mat4 Orthographic(double left, double right, double bottom, double top, double nearPlane, double farPlane) {
+    inline mat4 Orthographic(double left, double right, double bottom, double top, double nearPlane, double farPlane) {
 
         mat4 result = mat4::Identity();
         double rl = right - left;
@@ -465,7 +465,7 @@ namespace lina {
 
 
     // HELPERS
-    double ToRadians(double degrees) {
+    inline double ToRadians(double degrees) {
         return degrees * (PI / 180.0);
     }
 

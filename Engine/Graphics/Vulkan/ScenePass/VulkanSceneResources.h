@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Window.h"
-#include "Graphics/Vulkan/RenderResources/RenderTarget.h"
+#include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 
 class VulkanSceneResources {
 public:

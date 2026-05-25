@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "VulkanSSAARenderPass.h"
 #include "Graphics/Vulkan/Utils/VulkanUtils.h"
-#include "Graphics/Vulkan/RenderResources/RenderTarget.h"
+#include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 #include "Core/ApplicationDesc.h"
 #include "Debug/ErrorDialog.h"
 

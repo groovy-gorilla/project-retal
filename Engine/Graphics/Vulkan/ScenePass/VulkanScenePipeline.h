@@ -7,7 +7,7 @@ public:
     void Create(VkDevice device, VkRenderPass renderPass, AntiAliasing aaMode, VkSampleCountFlagBits samples);
     void Destroy(VkDevice device);
 
-    void Bind(VkCommandBuffer commandBuffer);
+    //void Bind(VkCommandBuffer commandBuffer);
 
     [[nodiscard]] VkPipeline Get() const { return m_pipeline; }
     [[nodiscard]] VkPipelineLayout GetLayout() const {return m_layout;}

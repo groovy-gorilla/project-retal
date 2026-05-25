@@ -173,9 +173,9 @@ void VulkanScenePipeline::Destroy(VkDevice device) {
 
 }
 
-void VulkanScenePipeline::Bind(VkCommandBuffer commandBuffer) {
+/*void VulkanScenePipeline::Bind(VkCommandBuffer commandBuffer) {
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
 
-}
+}*/
 

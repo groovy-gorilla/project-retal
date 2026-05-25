@@ -37,7 +37,14 @@ void VulkanRenderer::Initialize(Display& display, Window& window, ApplicationDes
     m_context.graphicsQueue = m_queues.GetGraphics();
 
     // SCENE
-    m_sceneRenderPass.Create(m_device.Get(), m_hdrFormat, FindDepthFormat(m_physicalDevice.Get()), desc.AA_MODE, desc.MSAA_SAMPLES);
+    m_sceneRenderPass.Create(m_device.Get(), m_physicalDevice.Get(), m_renderExtent, m_hdrFormat, FindDepthFormat(m_physicalDevice.Get()), desc.AA_MODE, desc.MSAA_SAMPLES, desc);
+
+
+
+
+
+
+    // POPSUTE !!!!!!!!!!!!!
     m_sceneResources.Create(m_physicalDevice.Get(), m_device.Get(), m_renderExtent, m_hdrFormat, FindDepthFormat(m_physicalDevice.Get()), desc, m_sceneRenderPass.Get());
     m_scenePipeline.Create(m_device.Get(), m_sceneRenderPass.Get(), desc.AA_MODE, desc.MSAA_SAMPLES);
 
@@ -45,7 +52,7 @@ void VulkanRenderer::Initialize(Display& display, Window& window, ApplicationDes
     m_smaaRenderPass.Create(m_physicalDevice.Get(), m_device.Get(), m_renderExtent, m_sceneResources.SMAAColor, m_hdrFormat,desc, m_commands.GetPool(), m_queues.GetGraphics());
 
     // SSAA
-    m_ssaaRenderPass.Create(m_device.Get(), m_renderExtent, m_hdrFormat, /*IN*/m_sceneResources.SceneColor, /*IN*/m_sceneResources.SceneDepth, /*OUT*/m_sceneResources.SSAAColor, desc);
+    m_ssaaRenderPass.Create(m_device.Get(), m_renderExtent, m_hdrFormat, /*IN*/m_sceneRenderPass.GetColor(), /*IN*/m_sceneRenderPass.GetDepth(), /*OUT*/m_sceneResources.SSAAColor, desc);
 
     // POST
     m_postRenderPass.Create(m_device.Get(), m_windowExtent, m_swapchain.GetImageFormat(), desc);
@@ -89,14 +96,14 @@ void VulkanRenderer::RecordCommandBuffer(VkDevice device, uint32_t imageIndex, A
     vkBeginCommandBuffer(commandBuffer, &beginInfo);
 
     // CURRENT PIPELINE OUTPUT
-    RenderTarget* currentColor = &m_sceneResources.SceneColor;
+    RenderTarget* currentColor = &m_sceneRenderPass.GetColor();
 
     // SCENE PASS
-    m_sceneRenderPass.Begin(commandBuffer, m_sceneResources.GetFramebuffer(), m_sceneResources.GetExtent());
-    m_scenePipeline.Bind(commandBuffer);
+    m_sceneRenderPass.Begin(commandBuffer);
+    m_sceneRenderPass.PipelineBind(commandBuffer);
 
-    m_commands.SetViewport(commandBuffer, m_sceneResources.GetExtent());
-    m_commands.SetScissor(commandBuffer, m_sceneResources.GetExtent());
+    m_commands.SetViewport(commandBuffer, m_sceneRenderPass.GetExtent());
+    m_commands.SetScissor(commandBuffer, m_sceneRenderPass.GetExtent());
 
     vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 
@@ -104,7 +111,7 @@ void VulkanRenderer::RecordCommandBuffer(VkDevice device, uint32_t imageIndex, A
 
     // MSAA
     if (desc.AA_MODE == AntiAliasing::MSAA || desc.AA_MODE == AntiAliasing::MSAA_SMAA) {
-        currentColor = &m_sceneResources.ResolveColor;
+        currentColor = &m_sceneRenderPass.GetResolve();
     }
 
     // SSAA
@@ -232,7 +239,7 @@ void VulkanRenderer::RecreateRenderer(Display& display, Window& window, Applicat
     m_swapchain.Create(m_physicalDevice.Get(), m_device.Get(), m_surface.Get(), m_windowExtent, m_physicalDevice.GetGraphicsQueueFamily(), m_physicalDevice.GetPresentQueueFamily(), desc.VSYNC);
 
     // SCENE
-    m_sceneRenderPass.Create(m_device.Get(), m_hdrFormat, FindDepthFormat(m_physicalDevice.Get()), desc.AA_MODE, desc.MSAA_SAMPLES);
+    m_sceneRenderPass.Create(m_device.Get(), m_physicalDevice.Get(), m_renderExtent, m_hdrFormat, FindDepthFormat(m_physicalDevice.Get()), desc.AA_MODE, desc.MSAA_SAMPLES, desc);
     m_sceneResources.Create(m_physicalDevice.Get(), m_device.Get(), m_renderExtent, m_hdrFormat, FindDepthFormat(m_physicalDevice.Get()), desc, m_sceneRenderPass.Get());
     m_scenePipeline.Create(m_device.Get(), m_sceneRenderPass.Get(), desc.AA_MODE, desc.MSAA_SAMPLES);
 
@@ -240,7 +247,7 @@ void VulkanRenderer::RecreateRenderer(Display& display, Window& window, Applicat
     m_smaaRenderPass.Create(m_physicalDevice.Get(), m_device.Get(), m_renderExtent, m_sceneResources.SMAAColor, m_hdrFormat, desc, m_commands.GetPool(), m_device.GetGraphicsQueue());
 
     // SSAA
-    m_ssaaRenderPass.Create(m_device.Get(), m_renderExtent, m_hdrFormat, /*IN*/m_sceneResources.SceneColor, /*IN*/m_sceneResources.SceneDepth, /*OUT*/m_sceneResources.SSAAColor, desc);
+    m_ssaaRenderPass.Create(m_device.Get(), m_renderExtent, m_hdrFormat, /*IN*/m_sceneRenderPass.GetColor(), /*IN*/m_sceneRenderPass.GetDepth(), /*OUT*/m_sceneResources.SSAAColor, desc);
 
     // POST
     m_postRenderPass.Create(m_device.Get(), m_windowExtent, m_swapchain.GetImageFormat(), desc);

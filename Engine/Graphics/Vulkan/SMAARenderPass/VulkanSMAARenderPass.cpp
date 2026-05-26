@@ -388,11 +388,11 @@ void VulkanSMAARenderPass::CreateEdgePipeline(VkDevice device, VkExtent2D extent
     std::string filename;
 
     filename = "smaa_edge_vert.spv";
-    auto vertCode = ReadFile("../Assets/Shaders/SMAA/" + filename);
+    auto vertCode = ReadFile("../Engine/Graphics/Resources/Shaders/SMAA/" + filename);
     std::cout << "[Shader] Loading: " << filename << std::endl;
 
     filename = "smaa_edge_frag.spv";
-    auto fragCode = ReadFile("../Assets/Shaders/SMAA/" + filename);
+    auto fragCode = ReadFile("../Engine/Graphics/Resources/Shaders/SMAA/" + filename);
     std::cout << "[Shader] Loading: " << filename << std::endl;
 
     VkShaderModule vertShader = CreateShaderModule(device, vertCode);
@@ -641,11 +641,11 @@ void VulkanSMAARenderPass::CreateBlendPipeline(VkDevice device, VkExtent2D exten
     std::string filename;
 
     filename = "smaa_weights_vert.spv";
-    auto vertCode = ReadFile("../Assets/Shaders/SMAA/" + filename);
+    auto vertCode = ReadFile("../Engine/Graphics/Resources/Shaders/SMAA/" + filename);
     std::cout << "[Shader] Loading: " << filename << std::endl;
 
     filename = "smaa_weights_frag.spv";
-    auto fragCode = ReadFile("../Assets/Shaders/SMAA/" + filename);
+    auto fragCode = ReadFile("../Engine/Graphics/Resources/Shaders/SMAA/" + filename);
     std::cout << "[Shader] Loading: " << filename << std::endl;
 
     VkShaderModule vertShader = CreateShaderModule(device, vertCode);
@@ -894,11 +894,11 @@ void VulkanSMAARenderPass::CreateNeighborhoodPipeline(VkDevice device, VkExtent2
     std::string filename;
 
     filename = "smaa_blend_vert.spv";
-    auto vertCode = ReadFile("../Assets/Shaders/SMAA/" + filename);
+    auto vertCode = ReadFile("../Engine/Graphics/Resources/Shaders/SMAA/" + filename);
     std::cout << "[Shader] Loading: " << filename << std::endl;
 
     filename = "smaa_blend_frag.spv";
-    auto fragCode = ReadFile("../Assets/Shaders/SMAA/" + filename);
+    auto fragCode = ReadFile("../Engine/Graphics/Resources/Shaders/SMAA/" + filename);
     std::cout << "[Shader] Loading: " << filename << std::endl;
 
     VkShaderModule vertShader = CreateShaderModule(device, vertCode);

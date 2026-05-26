@@ -1,6 +1,6 @@
 #pragma once
 #include "Graphics/Camera/Camera.h"
-#include "Graphics/Resources/Image.h"
+#include "Sprite.h"
 
 using namespace lina;
 
@@ -10,12 +10,12 @@ struct UIPushConstants {
     fvec2 size;
 };
 
-class ImageRenderer {
+class SpriteRenderer {
 public:
     void Create(VkDevice device, VkRenderPass renderPass);
     void Shutdown();
     void Render(VkCommandBuffer commandBuffer, fvec2 screenSize, const Camera& camera);
-    void SetImage(Image& image);
+    void SetSprite(Sprite& image);
 
 private:
     VkDevice m_device = VK_NULL_HANDLE;
@@ -26,7 +26,7 @@ private:
     VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
     VkDescriptorSet m_descriptorSet = VK_NULL_HANDLE;
     VkRenderPass m_renderPass = VK_NULL_HANDLE;
-    Image* m_image = nullptr;
+    Sprite* m_sprite = nullptr;
 
     void CreateDescriptorSetLayout();
     void CreateDescriptorPool();

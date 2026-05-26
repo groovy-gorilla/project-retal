@@ -76,8 +76,8 @@ add_executable(TFX main.cpp
         Engine/Graphics/Vulkan/Wrappers/RenderTarget.cpp
         Engine/Core/Timer.h
         Engine/Core/Timer.cpp
-        Engine/Graphics/Resources/Texture.h
-        Engine/Graphics/Resources/Texture.cpp
+        Engine/Graphics/Texture/Texture.h
+        Engine/Graphics/Texture/Texture.cpp
         Engine/Math/Lina64.h
 )
 

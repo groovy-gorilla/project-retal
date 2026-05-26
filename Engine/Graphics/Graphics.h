@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Resources/ImageRenderer.h"
+#include "Sprite/SpriteRenderer.h"
 #include "Vulkan/VulkanRenderer.h"
 
 class Display;

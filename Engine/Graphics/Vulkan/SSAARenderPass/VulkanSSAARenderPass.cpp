@@ -56,11 +56,11 @@ void VulkanSSAARenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevi
     std::string filename;
 
     filename = "ssaa_vert.spv";
-    auto vertCode = ReadFile("../Assets/Shaders/SSAA/" + filename);
+    auto vertCode = ReadFile("../Engine/Graphics/Resources/Shaders/SSAA/" + filename);
     std::cout << "[Shader] Loading: " << filename << std::endl;
 
     filename = "ssaa_frag.spv";
-    auto fragCode = ReadFile("../Assets/Shaders/SSAA/" + filename);
+    auto fragCode = ReadFile("../Engine/Graphics/Resources/Shaders/SSAA/" + filename);
     std::cout << "[Shader] Loading: " << filename << std::endl;
 
     VkShaderModule vertShader = CreateShaderModule(device, vertCode);

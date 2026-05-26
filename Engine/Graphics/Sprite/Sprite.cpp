@@ -1,6 +1,6 @@
-#include "Image.h"
+#include "Sprite.h"
 
-void Image::Create(const VulkanContext& context, const std::filesystem::path& path) {
+void Sprite::Create(const VulkanContext& context, const std::filesystem::path& path) {
 
     TextureCreateInfo info{};
     info.magFilter = VK_FILTER_LINEAR;
@@ -12,31 +12,31 @@ void Image::Create(const VulkanContext& context, const std::filesystem::path& pa
 
 }
 
-void Image::Shutdown() {
+void Sprite::Shutdown() {
 
     m_texture.Shutdown();
 
 }
 
-void Image::SetPosition(const fvec2& position) {
+void Sprite::SetPosition(const fvec2& position) {
 
     m_position = position;
 
 }
 
-void Image::SetSize(const fvec2& size) {
+void Sprite::SetSize(const fvec2& size) {
 
     m_size = size;
 
 }
 
-const fvec2& Image::GetPosition() const {
+const fvec2& Sprite::GetPosition() const {
 
     return m_position;
 
 }
 
-const fvec2& Image::GetSize() const {
+const fvec2& Sprite::GetSize() const {
 
     return m_size;
 

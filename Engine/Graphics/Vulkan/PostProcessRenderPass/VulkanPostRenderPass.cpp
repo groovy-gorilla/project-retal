@@ -62,11 +62,11 @@ void VulkanPostRenderPass::Create(VkDevice device, VkExtent2D extent, VkFormat s
     std::string filename;
 
     filename = "post_vert.spv";
-    auto vertCode = ReadFile("../Assets/Shaders/" + filename);
+    auto vertCode = ReadFile("../Engine/Graphics/Resources/Shaders/Post/" + filename);
     std::cout << "[Shader] Loading: " << filename << std::endl;
 
     filename = "post_frag.spv";
-    auto fragCode = ReadFile("../Assets/Shaders/" + filename);
+    auto fragCode = ReadFile("../Engine/Graphics/Resources/Shaders/Post/" + filename);
     std::cout << "[Shader] Loading: " << filename << std::endl;
 
     VkShaderModule vertShader = CreateShaderModule(device, vertCode);

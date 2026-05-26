@@ -133,11 +133,11 @@ void VulkanSceneRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDev
     std::string filename;
 
     filename = "scene_vert.spv";
-    auto vertCode = ReadFile("../Assets/Shaders/" + filename);
+    auto vertCode = ReadFile("../Engine/Graphics/Resources/Shaders/Scene/" + filename);
     std::cout << "[Shader] Loading: " << filename << std::endl;
 
     filename = "scene_frag.spv";
-    auto fragCode = ReadFile("../Assets/Shaders/" + filename);
+    auto fragCode = ReadFile("../Engine/Graphics/Resources/Shaders/Scene/" + filename);
     std::cout << "[Shader] Loading: " << filename << std::endl;
 
     VkShaderModule vertModule = CreateShaderModule(device, vertCode);

@@ -1,10 +1,10 @@
 #pragma once
-#include "Texture.h"
+#include "../Texture/Texture.h"
 #include "Math/Lina64.h"
 
 using namespace lina;
 
-class Image {
+class Sprite {
 public:
     void Create(
         const VulkanContext& context,

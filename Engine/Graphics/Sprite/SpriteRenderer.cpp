@@ -1,8 +1,8 @@
-#include "ImageRenderer.h"
+#include "../Resources/SpriteRenderer.h"
 #include "Debug/ErrorDialog.h"
 #include "Graphics/Vulkan/Utils/VulkanUtils.h"
 
-void ImageRenderer::Create(VkDevice device, VkRenderPass renderPass) {
+void SpriteRenderer::Create(VkDevice device, VkRenderPass renderPass) {
 
     m_device = device;
     m_renderPass = renderPass;
@@ -15,7 +15,7 @@ void ImageRenderer::Create(VkDevice device, VkRenderPass renderPass) {
 
 }
 
-void ImageRenderer::Shutdown() {
+void SpriteRenderer::Shutdown() {
 
     if (m_pipeline != VK_NULL_HANDLE) {
         vkDestroyPipeline(m_device, m_pipeline, nullptr);
@@ -42,10 +42,10 @@ void ImageRenderer::Shutdown() {
         m_descriptorSetLayout = VK_NULL_HANDLE;
     }
 
-    if (m_image) {
-        m_image->Shutdown();
-        delete m_image;
-        m_image = nullptr;
+    if (m_sprite) {
+        m_sprite->Shutdown();
+        delete m_sprite;
+        m_sprite = nullptr;
     }
 
     if (m_device != VK_NULL_HANDLE) {
@@ -55,7 +55,7 @@ void ImageRenderer::Shutdown() {
 
 }
 
-void ImageRenderer::Render(VkCommandBuffer commandBuffer, fvec2 screenSize, const Camera& camera) {
+void SpriteRenderer::Render(VkCommandBuffer commandBuffer, fvec2 screenSize, const Camera& camera) {
 
     m_commandBuffer = commandBuffer;
 
@@ -64,8 +64,8 @@ void ImageRenderer::Render(VkCommandBuffer commandBuffer, fvec2 screenSize, cons
     UIPushConstants push{};
 
     push.projection = camera.GetProjection();
-    push.position = m_image->GetPosition();
-    push.size = m_image->GetSize();
+    push.position = m_sprite->GetPosition();
+    push.size = m_sprite->GetSize();
 
     vkCmdPushConstants(m_commandBuffer, m_pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(UIPushConstants), &push);
 
@@ -94,7 +94,7 @@ void ImageRenderer::Render(VkCommandBuffer commandBuffer, fvec2 screenSize, cons
 
 }
 
-void ImageRenderer::CreateDescriptorSetLayout() {
+void SpriteRenderer::CreateDescriptorSetLayout() {
 
     VkDescriptorSetLayoutBinding binding{};
     binding.binding = 0;
@@ -111,7 +111,7 @@ void ImageRenderer::CreateDescriptorSetLayout() {
 
 }
 
-void ImageRenderer::CreateDescriptorPool() {
+void SpriteRenderer::CreateDescriptorPool() {
 
     VkDescriptorPoolSize poolSize{};
     poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -127,7 +127,7 @@ void ImageRenderer::CreateDescriptorPool() {
 
 }
 
-void ImageRenderer::CreateDescriptorSet() {
+void SpriteRenderer::CreateDescriptorSet() {
 
     VkDescriptorSetAllocateInfo alloc{};
     alloc.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -139,14 +139,14 @@ void ImageRenderer::CreateDescriptorSet() {
 
 }
 
-void ImageRenderer::UpdateDescriptor() {
+void SpriteRenderer::UpdateDescriptor() {
 
-    if (!m_image) return;
+    if (!m_sprite) return;
 
     VkDescriptorImageInfo imageInfo{};
     imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView   = m_image->GetTexture().GetImageView();
-    imageInfo.sampler     = m_image->GetTexture().GetSampler();
+    imageInfo.imageView   = m_sprite->GetTexture().GetImageView();
+    imageInfo.sampler     = m_sprite->GetTexture().GetSampler();
 
     VkWriteDescriptorSet write{};
     write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -160,7 +160,7 @@ void ImageRenderer::UpdateDescriptor() {
 
 }
 
-void ImageRenderer::CreatePipeline() {
+void SpriteRenderer::CreatePipeline() {
 
     // SHADERS
     std::string filename;
@@ -286,14 +286,14 @@ void ImageRenderer::CreatePipeline() {
 
 }
 
-void ImageRenderer::SetImage(Image& image) {
+void SpriteRenderer::SetImage(Image& image) {
 
-    m_image = &image;
+    m_sprite = &image;
     UpdateDescriptor();
 
 }
 
-void ImageRenderer::CreatePipelineLayout() {
+void SpriteRenderer::CreatePipelineLayout() {
 
     VkPushConstantRange pushRange{};
     pushRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;

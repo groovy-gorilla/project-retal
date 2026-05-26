@@ -7,7 +7,7 @@
 #include "ThirdParty/smaa_textures/SearchTex.h"
 #include "Debug/ErrorDialog.h"
 
-void VulkanSMAARenderPass::Create(VkPhysicalDevice physicalDevice, VkDevice device, VkExtent2D extent, RenderTarget& outputColor, VkFormat blendFormat, ApplicationDesc& desc, VkCommandPool commandPool, VkQueue graphicsQueue) {
+void VulkanSMAARenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, ApplicationDesc& desc, VkCommandPool commandPool, VkQueue graphicsQueue) {
 
     m_device = device;
     m_commandPool = commandPool;
@@ -53,28 +53,32 @@ void VulkanSMAARenderPass::Create(VkPhysicalDevice physicalDevice, VkDevice devi
     vkFreeMemory(device, searchStagingMemory, nullptr);
 
     // EDGE TARGET
-    m_edgeColor.Create(device, physicalDevice, extent.width, extent.height, VK_FORMAT_R8G8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_SAMPLE_COUNT_1_BIT);
+    m_edgeColor.Create(device, physicalDevice, renderExtent.width, renderExtent.height, VK_FORMAT_R8G8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_SAMPLE_COUNT_1_BIT);
 
     // BLEND TARGET
-    m_blendColor.Create(device, physicalDevice, extent.width, extent.height, blendFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_SAMPLE_COUNT_1_BIT);
+    m_blendColor.Create(device, physicalDevice, renderExtent.width, renderExtent.height, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_SAMPLE_COUNT_1_BIT);
+
+    // OUTPUT TARGET
+    m_color.Create(device, physicalDevice, renderExtent.width, renderExtent.height, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_SAMPLE_COUNT_1_BIT);
+
 
     // EDGE PASS
     CreateEdgeRenderPass(device);
-    CreateEdgeFramebuffer(device, extent);
+    CreateEdgeFramebuffer(device, renderExtent);
     CreateEdgeDescriptors(device, desc);
-    CreateEdgePipeline(device, extent);
+    CreateEdgePipeline(device, renderExtent);
 
     // BLEND PASS
     CreateBlendRenderPass(device);
-    CreateBlendFramebuffer(device, extent);
+    CreateBlendFramebuffer(device, renderExtent);
     CreateBlendDescriptors(device, desc);
-    CreateBlendPipeline(device, extent);
+    CreateBlendPipeline(device, renderExtent);
 
     // NEIGHBORHOOD PASS
-    CreateNeighborhoodRenderPass(device, outputColor);
-    CreateNeighborhoodFramebuffer(device, extent, outputColor);
+    CreateNeighborhoodRenderPass(device, m_color);
+    CreateNeighborhoodFramebuffer(device, renderExtent, m_color);
     CreateNeighborhoodDescriptors(device, desc);
-    CreateNeighborhoodPipeline(device, extent);
+    CreateNeighborhoodPipeline(device, renderExtent);
 
     std::cout << "[Vulkan] SMAA render pass created" << std::endl;
 
@@ -102,6 +106,7 @@ void VulkanSMAARenderPass::Destroy(VkDevice device) {
     m_edgeDescriptor.Destroy(device);
     m_blendDescriptor.Destroy(device);
     m_neighborhoodDescriptor.Destroy(device);
+    m_color.Destroy(device);
 
     // EDGE PASS
     if (m_edgePipeline) {

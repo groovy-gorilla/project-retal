@@ -42,28 +42,22 @@ add_executable(TFX main.cpp
         Engine/Graphics/Vulkan/Core/VulkanDevice.cpp
         Engine/Graphics/Vulkan/Core/VulkanSwapchain.h
         Engine/Graphics/Vulkan/Core/VulkanSwapchain.cpp
-        Engine/Graphics/Vulkan/ScenePass/VulkanSceneRenderPass.h
-        Engine/Graphics/Vulkan/ScenePass/VulkanSceneRenderPass.cpp
+        Engine/Graphics/Vulkan/SceneRenderPass/VulkanSceneRenderPass.h
+        Engine/Graphics/Vulkan/SceneRenderPass/VulkanSceneRenderPass.cpp
         Engine/Graphics/Vulkan/VulkanRenderer.h
         Engine/Graphics/Vulkan/VulkanRenderer.cpp
         Engine/Graphics/Graphics.h
         Engine/Graphics/Graphics.cpp
         Engine/Graphics/Vulkan/Core/VulkanDebug.h
         Engine/Graphics/Vulkan/Core/VulkanDebug.cpp
-        Engine/Graphics/Vulkan/ScenePass/VulkanScenePipeline.h
-        Engine/Graphics/Vulkan/ScenePass/VulkanScenePipeline.cpp
         Engine/Core/ApplicationDesc.h
-        Engine/Graphics/Vulkan/ScenePass/VulkanSceneResources.h
-        Engine/Graphics/Vulkan/ScenePass/VulkanSceneResources.cpp
         Engine/Graphics/Vulkan/Utils/VulkanUtils.h
         Engine/Graphics/Vulkan/Utils/VulkanUtils.cpp
-        Engine/Graphics/Vulkan/PostProcessPass/VulkanPostRenderPass.cpp
-        Engine/Graphics/Vulkan/PostProcessPass/VulkanPostRenderPass.h
+        Engine/Graphics/Vulkan/PostProcessRenderPass/VulkanPostRenderPass.cpp
+        Engine/Graphics/Vulkan/PostProcessRenderPass/VulkanPostRenderPass.h
         Engine/Graphics/Vulkan/Core/VulkanValidation.h
         Engine/Graphics/Vulkan/Core/VulkanValidation.cpp
         Engine/Graphics/Vulkan/Wrappers/RenderTarget.h
-        Engine/Graphics/Vulkan/PostProcessPass/VulkanPostResources.h
-        Engine/Graphics/Vulkan/PostProcessPass/VulkanPostResources.cpp
         Engine/Graphics/Vulkan/Core/VulkanCommands.h
         Engine/Graphics/Vulkan/Core/VulkanCommands.cpp
         Engine/Graphics/Vulkan/Core/VulkanSync.h
@@ -72,13 +66,13 @@ add_executable(TFX main.cpp
         Engine/Graphics/Vulkan/Core/VulkanQueues.cpp
         Engine/Graphics/Vulkan/Wrappers/VulkanTextureDescriptor.h
         Engine/Graphics/Vulkan/Wrappers/VulkanTextureDescriptor.cpp
-        Engine/Graphics/Vulkan/PostProcessPass/VulkanSSAARenderPass.h
-        Engine/Graphics/Vulkan/PostProcessPass/VulkanSSAARenderPass.cpp
+        Engine/Graphics/Vulkan/SSAARenderPass/VulkanSSAARenderPass.h
+        Engine/Graphics/Vulkan/SSAARenderPass/VulkanSSAARenderPass.cpp
         ThirdParty/stb/stb_image_write.h
         Engine/pch.h
         Engine/pch.cpp
-        Engine/Graphics/Vulkan/PostProcessPass/VulkanSMAARenderPass.cpp
-        Engine/Graphics/Vulkan/PostProcessPass/VulkanSMAARenderPass.h
+        Engine/Graphics/Vulkan/SMAARenderPass/VulkanSMAARenderPass.cpp
+        Engine/Graphics/Vulkan/SMAARenderPass/VulkanSMAARenderPass.h
         Engine/Graphics/Vulkan/Wrappers/RenderTarget.cpp
         Engine/Core/Timer.h
         Engine/Core/Timer.cpp

@@ -6,11 +6,11 @@
 #include "Debug/ErrorDialog.h"
 
 
-void VulkanSSAARenderPass::Create(VkDevice device, VkExtent2D extent, VkFormat swapchainFormat, /*IN*/RenderTarget& sceneColor, RenderTarget& sceneDepth, RenderTarget& finalColor, ApplicationDesc& desc) {
+void VulkanSSAARenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, /*IN*/RenderTarget& sceneColor, RenderTarget& sceneDepth, ApplicationDesc& desc) {
 
     // RENDER PASS
     VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = swapchainFormat;
+    colorAttachment.format = colorFormat;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -95,13 +95,13 @@ void VulkanSSAARenderPass::Create(VkDevice device, VkExtent2D extent, VkFormat s
 
     // VIEWPORT
     VkViewport viewport{};
-    viewport.width = static_cast<float>(extent.width);
-    viewport.height = static_cast<float>(extent.height);
+    viewport.width = static_cast<float>(renderExtent.width);
+    viewport.height = static_cast<float>(renderExtent.height);
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
     VkRect2D scissor{};
-    scissor.extent = extent;
+    scissor.extent = renderExtent;
 
     VkPipelineViewportStateCreateInfo viewportState{};
     viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -163,7 +163,9 @@ void VulkanSSAARenderPass::Create(VkDevice device, VkExtent2D extent, VkFormat s
     vkDestroyShaderModule(device, vertShader, nullptr);
     vkDestroyShaderModule(device, fragShader, nullptr);
 
-    CreateFramebuffer(device, extent, finalColor);
+    m_color.Create(device, physicalDevice, renderExtent.width, renderExtent.height, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_SAMPLE_COUNT_1_BIT);
+
+    CreateFramebuffer(device, renderExtent);
 
     std::cout << "[Vulkan] Post-render pass created" << std::endl;
 
@@ -201,6 +203,8 @@ void VulkanSSAARenderPass::Destroy(VkDevice device) {
 
     m_sceneDescriptor.Destroy(device);
 
+    m_color.Destroy(device);
+
     if (m_framebuffer) {
         vkDestroyFramebuffer(device, m_framebuffer, nullptr);
         m_framebuffer = VK_NULL_HANDLE;
@@ -223,10 +227,10 @@ void VulkanSSAARenderPass::Destroy(VkDevice device) {
 
 }
 
-void VulkanSSAARenderPass::CreateFramebuffer(VkDevice device, VkExtent2D extent, RenderTarget& finalColor) {
+void VulkanSSAARenderPass::CreateFramebuffer(VkDevice device, VkExtent2D extent) {
 
     VkImageView attachments[] = {
-        finalColor.GetImageView()
+        m_color.GetImageView()
     };
 
     VkFramebufferCreateInfo fb{};

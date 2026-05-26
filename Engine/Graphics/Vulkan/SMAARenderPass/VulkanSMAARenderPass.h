@@ -10,11 +10,10 @@ class ApplicationDesc;
 class VulkanSMAARenderPass {
 public:
 
-    void Create(VkPhysicalDevice physicalDevice,
-                VkDevice device,
-                VkExtent2D extent,
-                RenderTarget& outputColor,
-                VkFormat blendFormat,
+    void Create(VkDevice device,
+                VkPhysicalDevice physicalDevice,
+                VkExtent2D renderExtent,
+                VkFormat colorFormat,
                 ApplicationDesc& desc,
                 VkCommandPool commandPool,
                 VkQueue graphicsQueue);
@@ -25,6 +24,8 @@ public:
                 RenderTarget& inputColor);
 
     void Destroy(VkDevice device);
+
+    RenderTarget& GetColor() { return m_color; }
 
 private:
 
@@ -123,5 +124,7 @@ private:
 
     VkCommandPool m_commandPool{};
     VkQueue m_graphicsQueue{};
+
+    RenderTarget m_color;
 
 };

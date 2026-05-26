@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/Display.h"
+#include "Core/Window.h"
 #include "Core/Timer.h"
 #include "Core/VulkanInstance.h"
 #include "Core/VulkanDebug.h"
@@ -7,16 +9,13 @@
 #include "Core/VulkanPhysicalDevice.h"
 #include "Core/VulkanDevice.h"
 #include "Core/VulkanSwapchain.h"
-#include "ScenePass/VulkanSceneRenderPass.h"
-#include "PostProcessPass/VulkanPostRenderPass.h"
-#include "ScenePass/VulkanScenePipeline.h"
-#include "ScenePass/VulkanSceneResources.h"
-#include "PostProcessPass/VulkanPostResources.h"
+#include "SceneRenderPass/VulkanSceneRenderPass.h"
+#include "PostProcessRenderPass/VulkanPostRenderPass.h"
 #include "Core/VulkanCommands.h"
 #include "Core/VulkanSync.h"
 #include "Core/VulkanQueues.h"
-#include "PostProcessPass/VulkanSMAARenderPass.h"
-#include "PostProcessPass/VulkanSSAARenderPass.h"
+#include "SMAARenderPass/VulkanSMAARenderPass.h"
+#include "SSAARenderPass/VulkanSSAARenderPass.h"
 
 struct VulkanContext {
     VkDevice device = VK_NULL_HANDLE;
@@ -52,7 +51,6 @@ public:
 
     const VulkanContext& GetContext() const { return m_context; }
 
-    VulkanSceneResources& GetSceneResources() { return m_sceneResources; }
     VulkanPostRenderPass& GetPostRenderPass() { return m_postRenderPass; }
     VulkanSSAARenderPass& GetSSAARenderPass() { return m_ssaaRenderPass; }
 
@@ -70,14 +68,11 @@ private:
 
     // SCENE
     VulkanSceneRenderPass m_sceneRenderPass;
-    VulkanSceneResources m_sceneResources;
-    VulkanScenePipeline m_scenePipeline;
 
     // SCREEN
     VulkanPostRenderPass m_postRenderPass;
     VulkanSMAARenderPass m_smaaRenderPass;
     VulkanSSAARenderPass m_ssaaRenderPass;
-    VulkanPostResources m_postResources;
 
     VulkanCommands m_commands;
     VulkanSync m_sync;

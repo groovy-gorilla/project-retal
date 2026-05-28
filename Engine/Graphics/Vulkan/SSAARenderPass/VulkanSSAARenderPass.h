@@ -1,7 +1,8 @@
 #pragma once
 
+#include "Graphics/Vulkan/Wrappers/Pipeline.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
-#include "Graphics/Vulkan/Wrappers/VulkanTextureDescriptor.h"
+#include "Graphics/Vulkan/Wrappers/Descriptor.h"
 
 struct ApplicationDesc;
 
@@ -25,21 +26,27 @@ public:
         uint32_t currentFrame);
 
     [[nodiscard]] VkRenderPass Get() const { return m_renderPass; }
-    [[nodiscard]] VulkanTextureDescriptor GetDescriptor() const { return m_sceneDescriptor; }
+    [[nodiscard]] Descriptor GetDescriptor() const { return m_descriptor; }
 
     RenderTarget& GetColor() { return m_color; }
 
 private:
-    VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
-    VkPipeline m_pipeline = VK_NULL_HANDLE;
+
+    //PASS
     VkRenderPass m_renderPass = VK_NULL_HANDLE;
-    VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
-    VulkanTextureDescriptor m_sceneDescriptor;
 
-    VkFramebuffer m_framebuffer = VK_NULL_HANDLE;
-    void CreateFramebuffer(VkDevice device, VkExtent2D extent);
+    // PIPELINE
+    Pipeline m_pipeline;
 
+    // ATTACHMENTS
     RenderTarget m_color;
+
+    // DESCRIPTOR
+    Descriptor m_descriptor;
+
+    // FRAMEBUFFER
+    VkFramebuffer m_framebuffer = VK_NULL_HANDLE;
+
 
 };
 

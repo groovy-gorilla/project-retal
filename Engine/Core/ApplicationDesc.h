@@ -38,8 +38,10 @@ struct ApplicationDesc {
 
     // ANTIALIASING
     AntiAliasing AA_MODE                = AntiAliasing::None;
+
     // MSAA
     VkSampleCountFlagBits MSAA_SAMPLES  = VK_SAMPLE_COUNT_1_BIT;
+
     // SSAA
     float SSAA_SCALE                    = 1.0f;                                                 // scale choice: 1.0 - 1.25 - 1.5 - 2.0
                                                                                                 // UWAGA! Wartości ustawiamy tylko przy AntiAliasing::SSAA lub SSAA_TAA

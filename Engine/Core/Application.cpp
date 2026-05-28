@@ -200,18 +200,18 @@ void Application::Run() {
         if (actions.IsActionPressed(m_input, "AA")) {
             switch (m_desc.AA_MODE) {
                 case AntiAliasing::None:
-                    m_desc.AA_MODE = AntiAliasing::SMAA;
-                    m_desc.MSAA_SAMPLES = VK_SAMPLE_COUNT_1_BIT;
-                    m_desc.SSAA_SCALE = 1.0f;
-                    std::cout << "AA_MODE: SMAA" << std::endl;
-                    break;
-                case AntiAliasing::SMAA:
                     m_desc.AA_MODE = AntiAliasing::MSAA;
                     m_desc.MSAA_SAMPLES = VK_SAMPLE_COUNT_16_BIT;
                     m_desc.SSAA_SCALE = 1.0f;
                     std::cout << "AA_MODE: MSAA" << std::endl;
                     break;
                 case AntiAliasing::MSAA:
+                    m_desc.AA_MODE = AntiAliasing::SMAA;
+                    m_desc.MSAA_SAMPLES = VK_SAMPLE_COUNT_1_BIT;
+                    m_desc.SSAA_SCALE = 1.0f;
+                    std::cout << "AA_MODE: SMAA" << std::endl;
+                    break;
+                case AntiAliasing::SMAA:
                     m_desc.AA_MODE = AntiAliasing::MSAA_SMAA;
                     m_desc.MSAA_SAMPLES = VK_SAMPLE_COUNT_16_BIT;
                     m_desc.SSAA_SCALE = 1.0f;

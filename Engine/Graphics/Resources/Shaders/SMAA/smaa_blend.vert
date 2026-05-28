@@ -1,8 +1,21 @@
 #version 450
 #extension  GL_GOOGLE_include_directive : require
 
+vec2 positions[3] = vec2[](
+vec2(-1.0,-1.0),
+vec2( 3.0,-1.0),
+vec2(-1.0, 3.0)
+);
+
+vec2 texture_coordinates[3] = vec2[](
+vec2( 0.0, 0.0),
+vec2( 2.0, 0.0),
+vec2( 0.0, 2.0)
+);
+
 layout(location=0) out vec2 textureCoord;
-layout(location=1) out vec4 offset;
+layout(location=1) out vec2 pixelCoord;
+layout(location=2) out vec4[3] offsets;
 
 #include "smaa_settings.h"
 #define SMAA_INCLUDE_VS 1
@@ -11,13 +24,8 @@ layout(location=1) out vec4 offset;
 
 void main()
 {
-    gl_Position = vec4(gl_VertexIndex == 1 ? 3.0 : -1.0,
-    gl_VertexIndex == 2 ? 3.0 : -1.0,
-    0.0,
-    1.0);
+    textureCoord = texture_coordinates[gl_VertexIndex];
+    SMAABlendingWeightCalculationVS(textureCoord, pixelCoord, offsets);
+    gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);
 
-    textureCoord = vec2(gl_VertexIndex == 1 ? 2.0 : 0.0,
-    gl_VertexIndex == 2 ? 2.0 : 0.0);
-
-    SMAANeighborhoodBlendingVS(textureCoord, offset);
 }

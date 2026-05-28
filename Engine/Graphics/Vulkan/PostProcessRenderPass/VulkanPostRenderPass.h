@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Graphics/Vulkan/Wrappers/VulkanTextureDescriptor.h"
+#include "Graphics/Vulkan/Wrappers/Descriptor.h"
+#include "Graphics/Vulkan/Wrappers/Pipeline.h"
 
 struct ApplicationDesc;
 
@@ -31,14 +32,18 @@ public:
         float exposure);
 
     [[nodiscard]] VkRenderPass Get() const { return m_renderPass; }
-    [[nodiscard]] VulkanTextureDescriptor GetDescriptor() const { return m_sceneDescriptor; }
+    [[nodiscard]] Descriptor GetDescriptor() const { return m_descriptor; }
 
 private:
-    VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
-    VkPipeline m_pipeline = VK_NULL_HANDLE;
+
+    // PASS
     VkRenderPass m_renderPass = VK_NULL_HANDLE;
-    VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
-    VulkanTextureDescriptor m_sceneDescriptor;
+
+    // PIPELINE
+    Pipeline m_pipeline;
+
+    // DESCRIPTOR
+    Descriptor m_descriptor;
 
 };
 

@@ -36,8 +36,12 @@ void VulkanRenderer::Initialize(Display& display, Window& window, ApplicationDes
     m_context.commandPool = m_commands.GetPool();
     m_context.graphicsQueue = m_queues.GetGraphics();
 
+    // SSAA UPSCALE CALCULATION
+    m_ssaaExtent.width = m_renderExtent.width * desc.SSAA_SCALE;
+    m_ssaaExtent.height = m_renderExtent.height * desc.SSAA_SCALE;
+
     // SCENE
-    m_sceneRenderPass.Create(m_device.Get(), m_physicalDevice.Get(), m_renderExtent, m_hdrFormat, FindDepthFormat(m_physicalDevice.Get()), desc.AA_MODE, desc.MSAA_SAMPLES, desc);
+    m_sceneRenderPass.Create(m_device.Get(), m_physicalDevice.Get(), m_ssaaExtent, m_hdrFormat, FindDepthFormat(m_physicalDevice.Get()), desc.AA_MODE, desc.MSAA_SAMPLES, desc);
 
     // SMAA
     m_smaaRenderPass.Create(m_device.Get(), m_physicalDevice.Get(), m_renderExtent, m_hdrFormat, desc, m_commands.GetPool(), m_queues.GetGraphics());
@@ -94,6 +98,7 @@ void VulkanRenderer::RecordCommandBuffer(VkDevice device, uint32_t imageIndex, A
 
     m_commands.SetViewport(commandBuffer, m_sceneRenderPass.GetExtent());
     m_commands.SetScissor(commandBuffer, m_sceneRenderPass.GetExtent());
+
 
     vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 
@@ -225,8 +230,12 @@ void VulkanRenderer::RecreateRenderer(Display& display, Window& window, Applicat
     // SWAPCHAIN
     m_swapchain.Create(m_physicalDevice.Get(), m_device.Get(), m_surface.Get(), m_windowExtent, m_physicalDevice.GetGraphicsQueueFamily(), m_physicalDevice.GetPresentQueueFamily(), desc.VSYNC);
 
+    // SSAA UPSCALE CALCULATION
+    m_ssaaExtent.width = m_renderExtent.width * desc.SSAA_SCALE;
+    m_ssaaExtent.height = m_renderExtent.height * desc.SSAA_SCALE;
+
     // SCENE
-    m_sceneRenderPass.Create(m_device.Get(), m_physicalDevice.Get(), m_renderExtent, m_hdrFormat, FindDepthFormat(m_physicalDevice.Get()), desc.AA_MODE, desc.MSAA_SAMPLES, desc);
+    m_sceneRenderPass.Create(m_device.Get(), m_physicalDevice.Get(), m_ssaaExtent, m_hdrFormat, FindDepthFormat(m_physicalDevice.Get()), desc.AA_MODE, desc.MSAA_SAMPLES, desc);
 
     // SMAA
     m_smaaRenderPass.Create(m_device.Get(), m_physicalDevice.Get(), m_renderExtent, m_hdrFormat, desc, m_commands.GetPool(), m_device.GetGraphicsQueue());

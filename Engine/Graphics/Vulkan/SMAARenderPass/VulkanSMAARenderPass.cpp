@@ -80,7 +80,7 @@ void VulkanSMAARenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevi
     CreateNeighborhoodDescriptors(device, desc);
     CreateNeighborhoodPipeline(device, renderExtent);
 
-    std::cout << "[Vulkan] SMAA render pass created" << std::endl;
+    std::cout << "[Vulkan] SMAA-render pass created" << std::endl;
 
 }
 
@@ -109,15 +109,7 @@ void VulkanSMAARenderPass::Destroy(VkDevice device) {
     m_color.Destroy(device);
 
     // EDGE PASS
-    if (m_edgePipeline) {
-        vkDestroyPipeline(device, m_edgePipeline, nullptr);
-        m_edgePipeline = VK_NULL_HANDLE;
-    }
-
-    if (m_edgePipelineLayout) {
-        vkDestroyPipelineLayout(device, m_edgePipelineLayout, nullptr);
-        m_edgePipelineLayout = VK_NULL_HANDLE;
-    }
+    m_edgePipeline.Destroy(device);
 
     if (m_edgeFramebuffer) {
         vkDestroyFramebuffer(device, m_edgeFramebuffer, nullptr);
@@ -130,15 +122,7 @@ void VulkanSMAARenderPass::Destroy(VkDevice device) {
     }
 
     // BLEND PASS
-    if (m_blendPipeline) {
-        vkDestroyPipeline(device, m_blendPipeline, nullptr);
-        m_blendPipeline = VK_NULL_HANDLE;
-    }
-
-    if (m_blendPipelineLayout) {
-        vkDestroyPipelineLayout(device, m_blendPipelineLayout, nullptr);
-        m_blendPipelineLayout = VK_NULL_HANDLE;
-    }
+    m_blendPipeline.Destroy(device);
 
     if (m_blendFramebuffer) {
         vkDestroyFramebuffer(device, m_blendFramebuffer, nullptr);
@@ -151,15 +135,7 @@ void VulkanSMAARenderPass::Destroy(VkDevice device) {
     }
 
     // NEIGHBORHOOD PASS
-    if (m_neighborhoodPipeline) {
-        vkDestroyPipeline(device, m_neighborhoodPipeline, nullptr);
-        m_neighborhoodPipeline = VK_NULL_HANDLE;
-    }
-
-    if (m_neighborhoodPipelineLayout) {
-        vkDestroyPipelineLayout(device, m_neighborhoodPipelineLayout, nullptr);
-        m_neighborhoodPipelineLayout = VK_NULL_HANDLE;
-    }
+    m_neighborhoodPipeline.Destroy(device);
 
     if (m_neighborhoodFramebuffer) {
         vkDestroyFramebuffer(device, m_neighborhoodFramebuffer, nullptr);
@@ -179,7 +155,7 @@ void VulkanSMAARenderPass::Destroy(VkDevice device) {
     m_areaTexture.Destroy(device);
     m_searchTexture.Destroy(device);
 
-    std::cout << "[Vulkan] SMAA render pass destroyed" << std::endl;
+    std::cout << "[Vulkan] SMAA-render pass destroyed" << std::endl;
 
 }
 
@@ -202,11 +178,11 @@ void VulkanSMAARenderPass::RenderEdgePass(VkCommandBuffer commandBuffer, VkExten
     vkCmdBeginRenderPass(commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
     // PIPELINE
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_edgePipeline);
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_edgePipeline.Get());
 
     // DESCRIPTORS
     VkDescriptorSet descriptorSet = m_edgeDescriptor.GetSet(currentFrame);
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_edgePipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_edgePipeline.GetLayout(), 0, 1, &descriptorSet, 0, nullptr);
 
     // DRAW FULLSCREEN TRIANGLE
     vkCmdDraw(commandBuffer, 3, 1, 0, 0);
@@ -235,11 +211,11 @@ void VulkanSMAARenderPass::RenderBlendPass(VkCommandBuffer commandBuffer, VkExte
     vkCmdBeginRenderPass(commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
     // PIPELINE
-    vkCmdBindPipeline(commandBuffer,VK_PIPELINE_BIND_POINT_GRAPHICS, m_blendPipeline);
+    vkCmdBindPipeline(commandBuffer,VK_PIPELINE_BIND_POINT_GRAPHICS, m_blendPipeline.Get());
 
     // DESCRIPTORS
     VkDescriptorSet descriptorSet = m_blendDescriptor.GetSet(currentFrame);
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_blendPipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_blendPipeline.GetLayout(), 0, 1, &descriptorSet, 0, nullptr);
 
     // DRAW FULLSCREEN TRIANGLE
     vkCmdDraw(commandBuffer, 3, 1, 0, 0);
@@ -268,11 +244,11 @@ void VulkanSMAARenderPass::RenderNeighborhoodPass(VkCommandBuffer commandBuffer,
     vkCmdBeginRenderPass(commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
     // PIPELINE
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_neighborhoodPipeline);
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_neighborhoodPipeline.Get());
 
     // DESCRIPTORS
     VkDescriptorSet descriptorSet = m_neighborhoodDescriptor.GetSet(currentFrame);
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_neighborhoodPipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_neighborhoodPipeline.GetLayout(), 0, 1, &descriptorSet, 0, nullptr);
 
     // DRAW FULLSCREEN TRIANGLE
     vkCmdDraw(commandBuffer, 3, 1, 0, 0);
@@ -376,41 +352,6 @@ void VulkanSMAARenderPass::CreateEdgeDescriptors(VkDevice device, ApplicationDes
 
 void VulkanSMAARenderPass::CreateEdgePipeline(VkDevice device, VkExtent2D extent) {
 
-    // PIPELINE LAYOUT
-    VkPipelineLayoutCreateInfo layoutInfo{};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    layoutInfo.setLayoutCount = 1;
-    layoutInfo.pSetLayouts = &m_edgeDescriptorLayout;
-
-    VK_CHECK(vkCreatePipelineLayout(device, &layoutInfo, nullptr, &m_edgePipelineLayout));
-
-    // SHADERS
-    std::string filename;
-
-    filename = "smaa_edge_vert.spv";
-    auto vertCode = ReadFile("../Engine/Graphics/Resources/Shaders/SMAA/" + filename);
-    std::cout << "[Shader] Loading: " << filename << std::endl;
-
-    filename = "smaa_edge_frag.spv";
-    auto fragCode = ReadFile("../Engine/Graphics/Resources/Shaders/SMAA/" + filename);
-    std::cout << "[Shader] Loading: " << filename << std::endl;
-
-    VkShaderModule vertShader = CreateShaderModule(device, vertCode);
-    VkShaderModule fragShader = CreateShaderModule(device, fragCode);
-
-    // SHADER STAGES
-    VkPipelineShaderStageCreateInfo vertStage{};
-    vertStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    vertStage.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vertStage.module = vertShader;
-    vertStage.pName = "main";
-
-    VkPipelineShaderStageCreateInfo fragStage{};
-    fragStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    fragStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragStage.module = fragShader;
-    fragStage.pName = "main";
-
     struct SMAASpecializationData {
         float width;
         float height;
@@ -456,96 +397,18 @@ void VulkanSMAARenderPass::CreateEdgePipeline(VkDevice device, VkExtent2D extent
     specializationInfo.dataSize = sizeof(specData);
     specializationInfo.pData = &specData;
 
-    vertStage.pSpecializationInfo = &specializationInfo;
-    fragStage.pSpecializationInfo = &specializationInfo;
-
-    VkPipelineShaderStageCreateInfo stages[] = {
-        vertStage,
-        fragStage
-    };
-
-    // VERTEX INPUT
-    VkPipelineVertexInputStateCreateInfo vertexInput{};
-    vertexInput.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-
-    // INPUT ASSEMBLY
-    VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
-    inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-
-    // VIEWPORT
-    VkViewport viewport{};
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    viewport.width = static_cast<float>(extent.width);
-    viewport.height = static_cast<float>(extent.height);
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
-
-    VkRect2D scissor{};
-    scissor.offset = { 0, 0 };
-    scissor.extent = extent;
-
-    VkPipelineViewportStateCreateInfo viewportState{};
-    viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    viewportState.viewportCount = 1;
-    viewportState.pViewports = &viewport;
-    viewportState.scissorCount = 1;
-    viewportState.pScissors = &scissor;
-
-    // RASTERIZER
-    VkPipelineRasterizationStateCreateInfo rasterizer{};
-    rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    rasterizer.depthClampEnable = VK_FALSE;
-    rasterizer.rasterizerDiscardEnable = VK_FALSE;
-    rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-    rasterizer.lineWidth = 1.0f;
-    rasterizer.cullMode = VK_CULL_MODE_NONE;
-    rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-
-    // MULTISAMPLING
-    VkPipelineMultisampleStateCreateInfo multisampling{};
-    multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-
-    // COLOR BLENDING
-    VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-    colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT;
-    colorBlendAttachment.blendEnable = VK_FALSE;
-
-    VkPipelineColorBlendStateCreateInfo colorBlending{};
-    colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    colorBlending.logicOpEnable = VK_FALSE;
-    colorBlending.attachmentCount = 1;
-    colorBlending.pAttachments = &colorBlendAttachment;
-
-    // DEPTH
-    VkPipelineDepthStencilStateCreateInfo depthStencil{};
-    depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    depthStencil.depthTestEnable = VK_FALSE;
-    depthStencil.depthWriteEnable = VK_FALSE;
-
-    // PIPELINE
-    VkGraphicsPipelineCreateInfo pipelineInfo{};
-    pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    pipelineInfo.stageCount = 2;
-    pipelineInfo.pStages = stages;
-    pipelineInfo.pVertexInputState = &vertexInput;
-    pipelineInfo.pInputAssemblyState = &inputAssembly;
-    pipelineInfo.pViewportState = &viewportState;
-    pipelineInfo.pRasterizationState = &rasterizer;
-    pipelineInfo.pMultisampleState = &multisampling;
-    pipelineInfo.pColorBlendState = &colorBlending;
-    pipelineInfo.pDepthStencilState = &depthStencil;
-    pipelineInfo.layout = m_edgePipelineLayout;
-    pipelineInfo.renderPass = m_edgeRenderPass;
-    pipelineInfo.subpass = 0;
-
-    VK_CHECK(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_edgePipeline));
-
-    // CLEANUP
-    vkDestroyShaderModule(device, vertShader, nullptr);
-    vkDestroyShaderModule(device, fragShader, nullptr);
+    m_edgePipeline.Create(
+        device,
+        m_edgeRenderPass,
+        m_edgeDescriptorLayout,
+        nullptr,
+        VK_SAMPLE_COUNT_1_BIT,
+        "../Engine/Graphics/Resources/Shaders/SMAA/smaa_edge_vert.spv",
+        "../Engine/Graphics/Resources/Shaders/SMAA/smaa_edge_frag.spv",
+        false,
+        false,
+        &specializationInfo,
+        &specializationInfo);
 
 }
 
@@ -629,41 +492,6 @@ void VulkanSMAARenderPass::CreateBlendDescriptors(VkDevice device, ApplicationDe
 
 void VulkanSMAARenderPass::CreateBlendPipeline(VkDevice device, VkExtent2D extent) {
 
-    // PIPELINE LAYOUT
-    VkPipelineLayoutCreateInfo layoutInfo{};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    layoutInfo.setLayoutCount = 1;
-    layoutInfo.pSetLayouts = &m_blendDescriptorLayout;
-
-    VK_CHECK(vkCreatePipelineLayout(device, &layoutInfo, nullptr, &m_blendPipelineLayout));
-
-    // SHADERS
-    std::string filename;
-
-    filename = "smaa_weights_vert.spv";
-    auto vertCode = ReadFile("../Engine/Graphics/Resources/Shaders/SMAA/" + filename);
-    std::cout << "[Shader] Loading: " << filename << std::endl;
-
-    filename = "smaa_weights_frag.spv";
-    auto fragCode = ReadFile("../Engine/Graphics/Resources/Shaders/SMAA/" + filename);
-    std::cout << "[Shader] Loading: " << filename << std::endl;
-
-    VkShaderModule vertShader = CreateShaderModule(device, vertCode);
-    VkShaderModule fragShader = CreateShaderModule(device, fragCode);
-
-    // SHADER STAGES
-    VkPipelineShaderStageCreateInfo vertStage{};
-    vertStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    vertStage.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vertStage.module = vertShader;
-    vertStage.pName = "main";
-
-    VkPipelineShaderStageCreateInfo fragStage{};
-    fragStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    fragStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragStage.module = fragShader;
-    fragStage.pName = "main";
-
     struct SMAASpecializationData {
         float width;
         float height;
@@ -709,96 +537,18 @@ void VulkanSMAARenderPass::CreateBlendPipeline(VkDevice device, VkExtent2D exten
     specializationInfo.dataSize = sizeof(specData);
     specializationInfo.pData = &specData;
 
-    vertStage.pSpecializationInfo = &specializationInfo;
-    fragStage.pSpecializationInfo = &specializationInfo;
-
-    VkPipelineShaderStageCreateInfo stages[] = {
-        vertStage,
-        fragStage
-    };
-
-    // VERTEX INPUT
-    VkPipelineVertexInputStateCreateInfo vertexInput{};
-    vertexInput.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-
-    // INPUT ASSEMBLY
-    VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
-    inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-
-    // VIEWPORT
-    VkViewport viewport{};
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    viewport.width = static_cast<float>(extent.width);
-    viewport.height = static_cast<float>(extent.height);
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
-
-    VkRect2D scissor{};
-    scissor.offset = { 0, 0 };
-    scissor.extent = extent;
-
-    VkPipelineViewportStateCreateInfo viewportState{};
-    viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    viewportState.viewportCount = 1;
-    viewportState.pViewports = &viewport;
-    viewportState.scissorCount = 1;
-    viewportState.pScissors = &scissor;
-
-    // RASTERIZER
-    VkPipelineRasterizationStateCreateInfo rasterizer{};
-    rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    rasterizer.depthClampEnable = VK_FALSE;
-    rasterizer.rasterizerDiscardEnable = VK_FALSE;
-    rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-    rasterizer.lineWidth = 1.0f;
-    rasterizer.cullMode = VK_CULL_MODE_NONE;
-    rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-
-    // MULTISAMPLING
-    VkPipelineMultisampleStateCreateInfo multisampling{};
-    multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-
-    // COLOR BLENDING
-    VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-    colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    colorBlendAttachment.blendEnable = VK_FALSE;
-
-    VkPipelineColorBlendStateCreateInfo colorBlending{};
-    colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    colorBlending.logicOpEnable = VK_FALSE;
-    colorBlending.attachmentCount = 1;
-    colorBlending.pAttachments = &colorBlendAttachment;
-
-    // DEPTH
-    VkPipelineDepthStencilStateCreateInfo depthStencil{};
-    depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    depthStencil.depthTestEnable = VK_FALSE;
-    depthStencil.depthWriteEnable = VK_FALSE;
-
-    // PIPELINE
-    VkGraphicsPipelineCreateInfo pipelineInfo{};
-    pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    pipelineInfo.stageCount = 2;
-    pipelineInfo.pStages = stages;
-    pipelineInfo.pVertexInputState = &vertexInput;
-    pipelineInfo.pInputAssemblyState = &inputAssembly;
-    pipelineInfo.pViewportState = &viewportState;
-    pipelineInfo.pRasterizationState = &rasterizer;
-    pipelineInfo.pMultisampleState = &multisampling;
-    pipelineInfo.pColorBlendState = &colorBlending;
-    pipelineInfo.pDepthStencilState = &depthStencil;
-    pipelineInfo.layout = m_blendPipelineLayout;
-    pipelineInfo.renderPass = m_blendRenderPass;
-    pipelineInfo.subpass = 0;
-
-    VK_CHECK(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_blendPipeline));
-
-    // CLEANUP
-    vkDestroyShaderModule(device, vertShader, nullptr);
-    vkDestroyShaderModule(device, fragShader, nullptr);
+    m_blendPipeline.Create(
+        device,
+        m_blendRenderPass,
+        m_blendDescriptorLayout,
+        nullptr,
+        VK_SAMPLE_COUNT_1_BIT,
+        "../Engine/Graphics/Resources/Shaders/SMAA/smaa_blend_vert.spv",
+        "../Engine/Graphics/Resources/Shaders/SMAA/smaa_blend_frag.spv",
+        false,
+        false,
+        &specializationInfo,
+        &specializationInfo);
 
 }
 
@@ -882,41 +632,6 @@ void VulkanSMAARenderPass::CreateNeighborhoodDescriptors(VkDevice device, Applic
 
 void VulkanSMAARenderPass::CreateNeighborhoodPipeline(VkDevice device, VkExtent2D extent) {
 
-    // PIPELINE LAYOUT
-    VkPipelineLayoutCreateInfo layoutInfo{};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    layoutInfo.setLayoutCount = 1;
-    layoutInfo.pSetLayouts = &m_neighborhoodDescriptorLayout;
-
-    VK_CHECK(vkCreatePipelineLayout(device, &layoutInfo, nullptr, &m_neighborhoodPipelineLayout));
-
-    // SHADERS
-    std::string filename;
-
-    filename = "smaa_blend_vert.spv";
-    auto vertCode = ReadFile("../Engine/Graphics/Resources/Shaders/SMAA/" + filename);
-    std::cout << "[Shader] Loading: " << filename << std::endl;
-
-    filename = "smaa_blend_frag.spv";
-    auto fragCode = ReadFile("../Engine/Graphics/Resources/Shaders/SMAA/" + filename);
-    std::cout << "[Shader] Loading: " << filename << std::endl;
-
-    VkShaderModule vertShader = CreateShaderModule(device, vertCode);
-    VkShaderModule fragShader = CreateShaderModule(device, fragCode);
-
-    // SHADER STAGES
-    VkPipelineShaderStageCreateInfo vertStage{};
-    vertStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    vertStage.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vertStage.module = vertShader;
-    vertStage.pName = "main";
-
-    VkPipelineShaderStageCreateInfo fragStage{};
-    fragStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    fragStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragStage.module = fragShader;
-    fragStage.pName = "main";
-
     struct SMAASpecializationData {
         float width;
         float height;
@@ -962,95 +677,17 @@ void VulkanSMAARenderPass::CreateNeighborhoodPipeline(VkDevice device, VkExtent2
     specializationInfo.dataSize = sizeof(specData);
     specializationInfo.pData = &specData;
 
-    vertStage.pSpecializationInfo = &specializationInfo;
-    fragStage.pSpecializationInfo = &specializationInfo;
-
-    VkPipelineShaderStageCreateInfo stages[] = {
-        vertStage,
-        fragStage
-    };
-
-    // VERTEX INPUT
-    VkPipelineVertexInputStateCreateInfo vertexInput{};
-    vertexInput.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-
-    // INPUT ASSEMBLY
-    VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
-    inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-
-    // VIEWPORT
-    VkViewport viewport{};
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    viewport.width = static_cast<float>(extent.width);
-    viewport.height = static_cast<float>(extent.height);
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
-
-    VkRect2D scissor{};
-    scissor.offset = { 0, 0 };
-    scissor.extent = extent;
-
-    VkPipelineViewportStateCreateInfo viewportState{};
-    viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    viewportState.viewportCount = 1;
-    viewportState.pViewports = &viewport;
-    viewportState.scissorCount = 1;
-    viewportState.pScissors = &scissor;
-
-    // RASTERIZER
-    VkPipelineRasterizationStateCreateInfo rasterizer{};
-    rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    rasterizer.depthClampEnable = VK_FALSE;
-    rasterizer.rasterizerDiscardEnable = VK_FALSE;
-    rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-    rasterizer.lineWidth = 1.0f;
-    rasterizer.cullMode = VK_CULL_MODE_NONE;
-    rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-
-    // MULTISAMPLING
-    VkPipelineMultisampleStateCreateInfo multisampling{};
-    multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-
-    // COLOR BLENDING
-    VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-    colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    colorBlendAttachment.blendEnable = VK_FALSE;
-
-    VkPipelineColorBlendStateCreateInfo colorBlending{};
-    colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    colorBlending.logicOpEnable = VK_FALSE;
-    colorBlending.attachmentCount = 1;
-    colorBlending.pAttachments = &colorBlendAttachment;
-
-    // DEPTH
-    VkPipelineDepthStencilStateCreateInfo depthStencil{};
-    depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    depthStencil.depthTestEnable = VK_FALSE;
-    depthStencil.depthWriteEnable = VK_FALSE;
-
-    // PIPELINE
-    VkGraphicsPipelineCreateInfo pipelineInfo{};
-    pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    pipelineInfo.stageCount = 2;
-    pipelineInfo.pStages = stages;
-    pipelineInfo.pVertexInputState = &vertexInput;
-    pipelineInfo.pInputAssemblyState = &inputAssembly;
-    pipelineInfo.pViewportState = &viewportState;
-    pipelineInfo.pRasterizationState = &rasterizer;
-    pipelineInfo.pMultisampleState = &multisampling;
-    pipelineInfo.pColorBlendState = &colorBlending;
-    pipelineInfo.pDepthStencilState = &depthStencil;
-    pipelineInfo.layout = m_neighborhoodPipelineLayout;
-    pipelineInfo.renderPass = m_neighborhoodRenderPass;
-    pipelineInfo.subpass = 0;
-
-    VK_CHECK(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_neighborhoodPipeline));
-
-    // CLEANUP
-    vkDestroyShaderModule(device, vertShader, nullptr);
-    vkDestroyShaderModule(device, fragShader, nullptr);
+    m_neighborhoodPipeline.Create(
+        device,
+        m_neighborhoodRenderPass,
+        m_neighborhoodDescriptorLayout,
+        nullptr,
+        VK_SAMPLE_COUNT_1_BIT,
+        "../Engine/Graphics/Resources/Shaders/SMAA/smaa_neighborhood_vert.spv",
+        "../Engine/Graphics/Resources/Shaders/SMAA/smaa_neighborhood_frag.spv",
+        false,
+        false,
+        &specializationInfo,
+        &specializationInfo);
 
 }

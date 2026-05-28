@@ -6,7 +6,7 @@
 
 void VulkanPostRenderPass::Create(VkDevice device, VkExtent2D extent, VkFormat swapchainFormat, ApplicationDesc desc) {
 
-    // RENDER PASS
+    // COLOR
     VkAttachmentDescription colorAttachment{};
     colorAttachment.format = swapchainFormat;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -17,7 +17,7 @@ void VulkanPostRenderPass::Create(VkDevice device, VkExtent2D extent, VkFormat s
     colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-    // ATTACHMENT REF
+    // ATTACHMENT
     VkAttachmentReference colorRef{};
     colorRef.attachment = 0;
     colorRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -28,158 +28,36 @@ void VulkanPostRenderPass::Create(VkDevice device, VkExtent2D extent, VkFormat s
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &colorRef;
 
-    // RENDER PASS INFO
-    VkRenderPassCreateInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = 1;
-    renderPassInfo.pAttachments = &colorAttachment;
-    renderPassInfo.subpassCount = 1;
-    renderPassInfo.pSubpasses = &subpass;
+    // CREATE RENDER PASS
+    VkRenderPassCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    createInfo.attachmentCount = 1;
+    createInfo.pAttachments = &colorAttachment;
+    createInfo.subpassCount = 1;
+    createInfo.pSubpasses = &subpass;
 
-    VK_CHECK(vkCreateRenderPass(device, &renderPassInfo, nullptr, &m_renderPass));
+    VK_CHECK(vkCreateRenderPass(device, &createInfo, nullptr, &m_renderPass));
 
     // DESCRIPTOR
-    m_sceneDescriptor.Create(device, desc.MAX_FRAMES_IN_FLIGHT, desc.FILTER);
-    m_descriptorSetLayout = m_sceneDescriptor.GetLayout();
+    m_descriptor.Create(device, desc.MAX_FRAMES_IN_FLIGHT);
 
     // PUSH CONSTANT
-    VkPushConstantRange push{};
-    push.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    push.offset = 0;
-    push.size = sizeof(PostPushConstants);
-
-    // PIPELINE LAYOUT
-    VkPipelineLayoutCreateInfo layoutInfo{};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    layoutInfo.setLayoutCount = 1;
-    layoutInfo.pSetLayouts = &m_descriptorSetLayout;
-    layoutInfo.pushConstantRangeCount = 1;
-    layoutInfo.pPushConstantRanges = &push;
-
-    VK_CHECK(vkCreatePipelineLayout(device, &layoutInfo, nullptr, &m_pipelineLayout));
-
-    // SHADERS
-    std::string filename;
-
-    filename = "post_vert.spv";
-    auto vertCode = ReadFile("../Engine/Graphics/Resources/Shaders/Post/" + filename);
-    std::cout << "[Shader] Loading: " << filename << std::endl;
-
-    filename = "post_frag.spv";
-    auto fragCode = ReadFile("../Engine/Graphics/Resources/Shaders/Post/" + filename);
-    std::cout << "[Shader] Loading: " << filename << std::endl;
-
-    VkShaderModule vertShader = CreateShaderModule(device, vertCode);
-    VkShaderModule fragShader = CreateShaderModule(device, fragCode);
-
-    // SHADER STAGES
-    VkPipelineShaderStageCreateInfo vertStage{};
-    vertStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    vertStage.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vertStage.module = vertShader;
-    vertStage.pName = "main";
-
-    VkPipelineShaderStageCreateInfo fragStage{};
-    fragStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    fragStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragStage.module = fragShader;
-    fragStage.pName = "main";
-
-    VkPipelineShaderStageCreateInfo stages[] = {
-        vertStage,
-        fragStage
-    };
-
-    // VERTEX INPUT
-    VkPipelineVertexInputStateCreateInfo vertexInput{};
-    vertexInput.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-
-    // INPUT ASSEMBLY
-    VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
-    inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-
-    // VIEWPORT
-    VkViewport viewport{};
-    viewport.width = static_cast<float>(extent.width);
-    viewport.height = static_cast<float>(extent.height);
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
-
-    VkRect2D scissor{};
-    scissor.extent = extent;
-
-    VkDynamicState dynamicStates[] = {
-        VK_DYNAMIC_STATE_VIEWPORT,
-        VK_DYNAMIC_STATE_SCISSOR
-    };
-
-    VkPipelineDynamicStateCreateInfo dynamicState{};
-    dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-    dynamicState.dynamicStateCount = 2;
-    dynamicState.pDynamicStates = dynamicStates;
-
-    VkPipelineViewportStateCreateInfo viewportState{};
-    viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    viewportState.viewportCount = 1;
-    viewportState.pViewports = &viewport;
-    viewportState.scissorCount = 1;
-    viewportState.pScissors = &scissor;
-
-    // RASTERIZER
-    VkPipelineRasterizationStateCreateInfo rasterizer{};
-    rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-    rasterizer.lineWidth = 1.0f;
-    rasterizer.cullMode = VK_CULL_MODE_NONE;
-    rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-
-    // MULTISAMPLING
-    VkPipelineMultisampleStateCreateInfo multisampling{};
-    multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-
-    // COLOR BLEND
-    VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-    colorBlendAttachment.colorWriteMask =
-        VK_COLOR_COMPONENT_R_BIT |
-        VK_COLOR_COMPONENT_G_BIT |
-        VK_COLOR_COMPONENT_B_BIT |
-        VK_COLOR_COMPONENT_A_BIT;
-
-    VkPipelineColorBlendStateCreateInfo colorBlending{};
-    colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    colorBlending.attachmentCount = 1;
-    colorBlending.pAttachments = &colorBlendAttachment;
-
-    // DEPTH
-    VkPipelineDepthStencilStateCreateInfo depthStencil{};
-    depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    depthStencil.depthTestEnable = VK_FALSE;
-    depthStencil.depthWriteEnable = VK_FALSE;
+    VkPushConstantRange pushConstant{};
+    pushConstant.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    pushConstant.offset = 0;
+    pushConstant.size = sizeof(PostPushConstants);
 
     // PIPELINE
-    VkGraphicsPipelineCreateInfo pipelineInfo{};
-    pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    pipelineInfo.stageCount = 2;
-    pipelineInfo.pStages = stages;
-    pipelineInfo.pVertexInputState = &vertexInput;
-    pipelineInfo.pInputAssemblyState = &inputAssembly;
-    pipelineInfo.pViewportState = &viewportState;
-    pipelineInfo.pRasterizationState = &rasterizer;
-    pipelineInfo.pMultisampleState = &multisampling;
-    pipelineInfo.pColorBlendState = &colorBlending;
-    pipelineInfo.pDepthStencilState = &depthStencil;
-    pipelineInfo.layout = m_pipelineLayout;
-    pipelineInfo.renderPass = m_renderPass;
-    pipelineInfo.subpass = 0;
-    pipelineInfo.pDynamicState = &dynamicState;
-
-    pipelineInfo.pStages = stages;
-    VK_CHECK(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline));
-
-    vkDestroyShaderModule(device, vertShader, nullptr);
-    vkDestroyShaderModule(device, fragShader, nullptr);
+    m_pipeline.Create(
+        device,
+        m_renderPass,
+        m_descriptor.GetLayout(),
+        &pushConstant,
+        VK_SAMPLE_COUNT_1_BIT,
+        "../Engine/Graphics/Resources/Shaders/Post/post_vert.spv",
+        "../Engine/Graphics/Resources/Shaders/Post/post_frag.spv",
+        false,
+        false);
 
     std::cout << "[Vulkan] Post-render pass created" << std::endl;
 
@@ -187,7 +65,7 @@ void VulkanPostRenderPass::Create(VkDevice device, VkExtent2D extent, VkFormat s
 
 void VulkanPostRenderPass::Render(VkDevice device, uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VkFramebuffer framebuffer, VkExtent2D extent, ApplicationDesc& desc, float exposure) {
 
-    m_sceneDescriptor.UpdateColor(device, frameIndex, inputColor, desc.FILTER);
+    m_descriptor.UpdateColor(device, frameIndex, inputColor, desc.FILTER);
 
     VkClearValue clear{};
     clear.color = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -257,13 +135,13 @@ void VulkanPostRenderPass::Render(VkDevice device, uint32_t frameIndex, VkComman
     PC.exposure = exposure;
     PC.dithering = desc.DITHERING;
 
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
-    vkCmdPushConstants(commandBuffer, m_pipelineLayout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PostPushConstants), &PC);
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.Get());
+    vkCmdPushConstants(commandBuffer, m_pipeline.GetLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PostPushConstants), &PC);
 
 
-    VkDescriptorSet descriptorSet = m_sceneDescriptor.GetSet(frameIndex);
+    VkDescriptorSet descriptorSet = m_descriptor.GetSet(frameIndex);
 
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.GetLayout(), 0, 1, &descriptorSet, 0, nullptr);
 
     vkCmdDraw(commandBuffer, 3, 1,0, 0);
 
@@ -273,17 +151,8 @@ void VulkanPostRenderPass::Render(VkDevice device, uint32_t frameIndex, VkComman
 
 void VulkanPostRenderPass::Destroy(VkDevice device) {
 
-    m_sceneDescriptor.Destroy(device);
-
-    if (m_pipeline) {
-        vkDestroyPipeline(device, m_pipeline, nullptr);
-        m_pipeline = VK_NULL_HANDLE;
-    }
-
-    if (m_pipelineLayout) {
-        vkDestroyPipelineLayout(device, m_pipelineLayout, nullptr);
-        m_pipelineLayout = VK_NULL_HANDLE;
-    }
+    m_descriptor.Destroy(device);
+    m_pipeline.Destroy(device);
 
     if (m_renderPass) {
         vkDestroyRenderPass(device, m_renderPass, nullptr);

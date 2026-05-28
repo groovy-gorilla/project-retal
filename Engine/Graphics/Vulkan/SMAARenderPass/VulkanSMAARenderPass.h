@@ -2,7 +2,8 @@
 
 #include <vulkan/vulkan.h>
 
-#include "Graphics/Vulkan/Wrappers//VulkanTextureDescriptor.h"
+#include "Graphics/Vulkan/Wrappers/Descriptor.h"
+#include "Graphics/Vulkan/Wrappers/Pipeline.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 
 class ApplicationDesc;
@@ -95,32 +96,23 @@ private:
     // EDGE PASS
     VkRenderPass m_edgeRenderPass = VK_NULL_HANDLE;
     VkFramebuffer m_edgeFramebuffer = VK_NULL_HANDLE;
-
-    VkPipelineLayout m_edgePipelineLayout = VK_NULL_HANDLE;
-    VkPipeline m_edgePipeline = VK_NULL_HANDLE;
-
-    VulkanTextureDescriptor m_edgeDescriptor{};
+    Descriptor m_edgeDescriptor{};
     VkDescriptorSetLayout m_edgeDescriptorLayout = VK_NULL_HANDLE;
+    Pipeline m_edgePipeline;
 
     // BLEND PASS
     VkRenderPass m_blendRenderPass = VK_NULL_HANDLE;
     VkFramebuffer m_blendFramebuffer = VK_NULL_HANDLE;
-
-    VkPipelineLayout m_blendPipelineLayout = VK_NULL_HANDLE;
-    VkPipeline m_blendPipeline = VK_NULL_HANDLE;
-
-    VulkanTextureDescriptor m_blendDescriptor{};
+    Descriptor m_blendDescriptor{};
     VkDescriptorSetLayout m_blendDescriptorLayout = VK_NULL_HANDLE;
+    Pipeline m_blendPipeline;
 
     // NEIGHBORHOOD PASS
     VkRenderPass m_neighborhoodRenderPass = VK_NULL_HANDLE;
     VkFramebuffer m_neighborhoodFramebuffer = VK_NULL_HANDLE;
-
-    VkPipelineLayout m_neighborhoodPipelineLayout = VK_NULL_HANDLE;
-    VkPipeline m_neighborhoodPipeline = VK_NULL_HANDLE;
-
-    VulkanTextureDescriptor m_neighborhoodDescriptor{};
+    Descriptor m_neighborhoodDescriptor{};
     VkDescriptorSetLayout m_neighborhoodDescriptorLayout = VK_NULL_HANDLE;
+    Pipeline m_neighborhoodPipeline;
 
     VkCommandPool m_commandPool{};
     VkQueue m_graphicsQueue{};

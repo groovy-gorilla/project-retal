@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/ApplicationDesc.h"
+#include "Graphics/Vulkan/Wrappers/Pipeline.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 
 class VulkanSceneRenderPass {
@@ -38,8 +39,7 @@ private:
     VkRenderPass m_renderPass = VK_NULL_HANDLE;
 
     // PIPELINE
-    VkPipeline m_pipeline = VK_NULL_HANDLE;
-    VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
+    Pipeline m_pipeline;
 
     // ATTACHMENTS
     RenderTarget m_color;
@@ -49,7 +49,7 @@ private:
     // FRAMEBUFFER
     VkFramebuffer m_framebuffer = VK_NULL_HANDLE;
 
-    VkExtent2D m_renderExtent;
+    VkExtent2D m_renderExtent = {};
 
 };
 

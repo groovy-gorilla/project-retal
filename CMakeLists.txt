@@ -6,17 +6,17 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -fno-omit
 set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fsanitize=address")
 
 cmake_minimum_required(VERSION 3.30)
-project(TFX)
+project(IndigoEngine)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
-set(EXECUTABLE_NAME TFX)
+set(EXECUTABLE_NAME IndigoEngine)
 
 find_package(Vulkan REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(SDL3 REQUIRED)
 
-add_executable(TFX main.cpp
+add_executable(IndigoEngine main.cpp
         Engine/Input/Input.h
         Engine/Input/Input.cpp
         Engine/Platform/SDL/SDLInput.h
@@ -64,8 +64,8 @@ add_executable(TFX main.cpp
         Engine/Graphics/Vulkan/Core/VulkanSync.cpp
         Engine/Graphics/Vulkan/Core/VulkanQueues.h
         Engine/Graphics/Vulkan/Core/VulkanQueues.cpp
-        Engine/Graphics/Vulkan/Wrappers/VulkanTextureDescriptor.h
-        Engine/Graphics/Vulkan/Wrappers/VulkanTextureDescriptor.cpp
+        Engine/Graphics/Vulkan/Wrappers/Descriptor.h
+        Engine/Graphics/Vulkan/Wrappers/Descriptor.cpp
         Engine/Graphics/Vulkan/SSAARenderPass/VulkanSSAARenderPass.h
         Engine/Graphics/Vulkan/SSAARenderPass/VulkanSSAARenderPass.cpp
         ThirdParty/stb/stb_image_write.h
@@ -79,33 +79,35 @@ add_executable(TFX main.cpp
         Engine/Graphics/Texture/Texture.h
         Engine/Graphics/Texture/Texture.cpp
         Engine/Math/Lina64.h
+        Engine/Graphics/Vulkan/Wrappers/Pipeline.h
+        Engine/Graphics/Vulkan/Wrappers/Pipeline.cpp
 )
 
 
 # include
-target_include_directories(TFX PRIVATE
+target_include_directories(IndigoEngine PRIVATE
     ${CMAKE_SOURCE_DIR}/Engine
     ${CMAKE_SOURCE_DIR}/
 )
 
 # link dirs
-target_link_directories(TFX PRIVATE
+target_link_directories(IndigoEngine PRIVATE
 
 )
 
 # link libs
-target_link_libraries(TFX PRIVATE
+target_link_libraries(IndigoEngine PRIVATE
         Vulkan::Vulkan
         SDL3::SDL3
         ktx
         udev
 )
 
-target_precompile_headers(TFX PRIVATE
+target_precompile_headers(IndigoEngine PRIVATE
     Engine/pch.h
 )
 
 # compile flags
-target_compile_options(TFX PRIVATE -g -O0 -mavx -mfma)
+target_compile_options(IndigoEngine PRIVATE -g -O0 -mavx -mfma)
 
 

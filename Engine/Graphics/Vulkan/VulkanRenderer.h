@@ -82,6 +82,7 @@ private:
 
     // EXTENT
     VkExtent2D m_renderExtent = {};
+    VkExtent2D m_ssaaExtent = {};
     VkExtent2D m_windowExtent = {};
 
     // HDR

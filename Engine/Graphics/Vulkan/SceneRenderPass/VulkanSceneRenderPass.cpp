@@ -1,16 +1,10 @@
 #include "pch.h"
 #include "VulkanSceneRenderPass.h"
 #include "Debug/ErrorDialog.h"
-#include "Graphics/Vulkan/Utils/VulkanUtils.h"
 
 void VulkanSceneRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, VkFormat depthFormat, AntiAliasing aaMode, VkSampleCountFlagBits samples, ApplicationDesc& desc) {
 
-    std::vector<VkAttachmentDescription> attachments;
-
-    VkAttachmentReference colorRef{};
-    VkAttachmentReference depthRef{};
-    VkAttachmentReference resolveRef{};
-    VkSubpassDescription subpass{};
+  m_renderExtent = renderExtent;
 
     // COLOR MSAA
     VkAttachmentDescription msaa{};
@@ -34,7 +28,7 @@ void VulkanSceneRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDev
     depth.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     depth.finalLayout   = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-    // RESOLVE (final image → shader)
+    // RESOLVE
     VkAttachmentDescription resolve{};
     resolve.format = colorFormat;
     resolve.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -45,20 +39,26 @@ void VulkanSceneRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDev
     resolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     resolve.finalLayout   = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
+    // ATTACHMENTS
+    std::vector<VkAttachmentDescription> attachments;
     attachments.push_back(msaa);            // 0
     attachments.push_back(depth);           // 1
     attachments.push_back(resolve);         // 2
 
+    VkAttachmentReference colorRef{};
     colorRef.attachment = 0;
     colorRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+    VkAttachmentReference depthRef{};
     depthRef.attachment = 1;
     depthRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
+    VkAttachmentReference resolveRef{};
     resolveRef.attachment = 2;
     resolveRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
     // SUBPASS
+    VkSubpassDescription subpass{};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &colorRef;
@@ -102,182 +102,39 @@ void VulkanSceneRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDev
     VK_CHECK(vkCreateRenderPass(device, &createInfo, nullptr, &m_renderPass));
 
     // CREATE RENDER TARGETS
-    VkExtent2D ssaaExtent = renderExtent;
-    ssaaExtent.width *= desc.SSAA_SCALE;
-    ssaaExtent.height *= desc.SSAA_SCALE;
-    m_renderExtent = ssaaExtent;
-    m_color.Create(device, physicalDevice, ssaaExtent.width, ssaaExtent.height, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, samples);
-    m_depth.Create(device, physicalDevice, ssaaExtent.width, ssaaExtent.height, depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_DEPTH_BIT, samples);
-    m_resolve.Create(device, physicalDevice, ssaaExtent.width, ssaaExtent.height, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_SAMPLE_COUNT_1_BIT);
+    m_color.Create(device, physicalDevice, m_renderExtent.width, m_renderExtent.height, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, samples);
+    m_depth.Create(device, physicalDevice, m_renderExtent.width, m_renderExtent.height, depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_DEPTH_BIT, samples);
+    m_resolve.Create(device, physicalDevice, m_renderExtent.width, m_renderExtent.height, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_SAMPLE_COUNT_1_BIT);
 
     // FRAMEBUFFER
-    std::vector<VkImageView> imageViewAttachments;
-    imageViewAttachments.push_back(m_color.GetImageView());
-    imageViewAttachments.push_back(m_depth.GetImageView());
-    imageViewAttachments.push_back(m_resolve.GetImageView());
+    std::vector<VkImageView> imageAttachments = {
+        m_color.GetImageView(),
+        m_depth.GetImageView(),
+        m_resolve.GetImageView()
+    };
 
     VkFramebufferCreateInfo framebufferCreateInfo{};
     framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
     framebufferCreateInfo.renderPass = m_renderPass;
-    framebufferCreateInfo.attachmentCount = static_cast<uint32_t>(imageViewAttachments.size());
-    framebufferCreateInfo.pAttachments = imageViewAttachments.data();
-    framebufferCreateInfo.width = ssaaExtent.width;
-    framebufferCreateInfo.height = ssaaExtent.height;
+    framebufferCreateInfo.attachmentCount = static_cast<uint32_t>(imageAttachments.size());
+    framebufferCreateInfo.pAttachments = imageAttachments.data();
+    framebufferCreateInfo.width = m_renderExtent.width;
+    framebufferCreateInfo.height = m_renderExtent.height;
     framebufferCreateInfo.layers = 1;
 
     VK_CHECK(vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &m_framebuffer));
 
-    // *******************************************************
-    // ****************** PIPELINE ***************************
-    // *******************************************************
-    std::string filename;
-
-    filename = "scene_vert.spv";
-    auto vertCode = ReadFile("../Engine/Graphics/Resources/Shaders/Scene/" + filename);
-    std::cout << "[Shader] Loading: " << filename << std::endl;
-
-    filename = "scene_frag.spv";
-    auto fragCode = ReadFile("../Engine/Graphics/Resources/Shaders/Scene/" + filename);
-    std::cout << "[Shader] Loading: " << filename << std::endl;
-
-    VkShaderModule vertModule = CreateShaderModule(device, vertCode);
-    VkShaderModule fragModule = CreateShaderModule(device, fragCode);
-
-    VkPipelineShaderStageCreateInfo vertStage{};
-    vertStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    vertStage.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vertStage.module = vertModule;
-    vertStage.pName = "main";
-
-    VkPipelineShaderStageCreateInfo fragStage{};
-    fragStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    fragStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragStage.module = fragModule;
-    fragStage.pName = "main";
-
-    VkPipelineShaderStageCreateInfo stages[] = { vertStage, fragStage };
-
-    // VERTEX INPUT
-    VkPipelineVertexInputStateCreateInfo vertexInput{};
-    vertexInput.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInput.vertexBindingDescriptionCount = 0;
-    vertexInput.vertexAttributeDescriptionCount = 0;
-
-    // INPUT ASSEMBLY
-    VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
-    inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-    inputAssembly.primitiveRestartEnable = VK_FALSE;
-
-    // VIEWPORT / SCISSOR (dynamic)
-    VkPipelineViewportStateCreateInfo viewportState{};
-    viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    viewportState.viewportCount = 1;
-    viewportState.scissorCount = 1;
-
-    std::vector<VkDynamicState> dynamicStates = {
-        VK_DYNAMIC_STATE_VIEWPORT,
-        VK_DYNAMIC_STATE_SCISSOR
-    };
-
-    VkPipelineDynamicStateCreateInfo dynamicState{};
-    dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-    dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
-    dynamicState.pDynamicStates = dynamicStates.data();
-
-    // RASTERIZER
-    VkPipelineRasterizationStateCreateInfo rasterizer{};
-    rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    rasterizer.depthClampEnable = VK_FALSE;
-    rasterizer.rasterizerDiscardEnable = VK_FALSE;
-    rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-    rasterizer.lineWidth = 1.0f;
-    rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-    rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
-    rasterizer.depthBiasEnable = VK_FALSE;
-    rasterizer.depthBiasConstantFactor = 0.0f;
-    rasterizer.depthBiasClamp = 0.0f;
-    rasterizer.depthBiasSlopeFactor = 0.0f;
-
-    // MULTISAMPLING
-    VkPipelineMultisampleStateCreateInfo multisampling{};
-    multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    multisampling.sampleShadingEnable = VK_FALSE;
-    multisampling.minSampleShading = 1.0f;
-    multisampling.pSampleMask = nullptr;
-    multisampling.alphaToCoverageEnable = VK_FALSE;
-    multisampling.alphaToOneEnable = VK_FALSE;
-
-    if (aaMode == AntiAliasing::MSAA || aaMode == AntiAliasing::MSAA_SMAA) {
-        multisampling.rasterizationSamples = samples;
-    } else {
-        multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-    }
-
-    // DEPTH TEST
-    VkPipelineDepthStencilStateCreateInfo depthStencilState{};
-    depthStencilState.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    depthStencilState.depthTestEnable = VK_TRUE;
-    depthStencilState.depthWriteEnable = VK_TRUE;
-    depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS;
-    depthStencilState.depthBoundsTestEnable = VK_FALSE;
-    depthStencilState.stencilTestEnable = VK_FALSE;
-
-    // COLOR BLEND
-    VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-    colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    colorBlendAttachment.blendEnable = VK_FALSE;
-    colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-    colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-    colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-    colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-    colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-    colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
-
-    VkPipelineColorBlendStateCreateInfo colorBlend{};
-    colorBlend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    colorBlend.logicOpEnable = VK_FALSE;
-    colorBlend.logicOp = VK_LOGIC_OP_COPY;
-    colorBlend.attachmentCount = 1;
-    colorBlend.pAttachments = &colorBlendAttachment;
-    colorBlend.blendConstants[0] = 0.0f;
-    colorBlend.blendConstants[1] = 0.0f;
-    colorBlend.blendConstants[2] = 0.0f;
-    colorBlend.blendConstants[3] = 0.0f;
-
-    // PIPELINE LAYOUT
-    VkPipelineLayoutCreateInfo layout{};
-    layout.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    layout.setLayoutCount = 0;
-    layout.pSetLayouts = nullptr;
-    layout.pushConstantRangeCount = 0;
-    layout.pPushConstantRanges = nullptr;
-
-    VK_CHECK(vkCreatePipelineLayout(device, &layout, nullptr, &m_pipelineLayout));
-
-    // CREATE PIPELINE
-    VkGraphicsPipelineCreateInfo pipelineInfo{};
-    pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    pipelineInfo.stageCount = 2;
-    pipelineInfo.pStages = stages;
-    pipelineInfo.pVertexInputState = &vertexInput;
-    pipelineInfo.pInputAssemblyState = &inputAssembly;
-    pipelineInfo.pViewportState = &viewportState;
-    pipelineInfo.pRasterizationState = &rasterizer;
-    pipelineInfo.pMultisampleState = &multisampling;
-    pipelineInfo.pDepthStencilState = &depthStencilState;
-    pipelineInfo.pColorBlendState = &colorBlend;
-    pipelineInfo.pDynamicState = &dynamicState;
-    pipelineInfo.layout = m_pipelineLayout;
-    pipelineInfo.renderPass = m_renderPass;
-    pipelineInfo.subpass = 0;
-    pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
-    pipelineInfo.basePipelineIndex = -1;
-
-    VK_CHECK(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline));;
-
-    vkDestroyShaderModule(device, vertModule, nullptr);
-    vkDestroyShaderModule(device, fragModule, nullptr);
+    // PIPELINE
+    m_pipeline.Create(
+        device,
+        m_renderPass,
+        nullptr,
+        nullptr,
+        samples,
+        "../Engine/Graphics/Resources/Shaders/Scene/scene_vert.spv",
+        "../Engine/Graphics/Resources/Shaders/Scene/scene_frag.spv",
+        true,
+        false);
 
     std::cout << "[Vulkan] Scene-render pass created" << std::endl;
 
@@ -285,8 +142,7 @@ void VulkanSceneRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDev
 
 void VulkanSceneRenderPass::Destroy(VkDevice device) {
 
-    vkDestroyPipeline(device, m_pipeline, nullptr);
-    vkDestroyPipelineLayout(device, m_pipelineLayout, nullptr);
+    m_pipeline.Destroy(device);
 
     vkDestroyFramebuffer(device, m_framebuffer, nullptr);
     m_framebuffer = VK_NULL_HANDLE;
@@ -336,6 +192,6 @@ void VulkanSceneRenderPass::End(VkCommandBuffer commandBuffer) {
 
 void VulkanSceneRenderPass::PipelineBind(VkCommandBuffer commandBuffer) {
 
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.Get());
 
 }

@@ -1,10 +1,10 @@
 #include "pch.h"
-#include "VulkanTextureDescriptor.h"
+#include "Descriptor.h"
 #include "RenderTarget.h"
 #include "Debug/ErrorDialog.h"
 #include "Core/ApplicationDesc.h"
 
-void VulkanTextureDescriptor::Create(VkDevice device, uint32_t maxFramesInFlight, RenderTarget& colorTarget, RenderTarget& depthTarget, TextureFilter filter) {
+void Descriptor::Create(VkDevice device, uint32_t maxFramesInFlight, RenderTarget& colorTarget, RenderTarget& depthTarget, TextureFilter filter) {
 
     CreateDescriptorResources(device, maxFramesInFlight);
 
@@ -15,13 +15,13 @@ void VulkanTextureDescriptor::Create(VkDevice device, uint32_t maxFramesInFlight
 
 }
 
-void VulkanTextureDescriptor::Create(VkDevice device, uint32_t maxFramesInFlight, TextureFilter filter) {
+void Descriptor::Create(VkDevice device, uint32_t maxFramesInFlight) {
 
     CreateDescriptorResources(device, maxFramesInFlight);
 
 }
 
-void VulkanTextureDescriptor::CreateColor(VkDevice device, uint32_t maxFramesInFlight) {
+void Descriptor::CreateColor(VkDevice device, uint32_t maxFramesInFlight) {
 
     // DESCRIPTOR SET LAYOUT
     VkDescriptorSetLayoutBinding binding{};
@@ -68,7 +68,7 @@ void VulkanTextureDescriptor::CreateColor(VkDevice device, uint32_t maxFramesInF
 
 }
 
-void VulkanTextureDescriptor::CreateSMAABlend(VkDevice device, uint32_t maxFramesInFlight) {
+void Descriptor::CreateSMAABlend(VkDevice device, uint32_t maxFramesInFlight) {
 
     VkDescriptorSetLayoutBinding bindings[3]{};
 
@@ -125,7 +125,7 @@ void VulkanTextureDescriptor::CreateSMAABlend(VkDevice device, uint32_t maxFrame
 
 }
 
-void VulkanTextureDescriptor::CreateSMAANeighborhood(VkDevice device, uint32_t maxFramesInFlight) {
+void Descriptor::CreateSMAANeighborhood(VkDevice device, uint32_t maxFramesInFlight) {
 
     VkDescriptorSetLayoutBinding bindings[2]{};
 
@@ -148,6 +148,7 @@ void VulkanTextureDescriptor::CreateSMAANeighborhood(VkDevice device, uint32_t m
 
     VK_CHECK(vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &m_layout));
 
+    // DESCRIPTOR POOL
     VkDescriptorPoolSize poolSize{};
     poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     poolSize.descriptorCount = 2 * maxFramesInFlight;
@@ -160,7 +161,6 @@ void VulkanTextureDescriptor::CreateSMAANeighborhood(VkDevice device, uint32_t m
 
     VK_CHECK(vkCreateDescriptorPool(device, &poolInfo, nullptr, &m_pool));
 
-    //...
     // DESCRIPTOR SETS
     std::vector<VkDescriptorSetLayout> layouts(
         maxFramesInFlight,
@@ -179,7 +179,7 @@ void VulkanTextureDescriptor::CreateSMAANeighborhood(VkDevice device, uint32_t m
 
 }
 
-void VulkanTextureDescriptor::Destroy(VkDevice device) {
+void Descriptor::Destroy(VkDevice device) {
 
     if (m_pool) {
         vkDestroyDescriptorPool(device, m_pool, nullptr);
@@ -193,7 +193,7 @@ void VulkanTextureDescriptor::Destroy(VkDevice device) {
 
 }
 
-void VulkanTextureDescriptor::CreateDescriptorResources(VkDevice device, uint32_t maxFramesInFlight) {
+void Descriptor::CreateDescriptorResources(VkDevice device, uint32_t maxFramesInFlight) {
 
     // DESCRIPTOR SET LAYOUT
     VkDescriptorSetLayoutBinding bindings[2]{};
@@ -246,7 +246,7 @@ void VulkanTextureDescriptor::CreateDescriptorResources(VkDevice device, uint32_
 
 }
 
-void VulkanTextureDescriptor::UpdateColor(VkDevice device, uint32_t frameIndex, RenderTarget& color, TextureFilter filter) {
+void Descriptor::UpdateColor(VkDevice device, uint32_t frameIndex, RenderTarget& color, TextureFilter filter) {
 
     VkDescriptorImageInfo colorInfo{};
     colorInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -266,7 +266,7 @@ void VulkanTextureDescriptor::UpdateColor(VkDevice device, uint32_t frameIndex, 
 
 }
 
-void VulkanTextureDescriptor::UpdateDepth(VkDevice device, uint32_t frameIndex, RenderTarget& depth, TextureFilter filter) {
+void Descriptor::UpdateDepth(VkDevice device, uint32_t frameIndex, RenderTarget& depth, TextureFilter filter) {
 
     VkDescriptorImageInfo depthInfo{};
     depthInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
@@ -286,7 +286,7 @@ void VulkanTextureDescriptor::UpdateDepth(VkDevice device, uint32_t frameIndex, 
 
 }
 
-void VulkanTextureDescriptor::UpdateSMAABlend(VkDevice device, uint32_t frameIndex, RenderTarget& edge, RenderTarget& area, RenderTarget& search) {
+void Descriptor::UpdateSMAABlend(VkDevice device, uint32_t frameIndex, RenderTarget& edge, RenderTarget& area, RenderTarget& search) {
 
     VkDescriptorImageInfo edgeInfo{};
     edgeInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -329,7 +329,7 @@ void VulkanTextureDescriptor::UpdateSMAABlend(VkDevice device, uint32_t frameInd
 
 }
 
-void VulkanTextureDescriptor::UpdateSMAANeighborhood(VkDevice device, uint32_t currentFrame, RenderTarget& inputColor, RenderTarget& blendWeights) {
+void Descriptor::UpdateSMAANeighborhood(VkDevice device, uint32_t currentFrame, RenderTarget& inputColor, RenderTarget& blendWeights) {
 
     VkDescriptorImageInfo inputInfo{};
     inputInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

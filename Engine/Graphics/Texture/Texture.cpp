@@ -3,6 +3,8 @@
 #include <Engine/Graphics/Vulkan/Utils/VulkanUtils.h>
 #include <Debug/ErrorDialog.h>
 
+#include "Graphics/Vulkan/Wrappers/Buffer.h"
+
 void Texture::Create(const VulkanContext& context, const std::filesystem::path& path, const TextureCreateInfo& info) {
 
     m_device = context.device;
@@ -43,14 +45,12 @@ void Texture::Create(const VulkanContext& context, const std::filesystem::path& 
     std::cout << "Format: " << VkFormatToString(m_format) << std::endl;
 
     // Staging buffer
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingMemory;
-    CreateBuffer(m_device, m_physicalDevice, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingMemory);
+    Buffer stagingBuffer;
+    stagingBuffer.Create(m_device, m_physicalDevice, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-    void* mapped = nullptr;
-    VK_CHECK(vkMapMemory(m_device, stagingMemory, 0, imageSize, 0, &mapped));
+    void* mapped = stagingBuffer.Map();
     memcpy(mapped, data, imageSize);
-    vkUnmapMemory(m_device, stagingMemory);
+    stagingBuffer.Unmap();
 
     // Tworzenie obrazu VkImage
     CreateImage();
@@ -77,7 +77,7 @@ void Texture::Create(const VulkanContext& context, const std::filesystem::path& 
         regions.push_back(region);
     }
 
-    CopyBufferToImage(stagingBuffer, m_image, regions);
+    CopyBufferToImage(stagingBuffer.Get(), m_image, regions);
 
     // Layout: TRANSFER_DST -> SHADER_READ
     TransitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -89,8 +89,7 @@ void Texture::Create(const VulkanContext& context, const std::filesystem::path& 
     CreateSampler();
 
     // Cleanup staging + KTX
-    vkDestroyBuffer(context.device, stagingBuffer, nullptr);
-    vkFreeMemory(context.device, stagingMemory, nullptr);
+    stagingBuffer.Destroy();
     ktxTexture_Destroy(reinterpret_cast<ktxTexture*>(texture));
 
 }

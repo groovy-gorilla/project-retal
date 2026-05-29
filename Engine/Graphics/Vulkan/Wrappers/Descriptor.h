@@ -6,51 +6,41 @@ class RenderTarget;
 class Descriptor {
 public:
 
-    void Create(VkDevice device,  uint32_t maxFramesInFlight, RenderTarget& colorTarget, RenderTarget& depthTarget, TextureFilter filter);
-    void Create(VkDevice device, uint32_t maxFramesInFlight);
+    void Create(
+        VkDevice device,
+        const std::vector<VkDescriptorSetLayoutBinding>& bindings,
+        uint32_t maxFramesInFlight);
 
-    void CreateColor(VkDevice device, uint32_t maxFramesInFlight);
-    void CreateSMAABlend(VkDevice device, uint32_t maxFramesInFlight);
-    void CreateSMAANeighborhood(VkDevice device, uint32_t maxFramesInFlight);
-
-    void Destroy(VkDevice device);
+    void Destroy();
 
     [[nodiscard]] VkDescriptorSetLayout GetLayout() const { return m_layout; }
     [[nodiscard]] VkDescriptorSet GetSet(uint32_t frameIndex) const { return m_sets[frameIndex]; }
 
-    void UpdateColor(
-        VkDevice device,
+    void UpdateUniformBuffer(
         uint32_t frameIndex,
-        RenderTarget& color,
-        TextureFilter filter);
+        uint32_t binding,
+        VkBuffer buffer,
+        VkDeviceSize size);
 
-    void UpdateDepth(
-        VkDevice device,
+    void UpdateStorageBuffer(
         uint32_t frameIndex,
-        RenderTarget& depth,
-        TextureFilter filter);
+        uint32_t binding,
+        VkBuffer buffer,
+        VkDeviceSize size);
 
-    void UpdateSMAABlend(
-        VkDevice device,
+    void UpdateTexture(
         uint32_t frameIndex,
-        RenderTarget& edge,
-        RenderTarget& area,
-        RenderTarget& search);
-
-    void UpdateSMAANeighborhood(
-        VkDevice device,
-        uint32_t currentFrame,
-        RenderTarget& inputColor,
-        RenderTarget& blendWeights);
+        uint32_t binding,
+        VkImageView imageView,
+        VkSampler sampler);
 
 
 private:
 
+    VkDevice m_device = VK_NULL_HANDLE;
+
     VkDescriptorSetLayout m_layout = VK_NULL_HANDLE;
     VkDescriptorPool m_pool = VK_NULL_HANDLE;
     std::vector<VkDescriptorSet> m_sets;
-
-    void CreateDescriptorResources(VkDevice device, uint32_t maxFramesInFlight);
-
 
 };

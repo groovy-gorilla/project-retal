@@ -1,117 +1,41 @@
 #include "pch.h"
 #include "Descriptor.h"
-#include "RenderTarget.h"
 #include "Debug/ErrorDialog.h"
-#include "Core/ApplicationDesc.h"
 
-void Descriptor::Create(VkDevice device, uint32_t maxFramesInFlight, RenderTarget& colorTarget, RenderTarget& depthTarget, TextureFilter filter) {
+void Descriptor::Create(VkDevice device, const std::vector<VkDescriptorSetLayoutBinding>& bindings, uint32_t maxFramesInFlight) {
 
-    CreateDescriptorResources(device, maxFramesInFlight);
+    m_device = device;
 
-    for (uint32_t i = 0; i < maxFramesInFlight; i++) {
-        UpdateColor(device, i, colorTarget, filter);
-        UpdateDepth(device, i, depthTarget, filter);
+    // LAYOUT
+    VkDescriptorSetLayoutCreateInfo layoutInfo{};
+    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+    layoutInfo.pBindings = bindings.data();
+
+    VK_CHECK(vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &m_layout));
+
+    // POOL SIZES
+    std::vector<VkDescriptorPoolSize> poolSizes;
+    for (const auto& binding : bindings) {
+        VkDescriptorPoolSize poolSize{};
+        poolSize.type = binding.descriptorType;
+        poolSize.descriptorCount = binding.descriptorCount * maxFramesInFlight;
+        poolSizes.push_back(poolSize);
     }
 
-}
-
-void Descriptor::Create(VkDevice device, uint32_t maxFramesInFlight) {
-
-    CreateDescriptorResources(device, maxFramesInFlight);
-
-}
-
-void Descriptor::CreateColor(VkDevice device, uint32_t maxFramesInFlight) {
-
-    // DESCRIPTOR SET LAYOUT
-    VkDescriptorSetLayoutBinding binding{};
-
-    // COLOR
-    binding.binding = 0;
-    binding.descriptorCount = 1;
-    binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-    VkDescriptorSetLayoutCreateInfo layoutInfo{};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = 1;
-    layoutInfo.pBindings = &binding;
-
-    VK_CHECK(vkCreateDescriptorSetLayout(device, &layoutInfo,nullptr, &m_layout));
-
-    // DESCRIPTOR POOL
-    VkDescriptorPoolSize poolSize{};
-    poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSize.descriptorCount = 2 * maxFramesInFlight;
-
+    // POOL
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = 1;
-    poolInfo.pPoolSizes = &poolSize;
+    poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+    poolInfo.pPoolSizes = poolSizes.data();
     poolInfo.maxSets = maxFramesInFlight;
 
     VK_CHECK(vkCreateDescriptorPool(device, &poolInfo, nullptr, &m_pool));
 
-    // DESCRIPTOR SET
-    VkDescriptorSetAllocateInfo allocInfo{};
-    allocInfo.sType =VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = m_pool;
-    allocInfo.descriptorSetCount = maxFramesInFlight;
-
+    // DESCRIPTOR SETS
     std::vector<VkDescriptorSetLayout> layouts(maxFramesInFlight, m_layout);
 
-    allocInfo.pSetLayouts = layouts.data();
-
     m_sets.resize(maxFramesInFlight);
-
-    VK_CHECK(vkAllocateDescriptorSets(device, &allocInfo, m_sets.data()));
-
-}
-
-void Descriptor::CreateSMAABlend(VkDevice device, uint32_t maxFramesInFlight) {
-
-    VkDescriptorSetLayoutBinding bindings[3]{};
-
-    bindings[0].binding = 1;
-    bindings[0].descriptorCount = 1;
-    bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    bindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-    bindings[1].binding = 2;
-    bindings[1].descriptorCount = 1;
-    bindings[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    bindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-    bindings[2].binding = 3;
-    bindings[2].descriptorCount = 1;
-    bindings[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    bindings[2].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-    VkDescriptorSetLayoutCreateInfo layoutInfo{};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = 3;
-    layoutInfo.pBindings = bindings;
-
-    VK_CHECK(vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &m_layout));
-
-    // DESCRIPTOR POOL
-    VkDescriptorPoolSize poolSize{};
-    poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSize.descriptorCount = 3 * maxFramesInFlight;
-
-    VkDescriptorPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = 1;
-    poolInfo.pPoolSizes = &poolSize;
-    poolInfo.maxSets = maxFramesInFlight;
-
-    VK_CHECK(vkCreateDescriptorPool(device, &poolInfo, nullptr, &m_pool));
-
-    // DESCRIPTOR SETS
-    std::vector<VkDescriptorSetLayout> layouts(
-        maxFramesInFlight,
-        m_layout
-    );
 
     VkDescriptorSetAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -119,245 +43,84 @@ void Descriptor::CreateSMAABlend(VkDevice device, uint32_t maxFramesInFlight) {
     allocInfo.descriptorSetCount = maxFramesInFlight;
     allocInfo.pSetLayouts = layouts.data();
 
-    m_sets.resize(maxFramesInFlight);
-
-    VK_CHECK(vkAllocateDescriptorSets( device, &allocInfo, m_sets.data()));
-
-}
-
-void Descriptor::CreateSMAANeighborhood(VkDevice device, uint32_t maxFramesInFlight) {
-
-    VkDescriptorSetLayoutBinding bindings[2]{};
-
-    // INPUT COLOR
-    bindings[0].binding = 0;
-    bindings[0].descriptorCount = 1;
-    bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    bindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-    // BLEND WEIGHTS
-    bindings[1].binding = 4;
-    bindings[1].descriptorCount = 1;
-    bindings[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    bindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-    VkDescriptorSetLayoutCreateInfo layoutInfo{};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = 2;
-    layoutInfo.pBindings = bindings;
-
-    VK_CHECK(vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &m_layout));
-
-    // DESCRIPTOR POOL
-    VkDescriptorPoolSize poolSize{};
-    poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSize.descriptorCount = 2 * maxFramesInFlight;
-
-    VkDescriptorPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = 1;
-    poolInfo.pPoolSizes = &poolSize;
-    poolInfo.maxSets = maxFramesInFlight;
-
-    VK_CHECK(vkCreateDescriptorPool(device, &poolInfo, nullptr, &m_pool));
-
-    // DESCRIPTOR SETS
-    std::vector<VkDescriptorSetLayout> layouts(
-        maxFramesInFlight,
-        m_layout
-    );
-
-    VkDescriptorSetAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = m_pool;
-    allocInfo.descriptorSetCount = maxFramesInFlight;
-    allocInfo.pSetLayouts = layouts.data();
-
-    m_sets.resize(maxFramesInFlight);
-
     VK_CHECK(vkAllocateDescriptorSets(device, &allocInfo, m_sets.data()));
 
 }
 
-void Descriptor::Destroy(VkDevice device) {
+void Descriptor::Destroy() {
 
-    if (m_pool) {
-        vkDestroyDescriptorPool(device, m_pool, nullptr);
+    m_sets.clear();
+
+    if (m_pool != VK_NULL_HANDLE) {
+        vkDestroyDescriptorPool(m_device, m_pool, nullptr);
         m_pool = VK_NULL_HANDLE;
     }
 
-    if (m_layout) {
-        vkDestroyDescriptorSetLayout(device, m_layout, nullptr);
+    if (m_layout != VK_NULL_HANDLE) {
+        vkDestroyDescriptorSetLayout(m_device, m_layout, nullptr);
         m_layout = VK_NULL_HANDLE;
     }
 
-}
-
-void Descriptor::CreateDescriptorResources(VkDevice device, uint32_t maxFramesInFlight) {
-
-    // DESCRIPTOR SET LAYOUT
-    VkDescriptorSetLayoutBinding bindings[2]{};
-
-    // COLOR
-    bindings[0].binding = 0;
-    bindings[0].descriptorCount = 1;
-    bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    bindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-    // DEPTH
-    bindings[1].binding = 1;
-    bindings[1].descriptorCount = 1;
-    bindings[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    bindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-    VkDescriptorSetLayoutCreateInfo layoutInfo{};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = 2;
-    layoutInfo.pBindings = bindings;
-
-    VK_CHECK(vkCreateDescriptorSetLayout(device, &layoutInfo,nullptr, &m_layout));
-
-    // DESCRIPTOR POOL
-    VkDescriptorPoolSize poolSize{};
-    poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSize.descriptorCount = 2 * maxFramesInFlight;
-
-    VkDescriptorPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = 1;
-    poolInfo.pPoolSizes = &poolSize;
-    poolInfo.maxSets = maxFramesInFlight;
-
-    VK_CHECK(vkCreateDescriptorPool(device, &poolInfo, nullptr, &m_pool));
-
-    // DESCRIPTOR SET
-    VkDescriptorSetAllocateInfo allocInfo{};
-    allocInfo.sType =VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = m_pool;
-    allocInfo.descriptorSetCount = maxFramesInFlight;
-
-    std::vector<VkDescriptorSetLayout> layouts(maxFramesInFlight, m_layout);
-
-    allocInfo.pSetLayouts = layouts.data();
-
-    m_sets.resize(maxFramesInFlight);
-
-    VK_CHECK(vkAllocateDescriptorSets(device, &allocInfo, m_sets.data()));
+    m_device = VK_NULL_HANDLE;
 
 }
 
-void Descriptor::UpdateColor(VkDevice device, uint32_t frameIndex, RenderTarget& color, TextureFilter filter) {
+void Descriptor::UpdateUniformBuffer(uint32_t frameIndex, uint32_t binding, VkBuffer buffer, VkDeviceSize size) {
 
-    VkDescriptorImageInfo colorInfo{};
-    colorInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    colorInfo.imageView = color.GetImageView();
-    colorInfo.sampler = (filter == TextureFilter::Nearest) ? color.GetNearestSampler() : color.GetLinearSampler();
+    VkDescriptorBufferInfo bufferInfo{};
+    bufferInfo.buffer = buffer;
+    bufferInfo.offset = 0;
+    bufferInfo.range = size;
 
-    VkWriteDescriptorSet colorWrite{};
-    colorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    colorWrite.dstSet = m_sets[frameIndex];
-    colorWrite.dstBinding = 0;
-    colorWrite.dstArrayElement = 0;
-    colorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    colorWrite.descriptorCount = 1;
-    colorWrite.pImageInfo = &colorInfo;
+    VkWriteDescriptorSet write{};
+    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    write.dstSet = m_sets[frameIndex];
+    write.dstBinding = binding;
+    write.dstArrayElement = 0;
+    write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    write.descriptorCount = 1;
+    write.pBufferInfo = &bufferInfo;
 
-    vkUpdateDescriptorSets(device, 1, &colorWrite, 0, nullptr);
-
-}
-
-void Descriptor::UpdateDepth(VkDevice device, uint32_t frameIndex, RenderTarget& depth, TextureFilter filter) {
-
-    VkDescriptorImageInfo depthInfo{};
-    depthInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-    depthInfo.imageView = depth.GetImageView();
-    depthInfo.sampler = (filter == TextureFilter::Nearest) ? depth.GetNearestSampler() : depth.GetLinearSampler();
-
-    VkWriteDescriptorSet depthWrite{};
-    depthWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    depthWrite.dstSet = m_sets[frameIndex];
-    depthWrite.dstBinding = 1;
-    depthWrite.dstArrayElement = 0;
-    depthWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    depthWrite.descriptorCount = 1;
-    depthWrite.pImageInfo = &depthInfo;
-
-    vkUpdateDescriptorSets(device, 1, &depthWrite, 0, nullptr);
+    vkUpdateDescriptorSets(m_device, 1, &write, 0, nullptr);
 
 }
 
-void Descriptor::UpdateSMAABlend(VkDevice device, uint32_t frameIndex, RenderTarget& edge, RenderTarget& area, RenderTarget& search) {
+void Descriptor::UpdateStorageBuffer(uint32_t frameIndex, uint32_t binding, VkBuffer buffer, VkDeviceSize size) {
 
-    VkDescriptorImageInfo edgeInfo{};
-    edgeInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    edgeInfo.imageView = edge.GetImageView();
-    edgeInfo.sampler = edge.GetLinearSampler();
+    VkDescriptorBufferInfo bufferInfo{};
+    bufferInfo.buffer = buffer;
+    bufferInfo.offset = 0;
+    bufferInfo.range = size;
 
-    VkDescriptorImageInfo areaInfo{};
-    areaInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    areaInfo.imageView = area.GetImageView();
-    areaInfo.sampler = area.GetLinearSampler();
+    VkWriteDescriptorSet write{};
+    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    write.dstSet = m_sets[frameIndex];
+    write.dstBinding = binding;
+    write.dstArrayElement = 0;
+    write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    write.descriptorCount = 1;
+    write.pBufferInfo = &bufferInfo;
 
-    VkDescriptorImageInfo searchInfo{};
-    searchInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    searchInfo.imageView = search.GetImageView();
-    searchInfo.sampler = search.GetNearestSampler();
-
-    VkWriteDescriptorSet writes[3]{};
-    writes[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    writes[0].dstSet = m_sets[frameIndex];
-    writes[0].dstBinding = 1;
-    writes[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    writes[0].descriptorCount = 1;
-    writes[0].pImageInfo = &edgeInfo;
-
-    writes[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    writes[1].dstSet = m_sets[frameIndex];
-    writes[1].dstBinding = 2;
-    writes[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    writes[1].descriptorCount = 1;
-    writes[1].pImageInfo = &areaInfo;
-
-    writes[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    writes[2].dstSet = m_sets[frameIndex];
-    writes[2].dstBinding = 3;
-    writes[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    writes[2].descriptorCount = 1;
-    writes[2].pImageInfo = &searchInfo;
-
-    vkUpdateDescriptorSets( device, 3, writes, 0, nullptr);
+    vkUpdateDescriptorSets(m_device, 1, &write, 0, nullptr);
 
 }
 
-void Descriptor::UpdateSMAANeighborhood(VkDevice device, uint32_t currentFrame, RenderTarget& inputColor, RenderTarget& blendWeights) {
+void Descriptor::UpdateTexture(uint32_t frameIndex, uint32_t binding, VkImageView imageView, VkSampler sampler) {
 
-    VkDescriptorImageInfo inputInfo{};
-    inputInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    inputInfo.imageView = inputColor.GetImageView();
-    inputInfo.sampler = inputColor.GetLinearSampler();
+    VkDescriptorImageInfo imageInfo{};
+    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageInfo.imageView = imageView;
+    imageInfo.sampler = sampler;
 
-    VkDescriptorImageInfo blendInfo{};
-    blendInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    blendInfo.imageView = blendWeights.GetImageView();
-    blendInfo.sampler = blendWeights.GetLinearSampler();
+    VkWriteDescriptorSet write{};
+    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    write.dstSet = m_sets[frameIndex];
+    write.dstBinding = binding;
+    write.dstArrayElement = 0;
+    write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    write.descriptorCount = 1;
+    write.pImageInfo = &imageInfo;
 
-    VkWriteDescriptorSet writes[2]{};
-    writes[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    writes[0].dstSet = m_sets[currentFrame];
-    writes[0].dstBinding = 0;
-    writes[0].descriptorCount = 1;
-    writes[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    writes[0].pImageInfo = &inputInfo;
-
-    writes[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    writes[1].dstSet = m_sets[currentFrame];
-    writes[1].dstBinding = 4;
-    writes[1].descriptorCount = 1;
-    writes[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    writes[1].pImageInfo = &blendInfo;
-
-    vkUpdateDescriptorSets(device, 2, writes,0, nullptr);
+    vkUpdateDescriptorSets(m_device, 1, &write, 0, nullptr);
 
 }
-
-

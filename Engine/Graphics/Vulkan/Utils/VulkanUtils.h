@@ -36,15 +36,6 @@ VkShaderModule CreateShaderModule(
     VkDevice device,
     const std::vector<char>& code);
 
-void CreateBuffer(
-    VkDevice device,
-    VkPhysicalDevice physicalDevice,
-    VkDeviceSize size,
-    VkBufferUsageFlags usage,
-    VkMemoryPropertyFlags properties,
-    VkBuffer& buffer,
-    VkDeviceMemory& memory);
-
 VkCommandBuffer BeginSingleTimeCommands(
     VkDevice device,
     VkCommandPool commandPool);

@@ -81,6 +81,8 @@ add_executable(IndigoEngine main.cpp
         Engine/Math/Lina64.h
         Engine/Graphics/Vulkan/Wrappers/Pipeline.h
         Engine/Graphics/Vulkan/Wrappers/Pipeline.cpp
+        Engine/Graphics/Vulkan/Wrappers/Buffer.h
+        Engine/Graphics/Vulkan/Wrappers/Buffer.cpp
 )
 
 

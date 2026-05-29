@@ -5,6 +5,7 @@
 
 #include "Utils/VulkanUtils.h"
 #include "Debug/ErrorDialog.h"
+#include "Wrappers/Buffer.h"
 
 
 void VulkanRenderer::Initialize(Display& display, Window& window, ApplicationDesc& desc) {
@@ -272,10 +273,8 @@ void VulkanRenderer::TakeScreenshot(uint32_t imageIndex) {
     VkDeviceSize imageSize = static_cast<VkDeviceSize>(m_windowExtent.width) * static_cast<VkDeviceSize>(m_windowExtent.height) * 4;
 
     // STAGING BUFFER
-    VkBuffer stagingBuffer{};
-    VkDeviceMemory stagingMemory{};
-
-    CreateBuffer(m_device.Get(), m_physicalDevice.Get(), imageSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingMemory);
+    Buffer stagingBuffer;
+    stagingBuffer.Create(m_device.Get(), m_physicalDevice.Get(), imageSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
     VkCommandBuffer commandBuffer = BeginSingleTimeCommands(m_device.Get(), m_commands.GetPool());
 
@@ -307,7 +306,7 @@ void VulkanRenderer::TakeScreenshot(uint32_t imageIndex) {
     region.imageOffset = { 0, 0, 0 };
     region.imageExtent = { m_windowExtent.width, m_windowExtent.height, 1 };
 
-    vkCmdCopyImageToBuffer(commandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, stagingBuffer, 1, &region);
+    vkCmdCopyImageToBuffer(commandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, stagingBuffer.Get(), 1, &region);
 
     VkImageMemoryBarrier barrierBack{};
     barrierBack.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -328,9 +327,7 @@ void VulkanRenderer::TakeScreenshot(uint32_t imageIndex) {
 
     EndSingleTimeCommands(m_device.Get(), m_commands.GetPool(), m_queues.GetGraphics(), commandBuffer);
 
-    void* data = nullptr;
-
-    vkMapMemory(m_device.Get(), stagingMemory, 0, imageSize, 0, &data);
+    void* data = stagingBuffer.Map();
 
     std::vector<uint8_t> pixels(imageSize);
 
@@ -359,9 +356,8 @@ void VulkanRenderer::TakeScreenshot(uint32_t imageIndex) {
     stbi_write_png(filename.c_str(), m_windowExtent.width, m_windowExtent.height, 4, pixels.data(), m_windowExtent.width * 4);
 
     // DESTROY
-    vkUnmapMemory(m_device.Get(), stagingMemory);
-    vkDestroyBuffer(m_device.Get(), stagingBuffer, nullptr);
-    vkFreeMemory(m_device.Get(), stagingMemory, nullptr);
+    stagingBuffer.Unmap();
+    stagingBuffer.Destroy();
 
     std::cout << "Saving screenshot: " << filename << std::endl;
 

@@ -3,6 +3,7 @@
 #include "Graphics/Vulkan/Utils/VulkanUtils.h"
 #include "Debug/ErrorDialog.h"
 #include "Core/ApplicationDesc.h"
+#include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 
 void VulkanPostRenderPass::Create(VkDevice device, VkExtent2D extent, VkFormat swapchainFormat, ApplicationDesc desc) {
 
@@ -39,7 +40,23 @@ void VulkanPostRenderPass::Create(VkDevice device, VkExtent2D extent, VkFormat s
     VK_CHECK(vkCreateRenderPass(device, &createInfo, nullptr, &m_renderPass));
 
     // DESCRIPTOR
-    m_descriptor.Create(device, desc.MAX_FRAMES_IN_FLIGHT);
+    std::vector<VkDescriptorSetLayoutBinding> bindings;
+
+    VkDescriptorSetLayoutBinding colorBinding{};
+    colorBinding.binding = 0;
+    colorBinding.descriptorCount = 1;
+    colorBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    colorBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    bindings.push_back(colorBinding);
+
+    VkDescriptorSetLayoutBinding depthBinding{};
+    depthBinding.binding = 1;
+    depthBinding.descriptorCount = 1;
+    depthBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    depthBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    bindings.push_back(depthBinding);
+
+    m_descriptor.Create(device, bindings, desc.MAX_FRAMES_IN_FLIGHT);
 
     // PUSH CONSTANT
     VkPushConstantRange pushConstant{};
@@ -65,7 +82,8 @@ void VulkanPostRenderPass::Create(VkDevice device, VkExtent2D extent, VkFormat s
 
 void VulkanPostRenderPass::Render(VkDevice device, uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VkFramebuffer framebuffer, VkExtent2D extent, ApplicationDesc& desc, float exposure) {
 
-    m_descriptor.UpdateColor(device, frameIndex, inputColor, desc.FILTER);
+    VkSampler sampler = desc.FILTER == TextureFilter::Nearest ? inputColor.GetNearestSampler() : inputColor.GetLinearSampler();
+    m_descriptor.UpdateTexture(frameIndex, 0, inputColor.GetImageView(), sampler);
 
     VkClearValue clear{};
     clear.color = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -151,7 +169,7 @@ void VulkanPostRenderPass::Render(VkDevice device, uint32_t frameIndex, VkComman
 
 void VulkanPostRenderPass::Destroy(VkDevice device) {
 
-    m_descriptor.Destroy(device);
+    m_descriptor.Destroy();
     m_pipeline.Destroy(device);
 
     if (m_renderPass) {

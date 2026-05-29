@@ -151,34 +151,6 @@ VkShaderModule CreateShaderModule(VkDevice device, const std::vector<char>& code
 
 }
 
-void CreateBuffer(VkDevice device, VkPhysicalDevice physicalDevice, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& memory) {
-
-    // BUFFER
-    VkBufferCreateInfo bufferInfo{};
-    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = size;
-    bufferInfo.usage = usage;
-    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-    VK_CHECK(vkCreateBuffer(device,&bufferInfo, nullptr, &buffer));
-
-    // MEMORY REQUIREMENTS
-    VkMemoryRequirements memRequirements{};
-    vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
-
-    // ALLOC
-    VkMemoryAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = FindMemoryType(physicalDevice, memRequirements.memoryTypeBits, properties);
-
-    VK_CHECK(vkAllocateMemory(device, &allocInfo, nullptr, &memory));
-
-    // BIND
-    vkBindBufferMemory(device, buffer, memory, 0);
-
-}
-
 VkCommandBuffer BeginSingleTimeCommands(VkDevice device, VkCommandPool commandPool) {
 
     VkCommandBufferAllocateInfo allocInfo{};

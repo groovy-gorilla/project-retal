@@ -60,7 +60,28 @@ void VulkanSSAARenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevi
     VK_CHECK(vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &m_framebuffer));
 
     // DESCRIPTOR
-    m_descriptor.Create(device, desc.MAX_FRAMES_IN_FLIGHT, sceneColor, sceneDepth, TextureFilter::Linear);
+    std::vector<VkDescriptorSetLayoutBinding> bindings;
+
+    VkDescriptorSetLayoutBinding colorBinding{};
+    colorBinding.binding = 0;
+    colorBinding.descriptorCount = 1;
+    colorBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    colorBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    bindings.push_back(colorBinding);
+
+    VkDescriptorSetLayoutBinding depthBinding{};
+    depthBinding.binding = 1;
+    depthBinding.descriptorCount = 1;
+    depthBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    depthBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    bindings.push_back(depthBinding);
+
+    m_descriptor.Create(device, bindings, desc.MAX_FRAMES_IN_FLIGHT);
+
+    for (uint32_t i = 0; i < desc.MAX_FRAMES_IN_FLIGHT; i++) {
+        m_descriptor.UpdateTexture(i, 0, sceneColor.GetImageView(), sceneColor.GetLinearSampler());
+        m_descriptor.UpdateTexture(i, 1, sceneDepth.GetImageView(), sceneDepth.GetLinearSampler());
+    }
 
     // PIPELINE
     m_pipeline.Create(
@@ -124,7 +145,7 @@ void VulkanSSAARenderPass::Render(VkCommandBuffer commandBuffer, VkExtent2D exte
 
 void VulkanSSAARenderPass::Destroy(VkDevice device) {
 
-    m_descriptor.Destroy(device);
+    m_descriptor.Destroy();
 
     m_color.Destroy(device);
 

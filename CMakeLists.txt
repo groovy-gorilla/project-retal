@@ -83,6 +83,16 @@ add_executable(IndigoEngine main.cpp
         Engine/Graphics/Vulkan/Wrappers/Pipeline.cpp
         Engine/Graphics/Vulkan/Wrappers/Buffer.h
         Engine/Graphics/Vulkan/Wrappers/Buffer.cpp
+        Engine/Graphics/Vulkan/OverlayRenderPass/VulkanOverlayRenderPass.h
+        Engine/Graphics/Vulkan/OverlayRenderPass/VulkanOverlayRenderPass.cpp
+        Engine/Graphics/Sprite/Sprite.cpp
+        Engine/Graphics/Sprite/Sprite.h
+        Engine/Graphics/Sprite/SpriteRenderer.cpp
+        Engine/Graphics/Sprite/SpriteRenderer.h
+        Engine/Graphics/Camera/Camera.cpp
+        Engine/Graphics/Camera/Camera.h
+        Engine/Graphics/Vulkan/PresentPass/VulkanPresentRenderPass.cpp
+        Engine/Graphics/Vulkan/PresentPass/VulkanPresentRenderPass.h
 )
 
 
@@ -110,6 +120,6 @@ target_precompile_headers(IndigoEngine PRIVATE
 )
 
 # compile flags
-target_compile_options(IndigoEngine PRIVATE -g -O0 -mavx -mfma)
+target_compile_options(IndigoEngine PRIVATE -g -O0 -mavx2 -mfma)
 
 

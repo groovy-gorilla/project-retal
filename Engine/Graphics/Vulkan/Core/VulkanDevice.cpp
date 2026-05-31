@@ -61,15 +61,3 @@ void VulkanDevice::Destroy() {
     }
 
 }
-
-VkDevice VulkanDevice::Get() const {
-    return m_device;
-}
-
-VkQueue VulkanDevice::GetGraphicsQueue() const {
-    return m_graphicsQueue;
-}
-
-VkQueue VulkanDevice::GetPresentQueue() const {
-    return m_presentQueue;
-}

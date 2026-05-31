@@ -1,4 +1,6 @@
-#include "../Resources/SpriteRenderer.h"
+#include "Graphics/Sprite/SpriteRenderer.h"
+
+#include "Sprite.h"
 #include "Debug/ErrorDialog.h"
 #include "Graphics/Vulkan/Utils/VulkanUtils.h"
 
@@ -17,6 +19,8 @@ void SpriteRenderer::Create(VkDevice device, VkRenderPass renderPass) {
 
 void SpriteRenderer::Shutdown() {
 
+    vkDeviceWaitIdle(m_device);
+
     if (m_pipeline != VK_NULL_HANDLE) {
         vkDestroyPipeline(m_device, m_pipeline, nullptr);
         m_pipeline = VK_NULL_HANDLE;
@@ -25,11 +29,6 @@ void SpriteRenderer::Shutdown() {
     if (m_pipelineLayout != VK_NULL_HANDLE) {
         vkDestroyPipelineLayout(m_device, m_pipelineLayout, nullptr);
         m_pipelineLayout = VK_NULL_HANDLE;
-    }
-
-    if (m_descriptorSet != VK_NULL_HANDLE) {
-        // Brak destroy
-        m_descriptorSet = VK_NULL_HANDLE;
     }
 
     if (m_descriptorPool != VK_NULL_HANDLE) {
@@ -42,55 +41,39 @@ void SpriteRenderer::Shutdown() {
         m_descriptorSetLayout = VK_NULL_HANDLE;
     }
 
-    if (m_sprite) {
-        m_sprite->Shutdown();
-        delete m_sprite;
-        m_sprite = nullptr;
-    }
-
-    if (m_device != VK_NULL_HANDLE) {
-        vkDestroyDevice(m_device, nullptr);
-        m_device = VK_NULL_HANDLE;
-    }
-
 }
 
-void SpriteRenderer::Render(VkCommandBuffer commandBuffer, fvec2 screenSize, const Camera& camera) {
+void SpriteRenderer::Render(VkCommandBuffer commandBuffer, VkExtent2D renderExtent, const Camera& camera) {
 
-    m_commandBuffer = commandBuffer;
-
-    vkCmdBindPipeline(m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
 
     UIPushConstants push{};
 
-    push.projection = camera.GetProjection();
+    push.projection = ToFloat(camera.GetProjection());
     push.position = m_sprite->GetPosition();
     push.size = m_sprite->GetSize();
 
-    vkCmdPushConstants(m_commandBuffer, m_pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(UIPushConstants), &push);
+    vkCmdPushConstants(commandBuffer, m_pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(UIPushConstants), &push);
 
-    vkCmdBindDescriptorSets(m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &m_descriptorSet, 0, nullptr);
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &m_descriptorSet, 0, nullptr);
 
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = screenSize.x;
-    viewport.height = screenSize.y;
+    viewport.width = renderExtent.width;
+    viewport.height = renderExtent.height;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
-    vkCmdSetViewport(m_commandBuffer, 0, 1, &viewport);
+    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
     VkRect2D scissor{};
     scissor.offset = {0, 0};
-    scissor.extent = {
-        static_cast<uint32_t>(screenSize.x),
-        static_cast<uint32_t>(screenSize.y)
-    };
+    scissor.extent = renderExtent;
 
-    vkCmdSetScissor(m_commandBuffer, 0, 1, &scissor);
+    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    vkCmdDraw(m_commandBuffer, 4, 1, 0, 0);
+    vkCmdDraw(commandBuffer, 4, 1, 0, 0);
 
 }
 
@@ -165,12 +148,12 @@ void SpriteRenderer::CreatePipeline() {
     // SHADERS
     std::string filename;
 
-    filename = "image_vert.spv";
-    auto vertCode = ReadFile("../Assets/Shaders/" + filename);
+    filename = "sprite_vert.spv";
+    auto vertCode = ReadFile("../Engine/Graphics/Resources/Shaders/Sprite/" + filename);
     std::cout << "[Shader] Loading: " << filename << std::endl;
 
-    filename = "image_frag.spv";
-    auto fragCode = ReadFile("../Assets/Shaders/" + filename);
+    filename = "sprite_frag.spv";
+    auto fragCode = ReadFile("../Engine/Graphics/Resources/Shaders/Sprite/" + filename);
     std::cout << "[Shader] Loading: " << filename << std::endl;
 
     VkShaderModule vertShader = CreateShaderModule(m_device, vertCode);
@@ -286,9 +269,9 @@ void SpriteRenderer::CreatePipeline() {
 
 }
 
-void SpriteRenderer::SetImage(Image& image) {
+void SpriteRenderer::SetSprite(Sprite& sprite) {
 
-    m_sprite = &image;
+    m_sprite = &sprite;
     UpdateDescriptor();
 
 }

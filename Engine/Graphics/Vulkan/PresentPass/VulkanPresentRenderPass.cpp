@@ -1,21 +1,23 @@
 #include "pch.h"
-#include "VulkanPostRenderPass.h"
+#include "VulkanPresentRenderPass.h"
 #include "Debug/ErrorDialog.h"
 #include "Core/ApplicationDesc.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 
-void VulkanPostRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, ApplicationDesc& desc) {
+void VulkanPresentRenderPass::Create(VkDevice device, VkFormat swapchainFormat, ApplicationDesc& desc) {
+
+    m_device = device;
 
     // COLOR
     VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = colorFormat;
+    colorAttachment.format = swapchainFormat;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;;
+    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
     // ATTACHMENT
     VkAttachmentReference colorRef{};
@@ -28,12 +30,10 @@ void VulkanPostRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevi
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &colorRef;
 
-    // DEPENDENCIES
     VkSubpassDependency dependency{};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
     dependency.dstSubpass = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-    dependency.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
@@ -49,26 +49,6 @@ void VulkanPostRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevi
 
     VK_CHECK(vkCreateRenderPass(device, &createInfo, nullptr, &m_renderPass));
 
-    // CREATE RENDER TARGETS
-    m_color.Create(device, physicalDevice, renderExtent.width, renderExtent.height, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_SAMPLE_COUNT_1_BIT);
-
-
-    // FRAMEBUFFER
-    std::vector<VkImageView> attachments = {
-        m_color.GetImageView()
-    };
-
-    VkFramebufferCreateInfo framebufferCreateInfo{};
-    framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    framebufferCreateInfo.renderPass = m_renderPass;
-    framebufferCreateInfo.attachmentCount = 1;
-    framebufferCreateInfo.pAttachments = attachments.data();
-    framebufferCreateInfo.width = renderExtent.width;
-    framebufferCreateInfo.height = renderExtent.height;
-    framebufferCreateInfo.layers = 1;
-
-    VK_CHECK(vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &m_framebuffer));
-
     // DESCRIPTOR
     std::vector<VkDescriptorSetLayoutBinding> bindings;
 
@@ -79,49 +59,39 @@ void VulkanPostRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevi
     colorBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     bindings.push_back(colorBinding);
 
-    VkDescriptorSetLayoutBinding depthBinding{};
-    depthBinding.binding = 1;
-    depthBinding.descriptorCount = 1;
-    depthBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    depthBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    bindings.push_back(depthBinding);
-
     m_descriptor.Create(device, bindings, desc.MAX_FRAMES_IN_FLIGHT);
-
-    // PUSH CONSTANT
-    VkPushConstantRange pushConstant{};
-    pushConstant.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    pushConstant.offset = 0;
-    pushConstant.size = sizeof(PostPushConstants);
 
     // PIPELINE
     m_pipeline.Create(
         device,
         m_renderPass,
         m_descriptor.GetLayout(),
-        &pushConstant,
+        nullptr,
         VK_SAMPLE_COUNT_1_BIT,
-        "../Engine/Graphics/Resources/Shaders/Post/post_vert.spv",
-        "../Engine/Graphics/Resources/Shaders/Post/post_frag.spv",
+        "../Engine/Graphics/Resources/Shaders/Present/present_vert.spv",
+        "../Engine/Graphics/Resources/Shaders/Present/present_frag.spv",
         false,
         false);
 
-    std::cout << "[Vulkan] Post-render pass created" << std::endl;
+    std::cout << "[Vulkan] Overlay-render pass created" << std::endl;
 
 }
 
-void VulkanPostRenderPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VkExtent2D extent, ApplicationDesc& desc, float exposure) {
+void VulkanPresentRenderPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VkFramebuffer framebuffer, VkExtent2D extent, ApplicationDesc& desc) {
 
+    // UPDATE DESCRIPTOR
     VkSampler sampler = desc.FILTER == TextureFilter::Nearest ? inputColor.GetNearestSampler() : inputColor.GetLinearSampler();
     m_descriptor.UpdateTexture(frameIndex, 0, inputColor.GetImageView(), sampler);
 
+    // CLEAR
     VkClearValue clear{};
     clear.color = { 0.0f, 0.0f, 0.0f, 1.0f };
 
     VkRenderPassBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     beginInfo.renderPass = m_renderPass;
-    beginInfo.framebuffer = m_framebuffer;
+    beginInfo.framebuffer = framebuffer;
+    beginInfo.renderArea.offset = {0,0 };
     beginInfo.renderArea.extent = extent;
     beginInfo.clearValueCount = 1;
     beginInfo.pClearValues = &clear;
@@ -129,53 +99,76 @@ void VulkanPostRenderPass::Render(uint32_t frameIndex, VkCommandBuffer commandBu
     vkCmdBeginRenderPass(commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
     VkViewport viewport{};
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    viewport.width = static_cast<float>(extent.width);
-    viewport.height = static_cast<float>(extent.height);
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
-    vkCmdSetViewport(commandBuffer, 0,1, &viewport);
-
     VkRect2D scissor{};
-    scissor.offset = { 0, 0 };
-    scissor.extent = extent;
 
+    if (desc.ASPECT_RATIO) {
+
+        float targetAspect = static_cast<float>(desc.WIDTH) / static_cast<float>(desc.HEIGHT);
+        float windowAspect = static_cast<float>(extent.width) / static_cast<float>(extent.height);
+        float viewportWidth = static_cast<float>(extent.width);
+        float viewportHeight = static_cast<float>(extent.height);
+        float viewportX = 0.0f;
+        float viewportY = 0.0f;
+
+        if (windowAspect > targetAspect) {
+            viewportWidth = viewportHeight * targetAspect;
+            viewportX = (extent.width - viewportWidth) * 0.5f;
+        } else {
+            viewportHeight = viewportWidth / targetAspect;
+            viewportY = (extent.height - viewportHeight) * 0.5f;
+        }
+
+        viewport.x = viewportX;
+        viewport.y = viewportY;
+        viewport.width = viewportWidth;
+        viewport.height = viewportHeight;
+
+        scissor.offset = {
+            static_cast<int32_t>(viewportX),
+            static_cast<int32_t>(viewportY)
+        };
+
+        scissor.extent = {
+            static_cast<uint32_t>(viewportWidth),
+            static_cast<uint32_t>(viewportHeight)
+        };
+    } else {
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = static_cast<float>(extent.width);
+        viewport.height = static_cast<float>(extent.height);
+
+        scissor.offset = { 0, 0 };
+        scissor.extent = extent;
+    }
+
+    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    PostPushConstants PC;
-    PC.hdrEnable = desc.HDR;
-    PC.exposure = exposure;
-    PC.dithering = desc.DITHERING;
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.Get());
-    vkCmdPushConstants(commandBuffer, m_pipeline.GetLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PostPushConstants), &PC);
-
 
     VkDescriptorSet descriptorSet = m_descriptor.GetSet(frameIndex);
 
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.GetLayout(), 0, 1, &descriptorSet, 0, nullptr);
 
+    // FULLSCREEN TRIANGLE
     vkCmdDraw(commandBuffer, 3, 1,0, 0);
 
     vkCmdEndRenderPass(commandBuffer);
 
 }
 
-void VulkanPostRenderPass::Destroy(VkDevice device) {
+void VulkanPresentRenderPass::Destroy() {
 
-    if (m_framebuffer != VK_NULL_HANDLE) {
-        vkDestroyFramebuffer(device, m_framebuffer, nullptr);
-        m_framebuffer = VK_NULL_HANDLE;
-    }
-
-    m_color.Destroy(device);
     m_descriptor.Destroy();
-    m_pipeline.Destroy(device);
+    m_pipeline.Destroy(m_device);
 
     if (m_renderPass) {
-        vkDestroyRenderPass(device, m_renderPass, nullptr);
+        vkDestroyRenderPass(m_device, m_renderPass, nullptr);
         m_renderPass = VK_NULL_HANDLE;
     }
 

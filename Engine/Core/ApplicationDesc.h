@@ -18,17 +18,17 @@ enum class TextureFilter {
 
 struct ApplicationDesc {
 
-    const char* TITLE                   = "TFX";
+    const char* TITLE                   = "IndigoEngine";
 
-    uint32_t WIDTH                      = 320;
-    uint32_t HEIGHT                     = 200;
+    uint32_t WIDTH                      = 2560;
+    uint32_t HEIGHT                     = 1080;
 
     bool FULLSCREEN                     = false;
     bool ASPECT_RATIO                   = true;
     bool VSYNC                          = true;
     TextureFilter FILTER                = TextureFilter::Nearest;
     const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
-    uint32_t WINDOWED_SCALE             = 4;                                                    // Rozmiar okna po powiększeniu nie może być większy niż ekran.
+    uint32_t WINDOWED_SCALE             = 1;                                                    // Rozmiar okna po powiększeniu nie może być większy niż ekran.
 
     // HDR
     bool HDR                            = false;

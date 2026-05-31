@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Sprite/Sprite.h"
 #include "Sprite/SpriteRenderer.h"
 #include "Vulkan/VulkanRenderer.h"
 
@@ -17,6 +18,12 @@ public:
 
 private:
     VulkanRenderer m_renderer;
+
+    Camera m_camera;
+
+    SpriteRenderer m_spriteRenderer;
+    Sprite m_sprite;
+
 
 };
 

@@ -144,8 +144,10 @@ void VulkanSceneRenderPass::Destroy(VkDevice device) {
 
     m_pipeline.Destroy(device);
 
-    vkDestroyFramebuffer(device, m_framebuffer, nullptr);
-    m_framebuffer = VK_NULL_HANDLE;
+    if (m_framebuffer != VK_NULL_HANDLE) {
+        vkDestroyFramebuffer(device, m_framebuffer, nullptr);
+        m_framebuffer = VK_NULL_HANDLE;
+    }
 
     m_color.Destroy(device);
     m_depth.Destroy(device);

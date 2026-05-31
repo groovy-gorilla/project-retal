@@ -1,18 +1,11 @@
 #pragma once
 
+#include "Core/ApplicationDesc.h"
 #include "Graphics/Vulkan/Wrappers/Descriptor.h"
 #include "Graphics/Vulkan/Wrappers/Pipeline.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 
-struct ApplicationDesc;
-
-struct PostPushConstants {
-    int hdrEnable;
-    float exposure;
-    int dithering;
-};
-
-class VulkanPostRenderPass {
+class VulkanOverlayRenderPass {
 public:
     void Create(
         VkDevice device,
@@ -23,19 +16,23 @@ public:
 
     void Destroy(VkDevice device);
 
-    void Render(
+    void Begin(
         uint32_t frameIndex,
         VkCommandBuffer commandBuffer,
         RenderTarget& inputColor,
         VkExtent2D extent,
-        ApplicationDesc& desc,
-        float exposure);
+        ApplicationDesc& desc);
+
+    void End(VkCommandBuffer commandBuffer);
 
     [[nodiscard]] VkRenderPass Get() const { return m_renderPass; }
     [[nodiscard]] Descriptor GetDescriptor() const { return m_descriptor; }
     RenderTarget& GetColor() { return m_color; }
 
 private:
+
+    // DEVICE HANDLE
+    VkDevice m_device = VK_NULL_HANDLE;
 
     // PASS
     VkRenderPass m_renderPass = VK_NULL_HANDLE;

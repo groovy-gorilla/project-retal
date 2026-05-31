@@ -1,11 +1,12 @@
 #pragma once
 #include "Graphics/Camera/Camera.h"
-#include "Sprite.h"
 
 using namespace lina;
 
+class Sprite;
+
 struct UIPushConstants {
-    mat4 projection;
+    fmat4 projection;
     fvec2 position;
     fvec2 size;
 };
@@ -14,14 +15,13 @@ class SpriteRenderer {
 public:
     void Create(VkDevice device, VkRenderPass renderPass);
     void Shutdown();
-    void Render(VkCommandBuffer commandBuffer, fvec2 screenSize, const Camera& camera);
-    void SetSprite(Sprite& image);
+    void Render(VkCommandBuffer commandBuffer, VkExtent2D renderExtent, const Camera& camera);
+    void SetSprite(Sprite& sprite);
 
 private:
     VkDevice m_device = VK_NULL_HANDLE;
     VkPipeline m_pipeline = VK_NULL_HANDLE;
     VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
-    VkCommandBuffer m_commandBuffer = VK_NULL_HANDLE;
     VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
     VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
     VkDescriptorSet m_descriptorSet = VK_NULL_HANDLE;

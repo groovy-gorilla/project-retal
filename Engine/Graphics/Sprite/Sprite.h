@@ -7,13 +7,13 @@ using namespace lina;
 class Sprite {
 public:
     void Create(
-        const VulkanContext& context,
+        VulkanContext context,
         const std::filesystem::path& path);
 
     void Shutdown();
 
-    void SetPosition(const fvec2& position);
-    void SetSize(const fvec2& size);
+    void SetPosition(uint32_t width, uint32_t height);
+    void SetSize(uint32_t width, uint32_t height);
 
     const fvec2& GetPosition() const;
     const fvec2& GetSize() const;

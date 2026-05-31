@@ -14,6 +14,8 @@
 #include "Core/VulkanCommands.h"
 #include "Core/VulkanSync.h"
 #include "Core/VulkanQueues.h"
+#include "OverlayRenderPass/VulkanOverlayRenderPass.h"
+#include "PresentPass/VulkanPresentRenderPass.h"
 #include "SMAARenderPass/VulkanSMAARenderPass.h"
 #include "SSAARenderPass/VulkanSSAARenderPass.h"
 
@@ -33,14 +35,20 @@ struct ViewportRect {
 
 
 class VulkanRenderer {
+
 public:
     void Initialize(Display& display, Window& window, ApplicationDesc& desc);
     void Shutdown();
 
-    void RecordCommandBuffer(VkDevice device, uint32_t imageIndex, ApplicationDesc& desc);
+    void BeginFrame();
+    void BeginScene();
+    void EndScene();
+    void BeginOverlay(ApplicationDesc& desc);
+    void EndOverlay();
+    void RenderPresent(ApplicationDesc& desc);
+    void EndFrame(ApplicationDesc& desc);
 
     void Update(float deltaTime, bool hdrEnable);
-    void Render(VkDevice device, ApplicationDesc& desc);
 
     void RecreateSwapchain(Display& display, Window& window, ApplicationDesc& desc);
     void RecreateRenderer(Display& display, Window& window, ApplicationDesc& desc);
@@ -49,13 +57,15 @@ public:
 
     void TakeScreenshot(uint32_t imageIndex);
 
-    const VulkanContext& GetContext() const { return m_context; }
+    VulkanContext GetContext() const { return m_context; }
 
-    VulkanPostRenderPass& GetPostRenderPass() { return m_postRenderPass; }
-    VulkanSSAARenderPass& GetSSAARenderPass() { return m_ssaaRenderPass; }
+    VkRenderPass GetOverlayRenderPass() const { return m_overlayRenderPass.Get(); }
+
+    VkCommandBuffer GetCommandBuffer() const { return m_currentCommandBuffer; }
+
+    VkExtent2D GetRenderExtent() const { return m_renderExtent; }
 
 private:
-    VulkanContext m_context;
 
     VulkanInstance m_instance;
     VulkanDebug m_debug;
@@ -65,14 +75,17 @@ private:
     VulkanDevice m_device;
     VulkanSwapchain m_swapchain;
     uint32_t m_currentFrame = 0;
+    VulkanContext m_context;
 
     // SCENE
     VulkanSceneRenderPass m_sceneRenderPass;
 
     // SCREEN
-    VulkanPostRenderPass m_postRenderPass;
     VulkanSMAARenderPass m_smaaRenderPass;
     VulkanSSAARenderPass m_ssaaRenderPass;
+    VulkanPostRenderPass m_postRenderPass;
+    VulkanOverlayRenderPass m_overlayRenderPass;
+    VulkanPresentRenderPass m_presentRenderPass;
 
     VulkanCommands m_commands;
     VulkanSync m_sync;
@@ -92,5 +105,8 @@ private:
 
     void UpdateExposure(float deltaTime, bool hdrEnable);
 
+    uint32_t m_imageIndex = 0;
+    VkCommandBuffer m_currentCommandBuffer = VK_NULL_HANDLE;
+    RenderTarget* m_currentColor = nullptr;
 
 };

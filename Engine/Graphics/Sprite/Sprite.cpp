@@ -1,6 +1,6 @@
 #include "Sprite.h"
 
-void Sprite::Create(const VulkanContext& context, const std::filesystem::path& path) {
+void Sprite::Create(VulkanContext context, const std::filesystem::path& path) {
 
     TextureCreateInfo info{};
     info.magFilter = VK_FILTER_LINEAR;
@@ -18,15 +18,15 @@ void Sprite::Shutdown() {
 
 }
 
-void Sprite::SetPosition(const fvec2& position) {
+void Sprite::SetPosition(uint32_t width, uint32_t height) {
 
-    m_position = position;
+    m_position = fvec2(width, height);
 
 }
 
-void Sprite::SetSize(const fvec2& size) {
+void Sprite::SetSize(uint32_t width, uint32_t height) {
 
-    m_size = size;
+    m_size = fvec2(width, height);
 
 }
 

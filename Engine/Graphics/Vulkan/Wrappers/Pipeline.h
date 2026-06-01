@@ -1,27 +1,37 @@
 #pragma once
 #include "pch.h"
 
+struct PipelineDesc {
+    VkRenderPass renderPass = VK_NULL_HANDLE;
+    VkDescriptorSetLayout descriptorLayout = VK_NULL_HANDLE;
+    VkPushConstantRange* pushConstants = nullptr;
+    VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_1_BIT;
+    std::string vertexShader;
+    std::string fragmentShader;
+    VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    VkCullModeFlags cullMode = VK_CULL_MODE_BACK_BIT;
+    VkFrontFace frontFace = VK_FRONT_FACE_CLOCKWISE;
+    bool depthTest = true;
+    bool depthWrite = true;
+    bool blending = false;
+    VkSpecializationInfo* vertSpec = nullptr;
+    VkSpecializationInfo* fragSpec = nullptr;
+};
+
 class Pipeline {
 public:
 
     void Create(
         VkDevice device,
-        VkRenderPass renderPass,
-        VkDescriptorSetLayout descriptorLayout,
-        VkPushConstantRange* pushConstant,
-        VkSampleCountFlagBits samples,
-        const std::string& vertPath,
-        const std::string& fragPath,
-        bool depthTest,
-        bool blending,
-        VkSpecializationInfo* vertSpec = nullptr,
-        VkSpecializationInfo* fragSpec = nullptr
+        const PipelineDesc& desc
     );
 
     void Destroy(VkDevice device);
 
     [[nodiscard]] VkPipeline Get() const { return m_pipeline; }
     [[nodiscard]] VkPipelineLayout GetLayout() const { return m_layout; }
+    VkPipeline* GetHandle() { return &m_pipeline; }
+    VkPipelineLayout* GetLayoutHandle() { return &m_layout; }
 
 private:
 

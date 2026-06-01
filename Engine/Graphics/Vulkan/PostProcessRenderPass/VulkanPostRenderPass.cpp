@@ -94,17 +94,17 @@ void VulkanPostRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevi
     pushConstant.offset = 0;
     pushConstant.size = sizeof(PostPushConstants);
 
+    PipelineDesc pdesc;
+    pdesc.renderPass = m_renderPass;
+    pdesc.descriptorLayout = m_descriptor.GetLayout();
+    pdesc.pushConstants = &pushConstant;
+    pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Post/post_vert.spv";
+    pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/Post/post_frag.spv";
+    pdesc.depthTest = false;
+    pdesc.blending = false;
+
     // PIPELINE
-    m_pipeline.Create(
-        device,
-        m_renderPass,
-        m_descriptor.GetLayout(),
-        &pushConstant,
-        VK_SAMPLE_COUNT_1_BIT,
-        "../Engine/Graphics/Resources/Shaders/Post/post_vert.spv",
-        "../Engine/Graphics/Resources/Shaders/Post/post_frag.spv",
-        false,
-        false);
+    m_pipeline.Create(device, pdesc);
 
     std::cout << "[Vulkan] Post-render pass created" << std::endl;
 

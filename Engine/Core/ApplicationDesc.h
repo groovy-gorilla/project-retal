@@ -20,8 +20,8 @@ struct ApplicationDesc {
 
     const char* TITLE                   = "IndigoEngine";
 
-    uint32_t WIDTH                      = 2560;
-    uint32_t HEIGHT                     = 1080;
+    uint32_t WIDTH                      = 800;
+    uint32_t HEIGHT                     = 600;
 
     bool FULLSCREEN                     = false;
     bool ASPECT_RATIO                   = true;

@@ -92,17 +92,16 @@ void VulkanSSAARenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevi
         m_descriptor.UpdateTexture(i, 1, sceneDepth.GetImageView(), sceneDepth.GetLinearSampler());
     }
 
+    PipelineDesc pdesc;
+    pdesc.renderPass = m_renderPass;
+    pdesc.descriptorLayout = m_descriptor.GetLayout();
+    pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/SSAA/ssaa_vert.spv";
+    pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/SSAA/ssaa_frag.spv";
+    pdesc.depthTest = false;
+    pdesc.blending = false;
+
     // PIPELINE
-    m_pipeline.Create(
-        device,
-        m_renderPass,
-        m_descriptor.GetLayout(),
-        nullptr,
-        VK_SAMPLE_COUNT_1_BIT,
-        "../Engine/Graphics/Resources/Shaders/SSAA/ssaa_vert.spv",
-        "../Engine/Graphics/Resources/Shaders/SSAA/ssaa_frag.spv",
-        false,
-        false);
+    m_pipeline.Create(device, pdesc);
 
     std::cout << "[Vulkan] SSAA-render pass created" << std::endl;
 

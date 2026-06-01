@@ -124,17 +124,16 @@ void VulkanSceneRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDev
 
     VK_CHECK(vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &m_framebuffer));
 
+    PipelineDesc pdesc;
+    pdesc.renderPass = m_renderPass;
+    pdesc.samples = samples;
+    pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Scene/scene_vert.spv";
+    pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/Scene/scene_frag.spv";
+    pdesc.depthTest = true;
+    pdesc.blending = false;
+
     // PIPELINE
-    m_pipeline.Create(
-        device,
-        m_renderPass,
-        nullptr,
-        nullptr,
-        samples,
-        "../Engine/Graphics/Resources/Shaders/Scene/scene_vert.spv",
-        "../Engine/Graphics/Resources/Shaders/Scene/scene_frag.spv",
-        true,
-        false);
+    m_pipeline.Create(device, pdesc);
 
     std::cout << "[Vulkan] Scene-render pass created" << std::endl;
 
@@ -169,7 +168,7 @@ void VulkanSceneRenderPass::Begin(VkCommandBuffer commandBuffer) {
     clearValues[0].color = {0.05f, 0.05f, 0.08f, 1.0f};
 
     // DEPTH
-    clearValues[1].depthStencil = { 1.0f, 0 };
+    clearValues[1].depthStencil = { 0.0f, 0 };
 
     // RESOLVE COLOR
     clearValues[2].color = { 0.0f, 0.0f, 0.0f, 1.0f };

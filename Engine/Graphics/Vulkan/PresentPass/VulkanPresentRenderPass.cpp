@@ -61,17 +61,16 @@ void VulkanPresentRenderPass::Create(VkDevice device, VkFormat swapchainFormat, 
 
     m_descriptor.Create(device, bindings, desc.MAX_FRAMES_IN_FLIGHT);
 
+    PipelineDesc pdesc;
+    pdesc.renderPass = m_renderPass;
+    pdesc.descriptorLayout = m_descriptor.GetLayout();
+    pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Present/present_vert.spv";
+    pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/Present/present_frag.spv";
+    pdesc.depthTest = false;
+    pdesc.blending = false;
+
     // PIPELINE
-    m_pipeline.Create(
-        device,
-        m_renderPass,
-        m_descriptor.GetLayout(),
-        nullptr,
-        VK_SAMPLE_COUNT_1_BIT,
-        "../Engine/Graphics/Resources/Shaders/Present/present_vert.spv",
-        "../Engine/Graphics/Resources/Shaders/Present/present_frag.spv",
-        false,
-        false);
+    m_pipeline.Create(device, pdesc);
 
     std::cout << "[Vulkan] Overlay-render pass created" << std::endl;
 

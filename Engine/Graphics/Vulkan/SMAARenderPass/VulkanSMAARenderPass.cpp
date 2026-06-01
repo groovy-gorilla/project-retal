@@ -405,18 +405,17 @@ void VulkanSMAARenderPass::CreateEdgePipeline(VkDevice device, VkExtent2D extent
     specializationInfo.dataSize = sizeof(specData);
     specializationInfo.pData = &specData;
 
-    m_edgePipeline.Create(
-        device,
-        m_edgeRenderPass,
-        m_edgeDescriptorLayout,
-        nullptr,
-        VK_SAMPLE_COUNT_1_BIT,
-        "../Engine/Graphics/Resources/Shaders/SMAA/smaa_edge_vert.spv",
-        "../Engine/Graphics/Resources/Shaders/SMAA/smaa_edge_frag.spv",
-        false,
-        false,
-        &specializationInfo,
-        &specializationInfo);
+    PipelineDesc pdesc;
+    pdesc.renderPass = m_edgeRenderPass;
+    pdesc.descriptorLayout = m_edgeDescriptorLayout;
+    pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/SMAA/smaa_edge_vert.spv";
+    pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/SMAA/smaa_edge_frag.spv";
+    pdesc.depthTest = false;
+    pdesc.blending = false;
+    pdesc.vertSpec = &specializationInfo;
+    pdesc.fragSpec = &specializationInfo;
+
+    m_edgePipeline.Create(device, pdesc);
 
 }
 
@@ -568,18 +567,17 @@ void VulkanSMAARenderPass::CreateBlendPipeline(VkDevice device, VkExtent2D exten
     specializationInfo.dataSize = sizeof(specData);
     specializationInfo.pData = &specData;
 
-    m_blendPipeline.Create(
-        device,
-        m_blendRenderPass,
-        m_blendDescriptorLayout,
-        nullptr,
-        VK_SAMPLE_COUNT_1_BIT,
-        "../Engine/Graphics/Resources/Shaders/SMAA/smaa_blend_vert.spv",
-        "../Engine/Graphics/Resources/Shaders/SMAA/smaa_blend_frag.spv",
-        false,
-        false,
-        &specializationInfo,
-        &specializationInfo);
+    PipelineDesc pdesc;
+    pdesc.renderPass = m_blendRenderPass;
+    pdesc.descriptorLayout = m_blendDescriptorLayout;
+    pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/SMAA/smaa_blend_vert.spv";
+    pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/SMAA/smaa_blend_frag.spv";
+    pdesc.depthTest = false;
+    pdesc.blending = false;
+    pdesc.vertSpec = &specializationInfo;
+    pdesc.fragSpec = &specializationInfo;
+
+    m_blendPipeline.Create(device, pdesc);
 
 }
 
@@ -724,17 +722,16 @@ void VulkanSMAARenderPass::CreateNeighborhoodPipeline(VkDevice device, VkExtent2
     specializationInfo.dataSize = sizeof(specData);
     specializationInfo.pData = &specData;
 
-    m_neighborhoodPipeline.Create(
-        device,
-        m_neighborhoodRenderPass,
-        m_neighborhoodDescriptorLayout,
-        nullptr,
-        VK_SAMPLE_COUNT_1_BIT,
-        "../Engine/Graphics/Resources/Shaders/SMAA/smaa_neighborhood_vert.spv",
-        "../Engine/Graphics/Resources/Shaders/SMAA/smaa_neighborhood_frag.spv",
-        false,
-        false,
-        &specializationInfo,
-        &specializationInfo);
+    PipelineDesc pdesc;
+    pdesc.renderPass = m_neighborhoodRenderPass;
+    pdesc.descriptorLayout = m_neighborhoodDescriptorLayout;
+    pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/SMAA/smaa_neighborhood_vert.spv";
+    pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/SMAA/smaa_neighborhood_frag.spv";
+    pdesc.depthTest = false;
+    pdesc.blending = false;
+    pdesc.vertSpec = &specializationInfo;
+    pdesc.fragSpec = &specializationInfo;
+
+    m_neighborhoodPipeline.Create(device, pdesc);
 
 }

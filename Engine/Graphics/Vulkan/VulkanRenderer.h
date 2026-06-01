@@ -65,6 +65,8 @@ public:
 
     VkExtent2D GetRenderExtent() const { return m_renderExtent; }
 
+    VulkanSync GetSync() const { return m_sync; }
+
 private:
 
     VulkanInstance m_instance;

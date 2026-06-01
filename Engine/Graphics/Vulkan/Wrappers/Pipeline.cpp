@@ -2,14 +2,14 @@
 #include "Engine/Graphics/Vulkan/Utils/VulkanUtils.h"
 #include "Debug/ErrorDialog.h"
 
-void Pipeline::Create(VkDevice device, VkRenderPass renderPass, VkDescriptorSetLayout descriptorLayout, VkPushConstantRange* pushConstant, VkSampleCountFlagBits samples, const std::string& vertPath, const std::string& fragPath, bool depthTest, bool blending, VkSpecializationInfo* vertSpec, VkSpecializationInfo* fragSpec) {
+void Pipeline::Create(VkDevice device, const PipelineDesc& desc) {
 
     // SHADERS
-    auto vertCode = ReadFile(vertPath);
-    std::cout << "[Shader] Loading: " << std::filesystem::path(vertPath).filename().string() << std::endl;
+    auto vertCode = ReadFile(desc.vertexShader);
+    std::cout << "[Shader] Loading: " << std::filesystem::path(desc.vertexShader).filename().string() << std::endl;
 
-    auto fragCode = ReadFile(fragPath);
-    std::cout << "[Shader] Loading: " << std::filesystem::path(fragPath).filename().string() << std::endl;
+    auto fragCode = ReadFile(desc.fragmentShader);
+    std::cout << "[Shader] Loading: " << std::filesystem::path(desc.fragmentShader).filename().string() << std::endl;
 
     VkShaderModule vertShader = CreateShaderModule(device, vertCode);
     VkShaderModule fragShader = CreateShaderModule(device, fragCode);
@@ -20,14 +20,14 @@ void Pipeline::Create(VkDevice device, VkRenderPass renderPass, VkDescriptorSetL
     vertStage.stage = VK_SHADER_STAGE_VERTEX_BIT;
     vertStage.module = vertShader;
     vertStage.pName = "main";
-    vertStage.pSpecializationInfo = vertSpec;
+    vertStage.pSpecializationInfo = desc.vertSpec;
 
     VkPipelineShaderStageCreateInfo fragStage{};
     fragStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     fragStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
     fragStage.module = fragShader;
     fragStage.pName = "main";
-    fragStage.pSpecializationInfo = fragSpec;
+    fragStage.pSpecializationInfo = desc.fragSpec;
 
     VkPipelineShaderStageCreateInfo stages[] = {
         vertStage,
@@ -43,7 +43,7 @@ void Pipeline::Create(VkDevice device, VkRenderPass renderPass, VkDescriptorSetL
     // INPUT ASSEMBLY
     VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
     inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    inputAssembly.topology = desc.topology;
     inputAssembly.primitiveRestartEnable = VK_FALSE;
 
     // VIEWPORT STATE
@@ -70,8 +70,8 @@ void Pipeline::Create(VkDevice device, VkRenderPass renderPass, VkDescriptorSetL
     rasterizer.rasterizerDiscardEnable = VK_FALSE;
     rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth = 1.0f;
-    rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-    rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+    rasterizer.cullMode = desc.cullMode;
+    rasterizer.frontFace = desc.frontFace;
     rasterizer.depthBiasEnable = VK_FALSE;
     rasterizer.depthBiasConstantFactor = 0.0f;
     rasterizer.depthBiasClamp = 0.0f;
@@ -85,12 +85,12 @@ void Pipeline::Create(VkDevice device, VkRenderPass renderPass, VkDescriptorSetL
     multisampling.pSampleMask = nullptr;
     multisampling.alphaToCoverageEnable = VK_FALSE;
     multisampling.alphaToOneEnable = VK_FALSE;
-    multisampling.rasterizationSamples = samples;
+    multisampling.rasterizationSamples = desc.samples;
 
     // COLOR BLEND ATTACHMENT
     VkPipelineColorBlendAttachmentState colorBlendAttachment{};
     colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    colorBlendAttachment.blendEnable = blending ? VK_TRUE : VK_FALSE;
+    colorBlendAttachment.blendEnable = desc.blending ? VK_TRUE : VK_FALSE;
     colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
     colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
     colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
@@ -113,9 +113,9 @@ void Pipeline::Create(VkDevice device, VkRenderPass renderPass, VkDescriptorSetL
     // DEPTH TEST
     VkPipelineDepthStencilStateCreateInfo depthStencil{};
     depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    depthStencil.depthTestEnable = depthTest ? VK_TRUE : VK_FALSE;
-    depthStencil.depthWriteEnable = depthTest ? VK_TRUE : VK_FALSE;
-    depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+    depthStencil.depthTestEnable = desc.depthTest ? VK_TRUE : VK_FALSE;
+    depthStencil.depthWriteEnable = desc.depthWrite ? VK_TRUE : VK_FALSE;
+    depthStencil.depthCompareOp = VK_COMPARE_OP_GREATER;
     depthStencil.depthBoundsTestEnable = VK_FALSE;
     depthStencil.stencilTestEnable = VK_FALSE;
 
@@ -123,17 +123,17 @@ void Pipeline::Create(VkDevice device, VkRenderPass renderPass, VkDescriptorSetL
     VkPipelineLayoutCreateInfo layout{};
     layout.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
-    if (descriptorLayout != VK_NULL_HANDLE) {
+    if (desc.descriptorLayout != VK_NULL_HANDLE) {
         layout.setLayoutCount = 1;
-        layout.pSetLayouts = &descriptorLayout;
+        layout.pSetLayouts = &desc.descriptorLayout;
     } else {
         layout.setLayoutCount = 0;
         layout.pSetLayouts = nullptr;
     }
 
-    if (pushConstant) {
+    if (desc.pushConstants) {
         layout.pushConstantRangeCount = 1;
-        layout.pPushConstantRanges = pushConstant;
+        layout.pPushConstantRanges = desc.pushConstants;
     } else {
         layout.pushConstantRangeCount = 0;
         layout.pPushConstantRanges = nullptr;
@@ -154,7 +154,7 @@ void Pipeline::Create(VkDevice device, VkRenderPass renderPass, VkDescriptorSetL
     pipelineInfo.pColorBlendState = &colorBlend;
     pipelineInfo.pDepthStencilState = &depthStencil;
     pipelineInfo.layout = m_layout;
-    pipelineInfo.renderPass = renderPass;
+    pipelineInfo.renderPass = desc.renderPass;
     pipelineInfo.subpass = 0;
     pipelineInfo.pDynamicState = &dynamicState;
 

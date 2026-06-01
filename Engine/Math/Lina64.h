@@ -528,6 +528,16 @@ namespace lina {
         return Store(R);
     }
 
+    inline mat4 PerspectiveReverseZInfinite(double fov, double aspect, double nearPlane) {
+        double f = 1.0 / std::tan(fov * 0.5);
+        simd_mat4 R;
+        R.r[0] = _mm256_set_pd(0.0, 0.0, 0.0, f / aspect);
+        R.r[1] = _mm256_set_pd(0.0, 0.0, -f, 0.0);
+        R.r[2] = _mm256_set_pd(-1.0, 0.0, 0.0, 0.0);
+        R.r[3] = _mm256_set_pd(0.0, nearPlane, 0.0, 0.0);
+        return Store(R);
+    }
+
     inline mat4 Orthographic(double left, double right, double bottom, double top, double nearPlane, double farPlane) {
         double rl = right - left;
         double tb = top - bottom;

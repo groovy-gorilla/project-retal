@@ -27,7 +27,8 @@ void Camera::SetRotation(const vec3& rotation) {
 void Camera::SetPerspective(double fov, double aspect, double nearPlane, double farPlane) {
 
     m_projectionType = CameraProjection::Perspective;
-    m_projection = Perspective(fov, aspect, nearPlane, farPlane);
+    m_projection = PerspectiveReverseZInfinite(fov, aspect, nearPlane);
+    //m_projection = Perspective(fov, aspect, nearPlane, farPlane);
 
 }
 

@@ -22,7 +22,9 @@ private:
     Camera m_camera;
 
     SpriteRenderer m_spriteRenderer;
-    Sprite m_sprite;
+
+    Sprite m_sprite1;
+    Sprite m_sprite2;
 
 
 };

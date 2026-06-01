@@ -19,6 +19,7 @@ enum class TextureFilter {
 struct ApplicationDesc {
 
     const char* TITLE                   = "IndigoEngine";
+    std::string VERSION                 = "0.1.23";
 
     uint32_t WIDTH                      = 800;
     uint32_t HEIGHT                     = 600;

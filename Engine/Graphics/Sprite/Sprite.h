@@ -8,7 +8,8 @@ class Sprite {
 public:
     void Create(
         VulkanContext context,
-        const std::filesystem::path& path);
+        const std::filesystem::path& path,
+        uint32_t framesInFlight);
 
     void Shutdown();
 
@@ -19,11 +20,12 @@ public:
     const fvec2& GetSize() const;
 
     [[nodiscard]] const Texture& GetTexture() const { return m_texture; }
-    [[nodiscard]] VkDescriptorSet GetDescriptorSet() const;
+    [[nodiscard]] VkDescriptorSet GetDescriptorSet(uint32_t frameIndex) const { return m_descriptor.GetSet(frameIndex); }
 
 
 private:
     Texture m_texture;
+    Descriptor m_descriptor;
     fvec2 m_position;
     fvec2 m_size;
 

@@ -1,7 +1,6 @@
 #pragma once
 #include "Core/ApplicationDesc.h"
 #include "Graphics/Camera/Camera.h"
-#include "Graphics/Vulkan/Wrappers/Descriptor.h"
 #include "Graphics/Vulkan/Wrappers/Pipeline.h"
 
 using namespace lina;
@@ -16,16 +15,22 @@ struct UIPushConstants {
 
 class SpriteRenderer {
 public:
-    void Create(VkDevice device, VkRenderPass renderPass, ApplicationDesc& desc);
+    void Create(
+        VkDevice device,
+        VkRenderPass renderPass);
+
     void Shutdown();
-    void Render(uint32_t frameIndex, VkCommandBuffer commandBuffer, VkExtent2D renderExtent, const Camera& camera);
-    void SetSprite(Sprite& sprite, ApplicationDesc& desc);
+
+    void Render(
+        uint32_t frameIndex,
+        VkCommandBuffer commandBuffer,
+        const Sprite& sprite,
+        const Camera& camera);
 
 private:
     VkDevice m_device = VK_NULL_HANDLE;
     Pipeline m_pipeline;
-    Descriptor m_descriptor;
+    VkDescriptorSetLayout m_descriptorLayout = VK_NULL_HANDLE;
     VkRenderPass m_renderPass = VK_NULL_HANDLE;
-    Sprite* m_sprite = nullptr;
 
 };

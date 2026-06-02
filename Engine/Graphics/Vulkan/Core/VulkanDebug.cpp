@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "VulkanDebug.h"
 #include "Debug/ErrorDialog.h"
+#include <csignal>
 
 void VulkanDebug::Create(VkInstance instance) {
 
@@ -42,7 +43,10 @@ VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebug::DebugCallback(
     const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
     void* pUserData) {
 
-    if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+    if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+        #ifndef NDEBUG
+            raise(SIGTRAP);
+        #endif
         std::string msg = "Validation Layer\n\n"
         "ID:" + std::string(pCallbackData->pMessageIdName) + "\n\n"
         "Message:\n" + std::string(pCallbackData->pMessage);

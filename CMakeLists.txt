@@ -93,6 +93,8 @@ add_executable(IndigoEngine main.cpp
         Engine/Graphics/Camera/Camera.h
         Engine/Graphics/Vulkan/PresentPass/VulkanPresentRenderPass.cpp
         Engine/Graphics/Vulkan/PresentPass/VulkanPresentRenderPass.h
+        Engine/Graphics/Font/Font.h
+        Engine/Graphics/Font/Font.cpp
 )
 
 

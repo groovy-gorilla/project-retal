@@ -6,7 +6,7 @@
 #include "Debug/ErrorDialog.h"
 
 
-void VulkanSSAARenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, /*IN*/RenderTarget& sceneColor, RenderTarget& sceneDepth, ApplicationDesc& desc) {
+void VulkanSSAARenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, /*IN*/RenderTarget& sceneColor, ApplicationDesc& desc) {
 
     // COLOR
     VkAttachmentDescription colorAttachment{};
@@ -78,18 +78,10 @@ void VulkanSSAARenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevi
     colorBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     bindings.push_back(colorBinding);
 
-    VkDescriptorSetLayoutBinding depthBinding{};
-    depthBinding.binding = 1;
-    depthBinding.descriptorCount = 1;
-    depthBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    depthBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    bindings.push_back(depthBinding);
-
     m_descriptor.Create(device, bindings, desc.MAX_FRAMES_IN_FLIGHT);
 
     for (uint32_t i = 0; i < desc.MAX_FRAMES_IN_FLIGHT; i++) {
         m_descriptor.UpdateTexture(i, 0, sceneColor.GetImageView(), sceneColor.GetLinearSampler());
-        m_descriptor.UpdateTexture(i, 1, sceneDepth.GetImageView(), sceneDepth.GetLinearSampler());
     }
 
     PipelineDesc pdesc;

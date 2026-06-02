@@ -15,7 +15,6 @@ public:
         VkExtent2D renderExtent,
         VkFormat colorFormat,
         RenderTarget& sceneColor,
-        RenderTarget& sceneDepth,
         ApplicationDesc& desc);
 
     void Destroy(VkDevice device);

@@ -7,9 +7,11 @@
 
 void VulkanInstance::Create() {
 
-    if (VulkanValidation::ENABLE && !VulkanValidation::CheckSupport()) {
-        throw std::runtime_error("Validation layers are not available!");
-    }
+    #ifndef NDEBUG
+        if (!VulkanValidation::CheckSupport()) {
+            throw std::runtime_error("Validation layers are not available!");
+        }
+    #endif
 
     VkApplicationInfo appInfo = {};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -17,7 +19,7 @@ void VulkanInstance::Create() {
     appInfo.applicationVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
     appInfo.pEngineName = "Indigo";
     appInfo.engineVersion = VK_MAKE_API_VERSION(0, 1, 0, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_2;
+    appInfo.apiVersion = VK_API_VERSION_1_3;
 
     VkInstanceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -29,16 +31,30 @@ void VulkanInstance::Create() {
     createInfo.enabledLayerCount = 0;
     createInfo.pNext = nullptr;
 
+    VkValidationFeatureEnableEXT enables[] = {
+        VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT,
+        //VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT,
+        //VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_RESERVE_BINDING_SLOT_EXT,
+        VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT
+    };
+
+    VkValidationFeaturesEXT validationFeatures{};
+    validationFeatures.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
+    validationFeatures.pNext = nullptr;
+    validationFeatures.enabledValidationFeatureCount = static_cast<uint32_t>(std::size(enables));
+    validationFeatures.pEnabledValidationFeatures = enables;
+
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
-    if (VulkanValidation::ENABLE) {
+    #ifndef NDEBUG
         createInfo.enabledLayerCount = static_cast<uint32_t>(VulkanValidation::Layers.size());
         createInfo.ppEnabledLayerNames = VulkanValidation::Layers.data();
         PopulateDebugMessengerCreateInfo(debugCreateInfo);
+        debugCreateInfo.pNext = &validationFeatures;
         createInfo.pNext = &debugCreateInfo;
-    } else {
+    #else
         createInfo.enabledLayerCount = 0;
         createInfo.pNext = nullptr;
-    }
+    #endif
 
     VK_CHECK(vkCreateInstance(&createInfo, nullptr, &m_instance));
 

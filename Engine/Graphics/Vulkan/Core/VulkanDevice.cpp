@@ -35,12 +35,12 @@ void VulkanDevice::Create(VkPhysicalDevice physicalDevice, uint32_t graphicsQueu
     createInfo.enabledLayerCount = 0;
 
     const char* layers[] = { "VK_LAYER_KHRONOS_validation" };
-    if (VulkanValidation::ENABLE) {
+    #ifndef NDEBUG
         createInfo.enabledLayerCount = 1;
         createInfo.ppEnabledLayerNames = layers;
-    } else {
+    #else
         createInfo.enabledLayerCount = 0;
-    }
+    #endif
 
     VK_CHECK(vkCreateDevice(physicalDevice, &createInfo, nullptr, &m_device));
 

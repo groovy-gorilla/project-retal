@@ -76,14 +76,14 @@ void VulkanSceneRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDev
     dep1.dstSubpass = 0;
     dep1.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
     dep1.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-    dep1.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dep1.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    dep1.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;;
+    dep1.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;;
 
     VkSubpassDependency dep2{};
     dep2.srcSubpass = 0;
     dep2.dstSubpass = VK_SUBPASS_EXTERNAL;
-    dep2.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dep2.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    dep2.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;;
+    dep2.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;;
     dep2.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
     dep2.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
@@ -103,7 +103,7 @@ void VulkanSceneRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDev
 
     // CREATE RENDER TARGETS
     m_color.Create(device, physicalDevice, m_renderExtent.width, m_renderExtent.height, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, samples);
-    m_depth.Create(device, physicalDevice, m_renderExtent.width, m_renderExtent.height, depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_DEPTH_BIT, samples);
+    m_depth.Create(device, physicalDevice, m_renderExtent.width, m_renderExtent.height, depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_IMAGE_ASPECT_DEPTH_BIT, samples);
     m_resolve.Create(device, physicalDevice, m_renderExtent.width, m_renderExtent.height, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_SAMPLE_COUNT_1_BIT);
 
     // FRAMEBUFFER
@@ -182,6 +182,26 @@ void VulkanSceneRenderPass::Begin(VkCommandBuffer commandBuffer) {
     beginInfo.pClearValues = clearValues;
 
     vkCmdBeginRenderPass(commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+    // ************ COLOR TRIANGLE *************************
+
+    VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = m_renderExtent.width;
+    viewport.height = m_renderExtent.height;
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+    VkExtent2D extent;
+    extent.width = m_renderExtent.width;
+    extent.height = m_renderExtent.height;
+    VkRect2D scissor{};
+    scissor.offset = {0, 0};
+    scissor.extent = extent;
+    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.Get());
+    vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 
 }
 

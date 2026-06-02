@@ -48,7 +48,7 @@ void VulkanRenderer::Initialize(Display& display, Window& window, ApplicationDes
     m_smaaRenderPass.Create(m_device.Get(), m_physicalDevice.Get(), m_renderExtent, m_hdrFormat, desc, m_commands.GetPool(), m_queues.GetGraphics());
 
     // SSAA
-    m_ssaaRenderPass.Create(m_device.Get(), m_physicalDevice.Get(), m_renderExtent, m_hdrFormat, /*IN*/m_sceneRenderPass.GetColor(), /*IN*/m_sceneRenderPass.GetDepth(), desc);
+    m_ssaaRenderPass.Create(m_device.Get(), m_physicalDevice.Get(), m_renderExtent, m_hdrFormat, /*IN*/m_sceneRenderPass.GetColor(), desc);
 
     // POST
     m_postRenderPass.Create(m_device.Get(), m_physicalDevice.Get(), m_renderExtent, m_hdrFormat, desc);
@@ -275,7 +275,7 @@ void VulkanRenderer::RecreateRenderer(Display& display, Window& window, Applicat
     m_smaaRenderPass.Create(m_device.Get(), m_physicalDevice.Get(), m_renderExtent, m_hdrFormat, desc, m_commands.GetPool(), m_device.GetGraphicsQueue());
 
     // SSAA
-    m_ssaaRenderPass.Create(m_device.Get(), m_physicalDevice.Get(), m_renderExtent, m_hdrFormat, /*IN*/m_sceneRenderPass.GetColor(), /*IN*/m_sceneRenderPass.GetDepth(), desc);
+    m_ssaaRenderPass.Create(m_device.Get(), m_physicalDevice.Get(), m_renderExtent, m_hdrFormat, /*IN*/m_sceneRenderPass.GetColor(), desc);
 
     // POST
     m_postRenderPass.Create(m_device.Get(), m_physicalDevice.Get(), m_renderExtent, m_hdrFormat, desc);

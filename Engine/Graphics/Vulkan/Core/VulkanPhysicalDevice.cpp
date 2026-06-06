@@ -11,7 +11,7 @@ void VulkanPhysicalDevice::Pick(VkInstance instance, VkSurfaceKHR surface) {
 
     // Jeśli nie ma to błąd
     if (deviceCount == 0) {
-        throw std::runtime_error("Failed to find GPUs with Vulkan support!");
+        throw std::runtime_error("This hardware configuration does not meet the minimum system requirements.");
     }
 
     // Pobiera listę kart graficznych wspierających Vulkan
@@ -89,13 +89,18 @@ void VulkanPhysicalDevice::Pick(VkInstance instance, VkSurfaceKHR surface) {
 
     // Jeśli nie ma w ogóle to znaczy, że nie ma GPU spełniającego wymagania
     if (m_physicalDevice == VK_NULL_HANDLE) {
-        throw std::runtime_error("No suitable GPU found.");
+        throw std::runtime_error("This hardware configuration does not meet the minimum system requirements.");
     }
 
     VkPhysicalDeviceProperties physicalDeviceProperties;
     vkGetPhysicalDeviceProperties(m_physicalDevice, &physicalDeviceProperties);
     std::cout << "[Vulkan] Physical device selected: " << physicalDeviceProperties.deviceName << std::endl;
 
+    // Sprawdza czy karta obsłuży tekstury do 16384
+    std::cout << "Max 2D texture size: " << physicalDeviceProperties.limits.maxImageDimension2D << std::endl;
+    if (physicalDeviceProperties.limits.maxImageDimension2D < 16384) {
+        throw std::runtime_error("This hardware configuration does not meet the minimum system requirements.");
+    }
 }
 
 

@@ -25,13 +25,13 @@ private:
     Camera m_camera;
 
     SpriteRenderer m_spriteRenderer;
-    TextRenderer m_textRenderer;
+    TextRenderer m_msdfTextRenderer;
 
     Sprite m_sprite1;
     Sprite m_sprite2;
 
-    Font m_font;
-    Text m_text;
+    Font m_msdfFont;
+    Text m_msdfText;
 
 };
 

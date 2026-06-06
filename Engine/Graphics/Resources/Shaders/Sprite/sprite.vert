@@ -33,5 +33,5 @@ void main() {
     gl_Position = push.projection * vec4(worldPos, 0.0, 1.0);
 
 
-    fragUV = vec2(uvs[gl_VertexIndex].x, 1.0 - uvs[gl_VertexIndex].y);
+    fragUV = uvs[gl_VertexIndex];
 }

@@ -95,6 +95,10 @@ add_executable(IndigoEngine main.cpp
         Engine/Graphics/Vulkan/PresentPass/VulkanPresentRenderPass.h
         Engine/Graphics/Font/Font.h
         Engine/Graphics/Font/Font.cpp
+        Engine/Graphics/Text/Text.h
+        Engine/Graphics/Text/Text.cpp
+        Engine/Graphics/Text/TextRenderer.h
+        Engine/Graphics/Text/TextRenderer.cpp
 )
 
 

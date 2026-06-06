@@ -37,8 +37,21 @@ void Pipeline::Create(VkDevice device, const PipelineDesc& desc) {
     // VERTEX INPUT
     VkPipelineVertexInputStateCreateInfo vertexInput{};
     vertexInput.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInput.vertexBindingDescriptionCount = 0;
-    vertexInput.vertexAttributeDescriptionCount = 0;
+    if (desc.bindingDescription) {
+        vertexInput.vertexBindingDescriptionCount = 1;
+        vertexInput.pVertexBindingDescriptions = desc.bindingDescription;
+    } else {
+        vertexInput.vertexBindingDescriptionCount = 0;
+        vertexInput.pVertexBindingDescriptions = nullptr;
+    }
+
+    if (desc.attributeDescriptions) {
+        vertexInput.vertexAttributeDescriptionCount = desc.attributeCount;
+        vertexInput.pVertexAttributeDescriptions = desc.attributeDescriptions;
+    } else {
+        vertexInput.vertexAttributeDescriptionCount = 0;
+        vertexInput.pVertexAttributeDescriptions = nullptr;
+    }
 
     // INPUT ASSEMBLY
     VkPipelineInputAssemblyStateCreateInfo inputAssembly{};

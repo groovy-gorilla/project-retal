@@ -6,18 +6,31 @@ void Graphics::Initialize(Display& display, Window& window, ApplicationDesc& des
     m_renderer.Initialize(display, window, desc);
 
     m_spriteRenderer.Create(m_renderer.GetContext().device, m_renderer.GetOverlayRenderPass());
+    m_textRenderer.Create(m_renderer.GetContext().device, m_renderer.GetOverlayRenderPass());
 
     m_sprite1.Create(m_renderer.GetContext(), "gruvbox.ktx", desc.MAX_FRAMES_IN_FLIGHT);
     m_sprite2.Create(m_renderer.GetContext(), "smile.ktx", desc.MAX_FRAMES_IN_FLIGHT);
+
+    m_font.Initialize(m_renderer.GetContext(), "Fonts/font.ktx", "Fonts/font.fda", desc);
+    m_text.Initialize(m_renderer.GetContext(), m_font);
+    m_text.SetScale(256.0f);
+    m_text.SetPosition(10, 200);
+    m_text.SetText("Hello World!");
+
 
 }
 
 void Graphics::Shutdown() {
 
     m_spriteRenderer.Shutdown();
+    m_textRenderer.Shutdown();
 
     m_sprite1.Shutdown();
     m_sprite2.Shutdown();
+
+    m_text.Destroy();
+
+    m_font.Destroy();
 
     m_renderer.Shutdown();
 
@@ -40,13 +53,15 @@ void Graphics::Render(VkDevice device, ApplicationDesc& desc, float deltaTime) {
     auto extent = m_renderer.GetRenderExtent();
     m_camera.SetOrthographic(0.0, extent.width, extent.height, 0.0, -1.0, 1.0);
 
-    m_sprite1.SetPosition(0,0);
+    m_sprite1.SetPosition(0,100);
     m_sprite1.SetSize(extent.width / 2, extent.height);
-    m_spriteRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_sprite1, m_camera);
+    //m_spriteRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_sprite1, m_camera);
 
     m_sprite2.SetPosition(extent.width / 2,0);
     m_sprite2.SetSize(extent.width / 2, extent.height);
-    m_spriteRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_sprite2, m_camera);
+    //m_spriteRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_sprite2, m_camera);
+
+    m_textRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_text, m_camera);
 
     m_renderer.EndOverlay();
     m_renderer.RenderPresent(desc);

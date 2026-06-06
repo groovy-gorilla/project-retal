@@ -45,7 +45,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebug::DebugCallback(
 
     if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
         #ifndef NDEBUG
-            raise(SIGTRAP);
+            //raise(SIGTRAP);
         #endif
         std::string msg = "Validation Layer\n\n"
         "ID:" + std::string(pCallbackData->pMessageIdName) + "\n\n"

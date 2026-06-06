@@ -1,26 +1,37 @@
 #include "Font.h"
 
-void Font::Initialize(const VulkanContext& context, const std::filesystem::path& textureFontPath, const std::filesystem::path& dataFontPath) {
+void Font::Initialize(const VulkanContext& context, const std::filesystem::path& textureFontPath, const std::filesystem::path& dataFontPath, ApplicationDesc& desc) {
 
-    TextureCreateInfo textureInfo {};
-    textureInfo.magFilter = VK_FILTER_LINEAR;
-    textureInfo.minFilter = VK_FILTER_LINEAR;
-    textureInfo.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-    textureInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    LoadAtlas(context, textureFontPath);
 
-    m_texture.Create(context, textureFontPath, textureInfo);
+    VkDescriptorSetLayoutBinding binding{};
+    binding.binding = 0;
+    binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    binding.descriptorCount = 1;
+    binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-    LoadFontData(dataFontPath);
+    std::vector<VkDescriptorSetLayoutBinding> bindings = {
+        binding
+    };
+
+    m_descriptor.Create(context.device, bindings, desc.MAX_FRAMES_IN_FLIGHT);
+
+    for (uint32_t i = 0; i < desc.MAX_FRAMES_IN_FLIGHT; i++) {
+        m_descriptor.UpdateTexture(i, 0, m_texture.GetImageView(), m_texture.GetSampler());
+    }
+
+    LoadFDA(dataFontPath);
 
 }
 
 void Font::Destroy() {
 
     m_texture.Shutdown();
+    m_descriptor.Destroy();
 
 }
 
-void Font::LoadFontData(const std::filesystem::path& dataFontPath) {
+void Font::LoadFDA(const std::filesystem::path& dataFontPath) {
 
     // Open the font data file.
     std::ifstream file(dataFontPath, std::ios::binary);
@@ -29,21 +40,30 @@ void Font::LoadFontData(const std::filesystem::path& dataFontPath) {
         throw std::runtime_error("Failed to load font data file: " + dataFontPath.string());
     }
 
-    // First read atlas width.
-    file.read(
-        reinterpret_cast<char*>(&m_fontHeight),
-        sizeof(m_fontHeight));
+    // Wczytuje nagłówek
+    file.read(reinterpret_cast<char*>(&m_header), sizeof(FontHeader));
+    if (!file.good()) {
+        throw std::runtime_error("Failed to read font file (" + dataFontPath.filename().string() + ")");
+    }
+    if (m_header.version != 1) {
+        throw std::runtime_error("Unsupported font version (" + dataFontPath.filename().string() + ")");
+    }
 
-    // Second read font height.
-    file.read(
-        reinterpret_cast<char*>(&m_atlasWidth),
-        sizeof(m_atlasWidth));
+    // Czyta glify
+    m_glyphs.resize(m_header.glyphCount);
+    file.read(reinterpret_cast<char*>(m_glyphs.data()), sizeof(Glyph) * m_glyphs.size());
 
-    // Read in the 95 used ascii characters for text.
-    file.read(
-        reinterpret_cast<char*>(m_fontData.data()),
-        sizeof(FontType) * m_fontData.size());
 
-    file.close();
+}
+
+void Font::LoadAtlas(const VulkanContext& context, const std::filesystem::path& textureFontPath) {
+
+    TextureCreateInfo textureInfo {};
+    textureInfo.magFilter = VK_FILTER_LINEAR;
+    textureInfo.minFilter = VK_FILTER_LINEAR;
+    textureInfo.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    textureInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+
+    m_texture.Create(context, textureFontPath, textureInfo);
 
 }

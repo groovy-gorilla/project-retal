@@ -16,6 +16,9 @@ struct PipelineDesc {
     bool blending = false;
     VkSpecializationInfo* vertSpec = nullptr;
     VkSpecializationInfo* fragSpec = nullptr;
+    VkVertexInputBindingDescription* bindingDescription = nullptr;
+    VkVertexInputAttributeDescription* attributeDescriptions = nullptr;
+    uint32_t attributeCount = 0;
 };
 
 class Pipeline {

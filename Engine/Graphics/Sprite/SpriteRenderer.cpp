@@ -24,7 +24,7 @@ void SpriteRenderer::Create(VkDevice device, VkRenderPass renderPass) {
     VkPushConstantRange pushConstants{};
     pushConstants.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     pushConstants.offset = 0;
-    pushConstants.size = sizeof(UIPushConstants);
+    pushConstants.size = sizeof(SpritePushConstants);
 
     PipelineDesc pdesc;
     pdesc.renderPass = m_renderPass;
@@ -35,6 +35,8 @@ void SpriteRenderer::Create(VkDevice device, VkRenderPass renderPass) {
     pdesc.depthTest = false;
     pdesc.blending = true;
     pdesc.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+    pdesc.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    pdesc.cullMode = VK_CULL_MODE_NONE;
 
     m_pipeline.Create(device, pdesc);
 
@@ -57,13 +59,13 @@ void SpriteRenderer::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer, 
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.Get());
 
-    UIPushConstants push{};
+    SpritePushConstants push{};
 
     push.projection = ToFloat(camera.GetProjection());
     push.position = sprite.GetPosition();
     push.size = sprite.GetSize();
 
-    vkCmdPushConstants(commandBuffer, m_pipeline.GetLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(UIPushConstants), &push);
+    vkCmdPushConstants(commandBuffer, m_pipeline.GetLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &push);
 
     VkDescriptorSet set = sprite.GetDescriptorSet(frameIndex);
 

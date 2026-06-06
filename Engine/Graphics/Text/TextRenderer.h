@@ -1,19 +1,17 @@
 #pragma once
-#include "Core/ApplicationDesc.h"
+
 #include "Graphics/Camera/Camera.h"
 #include "Graphics/Vulkan/Wrappers/Pipeline.h"
 
-using namespace lina;
+class Text;
 
-class Sprite;
-
-struct SpritePushConstants {
+struct TextPushConstants {
     fmat4 projection;
-    fvec2 position;
-    fvec2 size;
+    fvec4 position;
+    fvec4 color;
 };
 
-class SpriteRenderer {
+class TextRenderer {
 public:
     void Create(
         VkDevice device,
@@ -24,7 +22,7 @@ public:
     void Render(
         uint32_t frameIndex,
         VkCommandBuffer commandBuffer,
-        const Sprite& sprite,
+        const Text& text,
         const Camera& camera);
 
 private:

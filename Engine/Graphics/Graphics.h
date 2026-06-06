@@ -1,7 +1,10 @@
 #pragma once
 
+#include "Font/Font.h"
 #include "Sprite/Sprite.h"
 #include "Sprite/SpriteRenderer.h"
+#include "Text/Text.h"
+#include "Text/TextRenderer.h"
 #include "Vulkan/VulkanRenderer.h"
 
 class Display;
@@ -22,10 +25,13 @@ private:
     Camera m_camera;
 
     SpriteRenderer m_spriteRenderer;
+    TextRenderer m_textRenderer;
 
     Sprite m_sprite1;
     Sprite m_sprite2;
 
+    Font m_font;
+    Text m_text;
 
 };
 

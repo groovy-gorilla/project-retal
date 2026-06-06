@@ -21,10 +21,10 @@ struct ApplicationDesc {
     const char* TITLE                   = "IndigoEngine";
     std::string VERSION                 = "0.1.23";
 
-    uint32_t WIDTH                      = 800;
-    uint32_t HEIGHT                     = 600;
+    uint32_t WIDTH                      = 3440;
+    uint32_t HEIGHT                     = 1440;
 
-    bool FULLSCREEN                     = false;
+    bool FULLSCREEN                     = true;
     bool ASPECT_RATIO                   = true;
     bool VSYNC                          = true;
     TextureFilter FILTER                = TextureFilter::Nearest;

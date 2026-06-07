@@ -16,7 +16,7 @@ public:
 
     void SetText(const std::string& text);
     void SetPosition(uint32_t width, uint32_t height);
-    void SetScale(float scale);
+    void SetSize(float size);
     void SetColor(const lina::fvec4& color);
 
     void SetCharacterSpacing(float spacing);
@@ -42,7 +42,6 @@ public:
     [[nodiscard]] uint32_t GetIndexCount() const { return m_indexCount; }
 
 private:
-
     VulkanContext m_context;
     Font* m_font = nullptr;
     std::string m_text;

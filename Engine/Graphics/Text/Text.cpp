@@ -32,9 +32,9 @@ void Text::SetPosition(uint32_t width, uint32_t height) {
 
 }
 
-void Text::SetScale(float scale) {
+void Text::SetSize(float size) {
 
-    m_scale = scale;
+    m_scale = size / m_font->GetFontSize();
 
 }
 
@@ -64,37 +64,38 @@ void Text::BuildGeometry() {
     float penX = 0.0f;
     float penY = 0.0f;
 
-    for(char character : m_text) {
+    for (char character : m_text) {
 
         if(character == '\n') {
             penX = 0.0f;
-            penY -= (m_font->GetLineHeight() + m_lineSpacing) * m_scale;
+            penY -= (m_font->GetFontSize() + m_lineSpacing) * m_scale;
             continue;
         }
 
-        const Glyph& glyph = m_font->GetCharacter(character);
+        const Glyph2& glyph = m_font->GetCharacter(character);
 
-        if (character == ' ') {
+        if (glyph.width == 0) {
             penX += (glyph.advance + m_characterSpacing) * m_scale;
             continue;
         }
 
-        float left = penX + glyph.planeLeft * m_scale;
-        float right = penX + glyph.planeRight * m_scale;
-        float top = penY - glyph.planeBottom * m_scale;   // Odwracamy top i bottom
-        float bottom = penY - glyph.planeTop * m_scale;
+        float left = penX;
+        float right = penX + glyph.width * m_scale;
+        float bottom = penY;
+        float top = penY + static_cast<float>(m_font->GetAtlasHeight()) * m_scale;
 
-        float u0 = glyph.atlasLeft / static_cast<float>(m_font->GetAtlasWidth());
-        float v0 = 1.0f - glyph.atlasBottom / static_cast<float>(m_font->GetAtlasHeight());
-        float u1 = glyph.atlasRight / static_cast<float>(m_font->GetAtlasWidth());
-        float v1 = 1.0f - glyph.atlasTop / static_cast<float>(m_font->GetAtlasHeight());
+        float u0 = glyph.x / static_cast<float>(m_font->GetAtlasWidth());
+        float u1 = (glyph.x + glyph.width) / static_cast<float>(m_font->GetAtlasWidth());
+
+        float v0 = 0.0f;
+        float v1 = 1.0f;
 
         uint32_t base = static_cast<uint32_t>(m_vertices.size());
 
-        m_vertices.push_back({{left, bottom, 0.0f}, {u0, v1}});
-        m_vertices.push_back({{right, bottom, 0.0f}, {u1, v1}});
-        m_vertices.push_back({{right, top, 0.0f}, {u1, v0}});
-        m_vertices.push_back({{left, top, 0.0f}, {u0, v0}});
+        m_vertices.push_back({{left, bottom, 0.0f}, {u0, v0}});
+        m_vertices.push_back({{right, bottom, 0.0f}, {u1, v0}});
+        m_vertices.push_back({{right, top, 0.0f}, {u1, v1}});
+        m_vertices.push_back({{left, top, 0.0f}, {u0, v1}});
 
         m_indices.push_back(base + 0);
         m_indices.push_back(base + 1);

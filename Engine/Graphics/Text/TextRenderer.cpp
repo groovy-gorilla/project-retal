@@ -37,7 +37,7 @@ void TextRenderer::Create(VkDevice device, VkRenderPass renderPass) {
     VK_CHECK(vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &m_descriptorLayout));
 
     VkPushConstantRange pushConstants{};
-    pushConstants.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;;
+    pushConstants.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
     pushConstants.offset = 0;
     pushConstants.size = sizeof(TextPushConstants);
 

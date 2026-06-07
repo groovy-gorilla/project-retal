@@ -1,8 +1,8 @@
 #include "Font.h"
 
-void Font::Initialize(const VulkanContext& context, const std::filesystem::path& textureFontPath, const std::filesystem::path& dataFontPath, ApplicationDesc& desc) {
+void Font::Initialize(const VulkanContext& context, const std::filesystem::path& textureFontPath, const std::filesystem::path& dataFontPath, TextureFilter filter, ApplicationDesc& desc) {
 
-    LoadAtlas(context, textureFontPath);
+    LoadAtlas(context, textureFontPath, filter);
 
     VkDescriptorSetLayoutBinding binding{};
     binding.binding = 0;
@@ -41,7 +41,7 @@ void Font::LoadFDA(const std::filesystem::path& dataFontPath) {
     }
 
     // Wczytuje nagłówek
-    file.read(reinterpret_cast<char*>(&m_header), sizeof(FontHeader));
+    file.read(reinterpret_cast<char*>(&m_header), sizeof(FontHeader2));
     if (!file.good()) {
         throw std::runtime_error("Failed to read font file (" + dataFontPath.filename().string() + ")");
     }
@@ -51,16 +51,21 @@ void Font::LoadFDA(const std::filesystem::path& dataFontPath) {
 
     // Czyta glify
     m_glyphs.resize(m_header.glyphCount);
-    file.read(reinterpret_cast<char*>(m_glyphs.data()), sizeof(Glyph) * m_glyphs.size());
-
+    file.read(reinterpret_cast<char*>(m_glyphs.data()), sizeof(Glyph2) * m_glyphs.size());
 
 }
 
-void Font::LoadAtlas(const VulkanContext& context, const std::filesystem::path& textureFontPath) {
+
+void Font::LoadAtlas(const VulkanContext& context, const std::filesystem::path& textureFontPath, TextureFilter filter) {
 
     TextureCreateInfo textureInfo {};
-    textureInfo.magFilter = VK_FILTER_LINEAR;
-    textureInfo.minFilter = VK_FILTER_LINEAR;
+    if (filter == TextureFilter::Linear) {
+        textureInfo.magFilter = VK_FILTER_LINEAR;
+        textureInfo.minFilter = VK_FILTER_LINEAR;
+    } else {
+        textureInfo.magFilter = VK_FILTER_NEAREST;
+        textureInfo.minFilter = VK_FILTER_NEAREST;
+    }
     textureInfo.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     textureInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 

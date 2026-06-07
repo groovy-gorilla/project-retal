@@ -1,29 +1,22 @@
 #pragma once
-#include <string>
+#include <cstdint>
 
 #include "Graphics/Texture/Texture.h"
+#include "Graphics/Vulkan/VulkanRenderer.h"
 
-struct FontHeader {
+
+struct FontHeader2 {
     uint32_t version;
     uint32_t atlasWidth;
     uint32_t atlasHeight;
-    float lineHeight;
-    float ascender;
-    float descender;
+    uint32_t fontSize;
     uint32_t glyphCount;
 };
 
-struct Glyph {
-    uint32_t unicode;
-    float advance;
-    float atlasLeft;
-    float atlasBottom;
-    float atlasRight;
-    float atlasTop;
-    float planeLeft;
-    float planeBottom;
-    float planeRight;
-    float planeTop;
+struct Glyph2 {
+    uint32_t x;
+    uint32_t width;
+    uint32_t advance;
 };
 
 class Font {
@@ -32,27 +25,26 @@ public:
         const VulkanContext& context,
         const std::filesystem::path& textureFontPath,
         const std::filesystem::path& dataFontPath,
+        TextureFilter filter,
         ApplicationDesc& desc);
 
     void Destroy();
 
     [[nodiscard]] const Texture& GetTexture() const { return m_texture; }
-    [[nodiscard]] const Glyph& GetCharacter(uint32_t unicode) const { return m_glyphs[unicode - 32]; }
-    [[nodiscard]] float GetLineHeight() const { return m_header.lineHeight; }
+    [[nodiscard]] const Glyph2& GetCharacter(uint32_t unicode) const { return m_glyphs[unicode - 32]; }
+    [[nodiscard]] float GetFontSize() const { return m_header.fontSize; }
     [[nodiscard]] uint32_t GetAtlasWidth() const { return m_header.atlasWidth; }
     [[nodiscard]] uint32_t GetAtlasHeight() const { return m_header.atlasHeight; }
     [[nodiscard]] VkDescriptorSet GetDescriptorSet(uint32_t frameIndex) { return m_descriptor.GetSet(frameIndex); }
     [[nodiscard]] const VkDescriptorSet GetDescriptorSet(uint32_t frameIndex) const { return m_descriptor.GetSet(frameIndex); }
-    [[nodiscard]] float GetAscender() const { return m_header.ascender; }
-    [[nodiscard]] float GetDescender() const { return m_header.descender; }
 
 private:
-    std::vector<Glyph> m_glyphs = {};
-    FontHeader m_header = {};
+    std::vector<Glyph2> m_glyphs = {};
+    FontHeader2 m_header = {};
     Texture m_texture;
     Descriptor m_descriptor;
 
     void LoadFDA(const std::filesystem::path& dataFontPath);
-    void LoadAtlas(const VulkanContext& context, const std::filesystem::path& textureFontPath);
+    void LoadAtlas(const VulkanContext& context, const std::filesystem::path& textureFontPath, TextureFilter filter);
 
 };

@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "VulkanPresentRenderPass.h"
 #include "Debug/ErrorDialog.h"
-#include "Core/ApplicationDesc.h"
+#include "Core/Settings.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 
-void VulkanPresentRenderPass::Create(VkDevice device, VkFormat swapchainFormat, ApplicationDesc& desc) {
+void VulkanPresentRenderPass::Create(VkDevice device, VkFormat swapchainFormat, Settings& settings) {
 
     m_device = device;
 
@@ -59,7 +59,7 @@ void VulkanPresentRenderPass::Create(VkDevice device, VkFormat swapchainFormat, 
     colorBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     bindings.push_back(colorBinding);
 
-    m_descriptor.Create(device, bindings, desc.MAX_FRAMES_IN_FLIGHT);
+    m_descriptor.Create(device, bindings, settings.MAX_FRAMES_IN_FLIGHT);
 
     PipelineDesc pdesc;
     pdesc.renderPass = m_renderPass;
@@ -76,10 +76,10 @@ void VulkanPresentRenderPass::Create(VkDevice device, VkFormat swapchainFormat, 
 
 }
 
-void VulkanPresentRenderPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VkFramebuffer framebuffer, VkExtent2D extent, ApplicationDesc& desc) {
+void VulkanPresentRenderPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VkFramebuffer framebuffer, VkExtent2D extent, Settings& settings) {
 
     // UPDATE DESCRIPTOR
-    VkSampler sampler = desc.FILTER == TextureFilter::Nearest ? inputColor.GetNearestSampler() : inputColor.GetLinearSampler();
+    VkSampler sampler = settings.FILTER == TextureFilter::Nearest ? inputColor.GetNearestSampler() : inputColor.GetLinearSampler();
     m_descriptor.UpdateTexture(frameIndex, 0, inputColor.GetImageView(), sampler);
 
     // CLEAR
@@ -103,9 +103,9 @@ void VulkanPresentRenderPass::Render(uint32_t frameIndex, VkCommandBuffer comman
 
     VkRect2D scissor{};
 
-    if (desc.ASPECT_RATIO) {
+    if (settings.ASPECT_RATIO) {
 
-        float targetAspect = static_cast<float>(desc.WIDTH) / static_cast<float>(desc.HEIGHT);
+        float targetAspect = static_cast<float>(settings.WIDTH) / static_cast<float>(settings.HEIGHT);
         float windowAspect = static_cast<float>(extent.width) / static_cast<float>(extent.height);
         float viewportWidth = static_cast<float>(extent.width);
         float viewportHeight = static_cast<float>(extent.height);

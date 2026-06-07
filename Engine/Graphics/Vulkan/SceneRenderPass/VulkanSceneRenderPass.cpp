@@ -2,7 +2,7 @@
 #include "VulkanSceneRenderPass.h"
 #include "Debug/ErrorDialog.h"
 
-void VulkanSceneRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, VkFormat depthFormat, AntiAliasing aaMode, VkSampleCountFlagBits samples, ApplicationDesc& desc) {
+void VulkanSceneRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, VkFormat depthFormat, AntiAliasing aaMode, VkSampleCountFlagBits samples, Settings& settings) {
 
   m_renderExtent = renderExtent;
 

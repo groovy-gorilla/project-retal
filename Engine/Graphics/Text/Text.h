@@ -11,13 +11,15 @@ struct TextVertex {
 
 class Text {
 public:
-    void Initialize(const VulkanContext& context, Font& font);
+    void Initialize(const VulkanContext& context, Font& font, uint32_t maxCharacters);
     void Destroy();
 
     void SetText(const std::string& text);
     void SetPosition(uint32_t width, uint32_t height);
     void SetSize(float size);
     void SetColor(const lina::fvec4& color);
+
+    void Update();
 
     void SetCharacterSpacing(float spacing);
     void SetLineSpacing(float spacing);
@@ -58,6 +60,10 @@ private:
     Buffer m_indexBuffer;
 
     uint32_t m_indexCount = 0;
+
+    bool m_dirty = false;
+
+    uint32_t m_maxCharacters = 1024;
 
     void BuildGeometry();
     void UpdateBuffers();

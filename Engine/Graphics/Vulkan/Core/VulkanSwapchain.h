@@ -1,6 +1,6 @@
 #pragma once
 
-struct ApplicationDesc;
+struct Settings;
 
 class VulkanSwapchain {
 public:

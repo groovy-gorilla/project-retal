@@ -1,22 +1,21 @@
 #include "pch.h"
 #include "Graphics.h"
 
-void Graphics::Initialize(Display& display, Window& window, ApplicationDesc& desc) {
+void Graphics::Initialize(Display& display, Window& window, Settings& settings) {
 
-    m_renderer.Initialize(display, window, desc);
+    m_renderer.Initialize(display, window, settings);
 
     m_spriteRenderer.Create(m_renderer.GetContext().device, m_renderer.GetOverlayRenderPass());
     m_textRenderer.Create(m_renderer.GetContext().device, m_renderer.GetOverlayRenderPass());
 
-    m_sprite1.Create(m_renderer.GetContext(), "gruvbox.ktx", desc.MAX_FRAMES_IN_FLIGHT);
-    m_sprite2.Create(m_renderer.GetContext(), "smile.ktx", desc.MAX_FRAMES_IN_FLIGHT);
+    m_sprite1.Create(m_renderer.GetContext(), "gruvbox.ktx", settings.MAX_FRAMES_IN_FLIGHT);
+    m_sprite2.Create(m_renderer.GetContext(), "smile.ktx", settings.MAX_FRAMES_IN_FLIGHT);
 
-    m_Font.Initialize(m_renderer.GetContext(), "Fonts/JetBrains.ktx", "Fonts/JetBrains.fda", TextureFilter::Linear, desc);
-    m_Text.Initialize(m_renderer.GetContext(), m_Font);
+    m_Font.Initialize(m_renderer.GetContext(), "Fonts/JetBrains.ktx", "Fonts/JetBrains.fda", TextureFilter::Linear, settings);
+    m_Text.Initialize(m_renderer.GetContext(), m_Font, 11);
     m_Text.SetSize(15.0f);
     m_Text.SetPosition(10, 10);
     m_Text.SetColor(lina::fvec4(1,1,0,1));
-    m_Text.SetText("FPS: 120");
 
 }
 
@@ -36,9 +35,10 @@ void Graphics::Shutdown() {
 
 }
 
-void Graphics::Render(VkDevice device, ApplicationDesc& desc, float deltaTime) {
+void Graphics::Render(VkDevice device, Settings& settings, float deltaTime) {
 
-    m_renderer.Update(deltaTime, desc.HDR);
+    m_renderer.Update(deltaTime, settings.HDR);
+    m_fps.Update(deltaTime);
 
     m_renderer.BeginFrame();
     m_renderer.BeginScene();
@@ -47,7 +47,7 @@ void Graphics::Render(VkDevice device, ApplicationDesc& desc, float deltaTime) {
     // ...
 
     m_renderer.EndScene();
-    m_renderer.BeginOverlay(desc);
+    m_renderer.BeginOverlay(settings);
 
     // TUTAJ OVERLAY
     auto extent = m_renderer.GetRenderExtent();
@@ -61,11 +61,12 @@ void Graphics::Render(VkDevice device, ApplicationDesc& desc, float deltaTime) {
     m_sprite2.SetSize(extent.width / 2, extent.height);
     //m_spriteRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_sprite2, m_camera);
 
+    m_Text.SetText("FPS: " + std::to_string(m_fps.GetFPS()));
     m_textRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_Text, m_camera);
 
     m_renderer.EndOverlay();
-    m_renderer.RenderPresent(desc);
-    m_renderer.EndFrame(desc);
+    m_renderer.RenderPresent(settings);
+    m_renderer.EndFrame(settings);
 
 }
 

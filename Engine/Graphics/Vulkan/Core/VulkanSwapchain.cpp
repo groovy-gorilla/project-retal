@@ -2,7 +2,7 @@
 #include "VulkanSwapchain.h"
 #include "VulkanPhysicalDevice.h"
 #include "Debug/ErrorDialog.h"
-#include "Core/ApplicationDesc.h"
+#include "Core/Settings.h"
 
 void VulkanSwapchain::Create(VkPhysicalDevice physicalDevice, VkDevice device, VkSurfaceKHR surface, VkExtent2D extent, uint32_t graphicsQueueFamily, uint32_t presentQueueFamily, bool vsync) {
 

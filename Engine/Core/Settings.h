@@ -16,15 +16,15 @@ enum class TextureFilter {
     Linear
 };
 
-struct ApplicationDesc {
+struct Settings {
 
     const char* TITLE                   = "IndigoEngine";
     std::string VERSION                 = "0.1.23";
 
-    uint32_t WIDTH                      = 3440;
-    uint32_t HEIGHT                     = 1440;
+    uint32_t WIDTH                      = 800;
+    uint32_t HEIGHT                     = 600;
 
-    bool FULLSCREEN                     = true;
+    bool FULLSCREEN                     = false;
     bool ASPECT_RATIO                   = true;
     bool VSYNC                          = true;
     TextureFilter FILTER                = TextureFilter::Nearest;

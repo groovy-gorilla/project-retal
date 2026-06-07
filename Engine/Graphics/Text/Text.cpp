@@ -1,9 +1,40 @@
 #include "Text.h"
 
-void Text::Initialize(const VulkanContext& context, Font& font) {
+#include <cassert>
+
+void Text::Initialize(const VulkanContext& context, Font& font, uint32_t maxCharacters) {
 
     m_font = &font;
     m_context = context;
+    m_maxCharacters = maxCharacters;
+
+    VkDeviceSize vertexSize =
+        sizeof(TextVertex) *
+        4 *
+        m_maxCharacters;
+
+    VkDeviceSize indexSize =
+        sizeof(uint32_t) *
+        6 *
+        m_maxCharacters;
+
+    m_vertexBuffer.Create(
+        m_context.device,
+        m_context.physicalDevice,
+        vertexSize,
+        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+    );
+
+    m_indexBuffer.Create(
+        m_context.device,
+        m_context.physicalDevice,
+        indexSize,
+        VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+    );
 
 }
 
@@ -16,12 +47,17 @@ void Text::Destroy() {
 
 void Text::SetText(const std::string& text) {
 
+    if (m_text == text) return;
+
     m_text = text;
 
     BuildGeometry();
-    UpdateBuffers();
+
+    m_dirty = true;
 
     m_indexCount = static_cast<uint32_t>(m_indices.size());
+
+    Update();
 
 }
 
@@ -41,6 +77,16 @@ void Text::SetSize(float size) {
 void Text::SetColor(const lina::fvec4& color) {
 
     m_color = color;
+
+}
+
+void Text::Update() {
+
+    if (!m_dirty) return;
+
+    UpdateBuffers();
+
+    m_dirty = false;
 
 }
 
@@ -113,16 +159,13 @@ void Text::BuildGeometry() {
 
 void Text::UpdateBuffers() {
 
-    m_vertexBuffer.Destroy();
-    m_indexBuffer.Destroy();
-
     if (m_vertices.empty()) return;
 
     VkDeviceSize vertexSize = sizeof(TextVertex) * m_vertices.size();
     VkDeviceSize indexSize = sizeof(uint32_t) * m_indices.size();
 
-    m_vertexBuffer.Create(m_context.device, m_context.physicalDevice, vertexSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    m_indexBuffer.Create(m_context.device, m_context.physicalDevice, indexSize, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    assert(m_vertices.size() <= m_maxCharacters * 4);
+    assert(m_indices.size() <= m_maxCharacters * 6);
 
     void* vertexData = m_vertexBuffer.Map();
     memcpy(vertexData, m_vertices.data(), vertexSize);

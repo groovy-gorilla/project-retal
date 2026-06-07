@@ -4,7 +4,7 @@
 #include "Graphics/Vulkan/Wrappers/Pipeline.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 
-struct ApplicationDesc;
+struct Settings;
 
 struct PostPushConstants {
     int hdrEnable;
@@ -19,7 +19,7 @@ public:
         VkPhysicalDevice physicalDevice,
         VkExtent2D renderExtent,
         VkFormat colorFormat,
-        ApplicationDesc& desc);
+        Settings& settings);
 
     void Destroy(VkDevice device);
 
@@ -28,7 +28,7 @@ public:
         VkCommandBuffer commandBuffer,
         RenderTarget& inputColor,
         VkExtent2D extent,
-        ApplicationDesc& desc,
+        Settings& settings,
         float exposure);
 
     [[nodiscard]] VkRenderPass Get() const { return m_renderPass; }

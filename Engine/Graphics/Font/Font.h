@@ -26,7 +26,7 @@ public:
         const std::filesystem::path& textureFontPath,
         const std::filesystem::path& dataFontPath,
         TextureFilter filter,
-        ApplicationDesc& desc);
+        Settings& settings);
 
     void Destroy();
 

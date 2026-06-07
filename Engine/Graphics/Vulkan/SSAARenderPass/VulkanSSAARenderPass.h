@@ -4,7 +4,7 @@
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 #include "Graphics/Vulkan/Wrappers/Descriptor.h"
 
-struct ApplicationDesc;
+struct Settings;
 
 class VulkanSSAARenderPass {
 public:
@@ -15,7 +15,7 @@ public:
         VkExtent2D renderExtent,
         VkFormat colorFormat,
         RenderTarget& sceneColor,
-        ApplicationDesc& desc);
+        Settings& settings);
 
     void Destroy(VkDevice device);
 

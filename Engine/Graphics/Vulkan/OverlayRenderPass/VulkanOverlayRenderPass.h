@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/ApplicationDesc.h"
+#include "Core/Settings.h"
 #include "Graphics/Vulkan/Wrappers/Descriptor.h"
 #include "Graphics/Vulkan/Wrappers/Pipeline.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
@@ -12,7 +12,7 @@ public:
         VkPhysicalDevice physicalDevice,
         VkExtent2D renderExtent,
         VkFormat colorFormat,
-        ApplicationDesc& desc);
+        Settings& settings);
 
     void Destroy(VkDevice device);
 
@@ -21,7 +21,7 @@ public:
         VkCommandBuffer commandBuffer,
         RenderTarget& inputColor,
         VkExtent2D extent,
-        ApplicationDesc& desc);
+        Settings& settings);
 
     void End(VkCommandBuffer commandBuffer);
 

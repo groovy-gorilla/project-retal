@@ -2,11 +2,11 @@
 #include "VulkanSSAARenderPass.h"
 #include "Graphics/Vulkan/Utils/VulkanUtils.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
-#include "Core/ApplicationDesc.h"
+#include "Core/Settings.h"
 #include "Debug/ErrorDialog.h"
 
 
-void VulkanSSAARenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, /*IN*/RenderTarget& sceneColor, ApplicationDesc& desc) {
+void VulkanSSAARenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, /*IN*/RenderTarget& sceneColor, Settings& settings) {
 
     // COLOR
     VkAttachmentDescription colorAttachment{};
@@ -78,9 +78,9 @@ void VulkanSSAARenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevi
     colorBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     bindings.push_back(colorBinding);
 
-    m_descriptor.Create(device, bindings, desc.MAX_FRAMES_IN_FLIGHT);
+    m_descriptor.Create(device, bindings, settings.MAX_FRAMES_IN_FLIGHT);
 
-    for (uint32_t i = 0; i < desc.MAX_FRAMES_IN_FLIGHT; i++) {
+    for (uint32_t i = 0; i < settings.MAX_FRAMES_IN_FLIGHT; i++) {
         m_descriptor.UpdateTexture(i, 0, sceneColor.GetImageView(), sceneColor.GetLinearSampler());
     }
 

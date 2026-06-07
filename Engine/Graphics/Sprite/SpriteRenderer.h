@@ -1,5 +1,5 @@
 #pragma once
-#include "Core/ApplicationDesc.h"
+#include "Core/Settings.h"
 #include "Graphics/Camera/Camera.h"
 #include "Graphics/Vulkan/Wrappers/Pipeline.h"
 

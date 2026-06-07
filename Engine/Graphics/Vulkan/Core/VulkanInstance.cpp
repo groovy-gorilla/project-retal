@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "VulkanInstance.h"
 #include "VulkanValidation.h"
-#include "Core/ApplicationDesc.h"
+#include "Core/Settings.h"
 #include "VulkanDebug.h"
 #include "Debug/ErrorDialog.h"
 

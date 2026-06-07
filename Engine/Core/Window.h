@@ -1,27 +1,27 @@
 #pragma once
 
-#include "ApplicationDesc.h"
+#include "Settings.h"
 #include "Display.h"
 
 class Window {
 public:
 
-    void Create(ApplicationDesc& desc, Display& display);
+    void Create(Settings& settings, Display& display);
     void Destroy();
 
     [[nodiscard]] bool ShouldClose() const;
     void SetShouldClose(bool value);
 
-    void SetWindowed(ApplicationDesc& desc, Display& display);
-    void SetFullscreen(ApplicationDesc& desc, Display& display);
+    void SetWindowed(Settings& settings, Display& display);
+    void SetFullscreen(Settings& settings, Display& display);
 
-    void SetWindowSize(ApplicationDesc& desc, Display& display);
+    void SetWindowSize(Settings& settings, Display& display);
 
     // Vulkan
     [[nodiscard]] SDL_Window* GetHandle() const;
 
-    VkExtent2D GetRenderExtent(ApplicationDesc& desc);
-    VkExtent2D GetWindowExtent(Display& display, ApplicationDesc& desc);
+    VkExtent2D GetRenderExtent(Settings& settings);
+    VkExtent2D GetWindowExtent(Display& display, Settings& settings);
 
 private:
     SDL_Window* m_window = nullptr;

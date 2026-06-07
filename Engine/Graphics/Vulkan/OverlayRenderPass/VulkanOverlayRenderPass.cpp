@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "VulkanOverlayRenderPass.h"
 #include "Debug/ErrorDialog.h"
-#include "Core/ApplicationDesc.h"
+#include "Core/Settings.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 
-void VulkanOverlayRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, ApplicationDesc& desc) {
+void VulkanOverlayRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, Settings& settings) {
 
     m_device = device;
 
@@ -78,7 +78,7 @@ void VulkanOverlayRenderPass::Create(VkDevice device, VkPhysicalDevice physicalD
     colorBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     bindings.push_back(colorBinding);
 
-    m_descriptor.Create(device, bindings, desc.MAX_FRAMES_IN_FLIGHT);
+    m_descriptor.Create(device, bindings, settings.MAX_FRAMES_IN_FLIGHT);
 
     PipelineDesc pdesc;
     pdesc.renderPass = m_renderPass;
@@ -95,10 +95,10 @@ void VulkanOverlayRenderPass::Create(VkDevice device, VkPhysicalDevice physicalD
 
 }
 
-void VulkanOverlayRenderPass::Begin(uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VkExtent2D extent, ApplicationDesc& desc) {
+void VulkanOverlayRenderPass::Begin(uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VkExtent2D extent, Settings& settings) {
 
     // UPDATE DESCRIPTOR
-    VkSampler sampler = desc.FILTER == TextureFilter::Nearest ? inputColor.GetNearestSampler() : inputColor.GetLinearSampler();
+    VkSampler sampler = settings.FILTER == TextureFilter::Nearest ? inputColor.GetNearestSampler() : inputColor.GetLinearSampler();
     m_descriptor.UpdateTexture(frameIndex, 0, inputColor.GetImageView(), sampler);
 
     // CLEAR

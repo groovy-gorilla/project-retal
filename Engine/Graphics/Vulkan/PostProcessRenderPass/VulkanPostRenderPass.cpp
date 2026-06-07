@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "VulkanPostRenderPass.h"
 #include "Debug/ErrorDialog.h"
-#include "Core/ApplicationDesc.h"
+#include "Core/Settings.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 
-void VulkanPostRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, ApplicationDesc& desc) {
+void VulkanPostRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, Settings& settings) {
 
     // COLOR
     VkAttachmentDescription colorAttachment{};
@@ -86,7 +86,7 @@ void VulkanPostRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevi
     depthBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     bindings.push_back(depthBinding);
 
-    m_descriptor.Create(device, bindings, desc.MAX_FRAMES_IN_FLIGHT);
+    m_descriptor.Create(device, bindings, settings.MAX_FRAMES_IN_FLIGHT);
 
     // PUSH CONSTANT
     VkPushConstantRange pushConstant{};
@@ -110,9 +110,9 @@ void VulkanPostRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevi
 
 }
 
-void VulkanPostRenderPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VkExtent2D extent, ApplicationDesc& desc, float exposure) {
+void VulkanPostRenderPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VkExtent2D extent, Settings& settings, float exposure) {
 
-    VkSampler sampler = desc.FILTER == TextureFilter::Nearest ? inputColor.GetNearestSampler() : inputColor.GetLinearSampler();
+    VkSampler sampler = settings.FILTER == TextureFilter::Nearest ? inputColor.GetNearestSampler() : inputColor.GetLinearSampler();
     m_descriptor.UpdateTexture(frameIndex, 0, inputColor.GetImageView(), sampler);
 
     VkClearValue clear{};
@@ -145,9 +145,9 @@ void VulkanPostRenderPass::Render(uint32_t frameIndex, VkCommandBuffer commandBu
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
     PostPushConstants PC;
-    PC.hdrEnable = desc.HDR;
+    PC.hdrEnable = settings.HDR;
     PC.exposure = exposure;
-    PC.dithering = desc.DITHERING;
+    PC.dithering = settings.DITHERING;
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.Get());
     vkCmdPushConstants(commandBuffer, m_pipeline.GetLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PostPushConstants), &PC);

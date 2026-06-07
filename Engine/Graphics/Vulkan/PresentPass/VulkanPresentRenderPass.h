@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/ApplicationDesc.h"
+#include "Core/Settings.h"
 #include "Graphics/Vulkan/Wrappers/Descriptor.h"
 #include "Graphics/Vulkan/Wrappers/Pipeline.h"
 
@@ -9,7 +9,7 @@ public:
     void Create(
         VkDevice device,
         VkFormat swapchainFormat,
-        ApplicationDesc& desc);
+        Settings& settings);
 
     void Destroy();
 
@@ -19,7 +19,7 @@ public:
         RenderTarget& inputColor,
         VkFramebuffer framebuffer,
         VkExtent2D extent,
-        ApplicationDesc& desc);
+        Settings& settings);
 
     [[nodiscard]] VkRenderPass Get() const { return m_renderPass; }
     [[nodiscard]] Descriptor GetDescriptor() const { return m_descriptor; }

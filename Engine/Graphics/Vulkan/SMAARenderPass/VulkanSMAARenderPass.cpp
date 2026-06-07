@@ -1,14 +1,14 @@
 #include "pch.h"
 #include "VulkanSMAARenderPass.h"
 
-#include "Core/ApplicationDesc.h"
+#include "Core/Settings.h"
 #include "Graphics/Vulkan/Utils/VulkanUtils.h"
 #include "ThirdParty/smaa_textures/AreaTex.h"
 #include "ThirdParty/smaa_textures/SearchTex.h"
 #include "Debug/ErrorDialog.h"
 #include "Graphics/Vulkan/Wrappers/Buffer.h"
 
-void VulkanSMAARenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, ApplicationDesc& desc, VkCommandPool commandPool, VkQueue graphicsQueue) {
+void VulkanSMAARenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, Settings& settings, VkCommandPool commandPool, VkQueue graphicsQueue) {
 
     m_device = device;
     m_commandPool = commandPool;
@@ -61,19 +61,19 @@ void VulkanSMAARenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevi
     // EDGE PASS
     CreateEdgeRenderPass(device);
     CreateEdgeFramebuffer(device, renderExtent);
-    CreateEdgeDescriptors(device, desc);
+    CreateEdgeDescriptors(device, settings);
     CreateEdgePipeline(device, renderExtent);
 
     // BLEND PASS
     CreateBlendRenderPass(device);
     CreateBlendFramebuffer(device, renderExtent);
-    CreateBlendDescriptors(device, desc);
+    CreateBlendDescriptors(device, settings);
     CreateBlendPipeline(device, renderExtent);
 
     // NEIGHBORHOOD PASS
     CreateNeighborhoodRenderPass(device, m_color);
     CreateNeighborhoodFramebuffer(device, renderExtent, m_color);
-    CreateNeighborhoodDescriptors(device, desc);
+    CreateNeighborhoodDescriptors(device, settings);
     CreateNeighborhoodPipeline(device, renderExtent);
 
     std::cout << "[Vulkan] SMAA-render pass created" << std::endl;
@@ -339,7 +339,7 @@ void VulkanSMAARenderPass::CreateEdgeFramebuffer(VkDevice device, VkExtent2D ext
 
 }
 
-void VulkanSMAARenderPass::CreateEdgeDescriptors(VkDevice device, ApplicationDesc& desc) {
+void VulkanSMAARenderPass::CreateEdgeDescriptors(VkDevice device, Settings& settings) {
 
     // DESCRIPTORS
     std::vector<VkDescriptorSetLayoutBinding> bindings;
@@ -351,7 +351,7 @@ void VulkanSMAARenderPass::CreateEdgeDescriptors(VkDevice device, ApplicationDes
     colorBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     bindings.push_back(colorBinding);
 
-    m_edgeDescriptor.Create(device, bindings, desc.MAX_FRAMES_IN_FLIGHT);
+    m_edgeDescriptor.Create(device, bindings, settings.MAX_FRAMES_IN_FLIGHT);
 
     // LAYOUT
     m_edgeDescriptorLayout = m_edgeDescriptor.GetLayout();
@@ -487,7 +487,7 @@ void VulkanSMAARenderPass::CreateBlendFramebuffer(VkDevice device, VkExtent2D ex
 
 }
 
-void VulkanSMAARenderPass::CreateBlendDescriptors(VkDevice device, ApplicationDesc& desc) {
+void VulkanSMAARenderPass::CreateBlendDescriptors(VkDevice device, Settings& settings) {
 
     // DESCRIPTORS
     std::vector<VkDescriptorSetLayoutBinding> bindings;
@@ -513,7 +513,7 @@ void VulkanSMAARenderPass::CreateBlendDescriptors(VkDevice device, ApplicationDe
     searchBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     bindings.push_back(searchBinding);
 
-    m_blendDescriptor.Create(device, bindings, desc.MAX_FRAMES_IN_FLIGHT);
+    m_blendDescriptor.Create(device, bindings, settings.MAX_FRAMES_IN_FLIGHT);
 
     // LAYOUT
     m_blendDescriptorLayout = m_blendDescriptor.GetLayout();
@@ -649,7 +649,7 @@ void VulkanSMAARenderPass::CreateNeighborhoodFramebuffer(VkDevice device, VkExte
 
 }
 
-void VulkanSMAARenderPass::CreateNeighborhoodDescriptors(VkDevice device, ApplicationDesc& desc) {
+void VulkanSMAARenderPass::CreateNeighborhoodDescriptors(VkDevice device, Settings& settings) {
 
     // DESCRIPTORS
     std::vector<VkDescriptorSetLayoutBinding> bindings;
@@ -668,7 +668,7 @@ void VulkanSMAARenderPass::CreateNeighborhoodDescriptors(VkDevice device, Applic
     blendBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     bindings.push_back(blendBinding);
 
-    m_neighborhoodDescriptor.Create(device, bindings, desc.MAX_FRAMES_IN_FLIGHT);
+    m_neighborhoodDescriptor.Create(device, bindings, settings.MAX_FRAMES_IN_FLIGHT);
 
     // LAYOUT
     m_neighborhoodDescriptorLayout = m_neighborhoodDescriptor.GetLayout();

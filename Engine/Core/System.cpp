@@ -1,7 +1,7 @@
 #include "pch.h"
-#include "Application.h"
+#include "System.h"
 
-void Application::Run() {
+void System::Run() {
 
     setenv("GTK_THEME", "Adwaita:dark", true);
 
@@ -10,33 +10,21 @@ void Application::Run() {
         throw std::runtime_error(SDL_GetError());
     }
 
+    // Display init
     m_display.Initialize();
 
+    // Window init
     m_window.Create(m_desc, m_display);
 
+    // Input init
     m_input.Initialize(SDL_SCANCODE_COUNT);
-
     m_sdlInput.Initialize(&m_input);
+    m_actions.KeyMapping();
 
-    actions.Bind("Quit", Key::Escape);
-    actions.Bind("Windowed", Key::W);
-    actions.Bind("Aspect", Key::A);
-    actions.Bind("Filter", Key::F);
-    actions.Bind("AA", Key::M);
-    actions.Bind("VSync", Key::V);
-    actions.Bind("Screenshot", Key::S);
-    actions.Bind("Exposure", Key::E);
-    actions.Bind("HDR", Key::H);
-    actions.Bind("Dithering", Key::D);
-    actions.Bind("ResolutionUp", Key::Equals);
-    actions.Bind("ResolutionDown", Key::Minus);
-
-    // VULKAN
+    // Graphics init
     m_graphics.Initialize(m_display, m_window, m_desc);
 
-    float timer = 0.0f;
-    uint32_t frames = 0;
-
+    // Main loop
     while (!m_window.ShouldClose()) {
 
         m_timer.Update();
@@ -103,25 +91,14 @@ void Application::Run() {
         // RENDER
         m_graphics.Render(m_graphics.GetRenderer().GetContext().device, m_desc, m_timer.GetDeltaTime());
 
-        // PSEUDO - FPS
-        float deltaTime = m_timer.GetDeltaTime();
-        timer += deltaTime;
-        frames++;
-        if (timer >= 0.5f) {
-            std::string fps = std::to_string(frames * 2);
-            SDL_SetWindowTitle(m_window.GetHandle(), fps.c_str());
-            frames = 0;
-            timer = 0.0f;
-        }
-
         // HDR ON/OFF
-        if (actions.IsActionPressed(m_input, "HDR")) {
+        if (m_actions.IsActionPressed(m_input, "HDR")) {
             m_desc.HDR = !m_desc.HDR;
         }
 
         // HDR EXPOSURE
         static bool explosion = true;
-        if (actions.IsActionPressed(m_input, "Exposure")) {
+        if (m_actions.IsActionPressed(m_input, "Exposure")) {
             if (explosion) {
                 m_graphics.GetRenderer().SetTargetExposure(5.0f);
                 explosion = false;
@@ -132,17 +109,17 @@ void Application::Run() {
         }
 
         // DITHERING ON/OFF
-        if (actions.IsActionPressed(m_input, "Dithering")) {
+        if (m_actions.IsActionPressed(m_input, "Dithering")) {
             m_desc.DITHERING = !m_desc.DITHERING;
         }
 
         // ASPECT RATIO
-        if (actions.IsActionPressed(m_input, "Aspect")) {
+        if (m_actions.IsActionPressed(m_input, "Aspect")) {
             m_desc.ASPECT_RATIO = !m_desc.ASPECT_RATIO;
         }
 
         // FILTER
-        if (actions.IsActionPressed(m_input, "Filter")) {
+        if (m_actions.IsActionPressed(m_input, "Filter")) {
             if (m_desc.FILTER == TextureFilter::Nearest) {
                 m_desc.FILTER = TextureFilter::Linear;
             } else {
@@ -151,13 +128,13 @@ void Application::Run() {
         }
 
         // VSYNC
-        if (actions.IsActionPressed(m_input, "VSync")) {
+        if (m_actions.IsActionPressed(m_input, "VSync")) {
             m_desc.VSYNC = !m_desc.VSYNC;
             m_graphics.GetRenderer().RecreateSwapchain(m_display, m_window, m_desc);
         }
 
         // WINDOWED
-        if (actions.IsActionPressed(m_input, "Windowed")) {
+        if (m_actions.IsActionPressed(m_input, "Windowed")) {
             if (m_desc.FULLSCREEN) {
                 m_desc.FULLSCREEN = false;
                 m_window.SetWindowed(m_desc, m_display);
@@ -182,14 +159,14 @@ void Application::Run() {
             i = std::distance(m.begin(), it);
         }
 
-        if (actions.IsActionPressed(m_input, "ResolutionDown")) {
+        if (m_actions.IsActionPressed(m_input, "ResolutionDown")) {
             i++;
             if (i > (size-1)) i = (size-1);
             SetResolution(m[i]);
             std::cout << "Resolution set to: " << m[i].width << "x" << m[i].height << std::endl;
         }
 
-        if (actions.IsActionPressed(m_input, "ResolutionUp")) {
+        if (m_actions.IsActionPressed(m_input, "ResolutionUp")) {
             i--;
             if (i < 0) i = 0;
             SetResolution(m[i]);
@@ -197,7 +174,7 @@ void Application::Run() {
         }
 
         // ANTIALIASING
-        if (actions.IsActionPressed(m_input, "AA")) {
+        if (m_actions.IsActionPressed(m_input, "AA")) {
             switch (m_desc.AA_MODE) {
                 case AntiAliasing::None:
                     m_desc.AA_MODE = AntiAliasing::MSAA;
@@ -240,12 +217,12 @@ void Application::Run() {
         }
 
         // TAKE SCREENSHOT
-        if (actions.IsActionPressed(m_input, "Screenshot")) {
+        if (m_actions.IsActionPressed(m_input, "Screenshot")) {
             m_desc.TAKE_SCREENSHOT = true;
         }
 
         // QUIT
-        if (actions.IsActionPressed(m_input, "Quit")) break;
+        if (m_actions.IsActionPressed(m_input, "Quit")) break;
 
     }
 
@@ -255,7 +232,7 @@ void Application::Run() {
 
 }
 
-void Application::SetResolution(const Mode& res) {
+void System::SetResolution(const Mode& res) {
 
     // 1. Window desc
     m_desc.WIDTH = res.width;

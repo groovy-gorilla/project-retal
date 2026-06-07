@@ -1,6 +1,6 @@
 #include "Font.h"
 
-void Font::Initialize(const VulkanContext& context, const std::filesystem::path& textureFontPath, const std::filesystem::path& dataFontPath, TextureFilter filter, ApplicationDesc& desc) {
+void Font::Initialize(const VulkanContext& context, const std::filesystem::path& textureFontPath, const std::filesystem::path& dataFontPath, TextureFilter filter, Settings& settings) {
 
     LoadAtlas(context, textureFontPath, filter);
 
@@ -14,9 +14,9 @@ void Font::Initialize(const VulkanContext& context, const std::filesystem::path&
         binding
     };
 
-    m_descriptor.Create(context.device, bindings, desc.MAX_FRAMES_IN_FLIGHT);
+    m_descriptor.Create(context.device, bindings, settings.MAX_FRAMES_IN_FLIGHT);
 
-    for (uint32_t i = 0; i < desc.MAX_FRAMES_IN_FLIGHT; i++) {
+    for (uint32_t i = 0; i < settings.MAX_FRAMES_IN_FLIGHT; i++) {
         m_descriptor.UpdateTexture(i, 0, m_texture.GetImageView(), m_texture.GetSampler());
     }
 

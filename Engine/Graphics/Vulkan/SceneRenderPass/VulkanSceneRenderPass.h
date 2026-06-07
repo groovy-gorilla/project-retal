@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/ApplicationDesc.h"
+#include "Core/Settings.h"
 #include "Graphics/Vulkan/Wrappers/Pipeline.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 
@@ -14,7 +14,7 @@ public:
         VkFormat depthFormat,
         AntiAliasing aaMode,
         VkSampleCountFlagBits samples,
-        ApplicationDesc& desc);
+        Settings& settings);
 
     void Destroy(VkDevice device);
 

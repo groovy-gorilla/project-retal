@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ApplicationDesc.h"
+#include "Settings.h"
 #include "Display.h"
 #include "Timer.h"
 #include "Window.h"
@@ -11,7 +11,7 @@
 
 class Display;
 
-class Application {
+class System {
 public:
     void Run();
 
@@ -21,13 +21,13 @@ private:
     bool m_running = true;
     bool m_paused = true;
 
-    ApplicationDesc m_desc;
+    Settings m_desc;
     Display m_display;
     Window m_window;
     Timer m_timer;
     Input m_input;
     SDLInput m_sdlInput;
-    InputMapping actions;
+    InputMapping m_actions;
     Graphics m_graphics;
 
 };

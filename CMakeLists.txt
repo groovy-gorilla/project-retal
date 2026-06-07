@@ -26,8 +26,8 @@ add_executable(IndigoEngine main.cpp
         Engine/Input/InputMapping.cpp
         Engine/Debug/ErrorDialog.h
         Engine/Debug/ErrorDialog.cpp
-        Engine/Core/Application.h
-        Engine/Core/Application.cpp
+        Engine/Core/System.h
+        Engine/Core/System.cpp
         Engine/Core/Window.h
         Engine/Core/Window.cpp
         Engine/Core/Display.h
@@ -99,6 +99,10 @@ add_executable(IndigoEngine main.cpp
         Engine/Graphics/Text/Text.cpp
         Engine/Graphics/Text/TextRenderer.h
         Engine/Graphics/Text/TextRenderer.cpp
+        Engine/Graphics/Fps/Fps.h
+        Engine/Graphics/Fps/Fps.cpp
+        Engine/Core/System.cpp
+        Engine/Core/System.h
 )
 
 

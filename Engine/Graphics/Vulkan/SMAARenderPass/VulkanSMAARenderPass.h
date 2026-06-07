@@ -6,7 +6,7 @@
 #include "Graphics/Vulkan/Wrappers/Pipeline.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 
-class ApplicationDesc;
+class Settings;
 
 class VulkanSMAARenderPass {
 public:
@@ -15,7 +15,7 @@ public:
                 VkPhysicalDevice physicalDevice,
                 VkExtent2D renderExtent,
                 VkFormat colorFormat,
-                ApplicationDesc& desc,
+                Settings& settings,
                 VkCommandPool commandPool,
                 VkQueue graphicsQueue);
 
@@ -50,7 +50,7 @@ private:
                                VkExtent2D extent);
 
     void CreateEdgeDescriptors(VkDevice device,
-                               ApplicationDesc& desc);
+                               Settings& settings);
 
     void CreateEdgePipeline(VkDevice device,
                             VkExtent2D extent);
@@ -62,7 +62,7 @@ private:
                                 VkExtent2D extent);
 
     void CreateBlendDescriptors(VkDevice device,
-                                 ApplicationDesc& desc);
+                                 Settings& settings);
 
     void CreateBlendPipeline(VkDevice device,
                              VkExtent2D extent);
@@ -75,7 +75,7 @@ private:
                                        RenderTarget& outputColor);
 
     void CreateNeighborhoodDescriptors(VkDevice device,
-                                       ApplicationDesc& desc);
+                                       Settings& settings);
 
     void CreateNeighborhoodPipeline(VkDevice device,
                                     VkExtent2D extent);

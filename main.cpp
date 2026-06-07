@@ -1,11 +1,11 @@
 #include <iostream>
 #include "Engine/Debug/ErrorDialog.h"
 
-#include "Engine/Core/Application.h"
+#include "Engine/Core/System.h"
 
 int main() {
 
-    Application app;
+    System app;
 
     try {
         app.Run();

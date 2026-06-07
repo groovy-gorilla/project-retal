@@ -6,7 +6,7 @@ class Input;
 
 class InputMapping {
 public:
-    void Bind(const std::string& action, Key key);
+    void KeyMapping();
 
     bool IsActionDown(const Input& input, const std::string& action) const;
     bool IsActionPressed(const Input& input, const std::string& action) const;
@@ -14,4 +14,6 @@ public:
 
 private:
     std::unordered_map<std::string, std::vector<Key>> m_Map;
+
+    void Bind(const std::string& action, Key key);
 };

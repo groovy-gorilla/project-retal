@@ -37,21 +37,21 @@ struct ViewportRect {
 class VulkanRenderer {
 
 public:
-    void Initialize(Display& display, Window& window, ApplicationDesc& desc);
+    void Initialize(Display& display, Window& window, Settings& settings);
     void Shutdown();
 
     void BeginFrame();
     void BeginScene();
     void EndScene();
-    void BeginOverlay(ApplicationDesc& desc);
+    void BeginOverlay(Settings& settings);
     void EndOverlay();
-    void RenderPresent(ApplicationDesc& desc);
-    void EndFrame(ApplicationDesc& desc);
+    void RenderPresent(Settings& settings);
+    void EndFrame(Settings& settings);
 
     void Update(float deltaTime, bool hdrEnable);
 
-    void RecreateSwapchain(Display& display, Window& window, ApplicationDesc& desc);
-    void RecreateRenderer(Display& display, Window& window, ApplicationDesc& desc);
+    void RecreateSwapchain(Display& display, Window& window, Settings& settings);
+    void RecreateRenderer(Display& display, Window& window, Settings& settings);
 
     void SetTargetExposure(float exposure);
 

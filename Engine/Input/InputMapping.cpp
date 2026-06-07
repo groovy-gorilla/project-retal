@@ -2,6 +2,23 @@
 #include "InputMapping.h"
 #include "Input.h"
 
+void InputMapping::KeyMapping() {
+
+    this->Bind("Quit",              Key::Escape);
+    this->Bind("Windowed",          Key::W);
+    this->Bind("Aspect",            Key::A);
+    this->Bind("Filter",            Key::F);
+    this->Bind("AA",                Key::M);
+    this->Bind("VSync",             Key::V);
+    this->Bind("Screenshot",        Key::S);
+    this->Bind("Exposure",          Key::E);
+    this->Bind("HDR",               Key::H);
+    this->Bind("Dithering",         Key::D);
+    this->Bind("ResolutionUp",      Key::Equals);
+    this->Bind("ResolutionDown",    Key::Minus);
+
+}
+
 void InputMapping::Bind(const std::string& action, Key key) {
     m_Map[action].push_back(key);
 }

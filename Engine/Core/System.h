@@ -28,4 +28,6 @@ private:
     SDLInput m_sdlInput;
     Graphics m_graphics;
 
+    bool CheckAVXSupport();
+
 };

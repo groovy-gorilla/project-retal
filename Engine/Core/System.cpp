@@ -1,9 +1,16 @@
 #include "pch.h"
 #include "System.h"
+#include <cpuid.h>
+#include <immintrin.h>
 
 void System::Run() {
 
     setenv("GTK_THEME", "Adwaita:dark", true);
+
+    // Sprawdzenie czy CPU obsługuje AVX dla Lina64
+    if (!CheckAVXSupport()) {
+        throw std::runtime_error("Your CPU does not support AVX instructions.");
+    }
 
     // SDL Init
     if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -246,6 +253,24 @@ void System::SetResolution(const Mode& res) {
 
     // 3. Renderer ogarnia swapchain
     m_graphics.GetRenderer().RecreateRenderer(m_display, m_window, m_desc);
+
+}
+
+bool System::CheckAVXSupport() {
+
+    unsigned int eax, ebx, ecx, edx;
+
+    if (!__get_cpuid(1, &eax, &ebx, &ecx, &edx)) return false;
+
+    bool avxSupported = (ecx & bit_AVX) != 0;
+
+    bool osxsaveSupported = (ecx & bit_OSXSAVE) != 0;
+
+    if (!avxSupported || !osxsaveSupported) return false;
+
+    uint64_t xcr0 = _xgetbv(0);
+
+    return (xcr0 & 0x6) == 0x6;
 
 }
 

@@ -17,9 +17,8 @@ void System::Run() {
     m_window.Create(m_desc, m_display);
 
     // Input init
-    m_input.Initialize(SDL_SCANCODE_COUNT);
+    m_input.Initialize();
     m_sdlInput.Initialize(&m_input);
-    m_actions.KeyMapping();
 
     // Graphics init
     m_graphics.Initialize(m_display, m_window, m_desc);
@@ -29,7 +28,7 @@ void System::Run() {
 
         m_timer.Update();
 
-        m_input.BeginFrame();
+        m_input.Update();
 
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -92,13 +91,13 @@ void System::Run() {
         m_graphics.Render(m_graphics.GetRenderer().GetContext().device, m_desc, m_timer.GetDeltaTime());
 
         // HDR ON/OFF
-        if (m_actions.IsActionPressed(m_input, "HDR")) {
+        if (m_input.IsPressed(Action::HDR)) {
             m_desc.HDR = !m_desc.HDR;
         }
 
         // HDR EXPOSURE
         static bool explosion = true;
-        if (m_actions.IsActionPressed(m_input, "Exposure")) {
+        if (m_input.IsPressed(Action::Exposure)) {
             if (explosion) {
                 m_graphics.GetRenderer().SetTargetExposure(5.0f);
                 explosion = false;
@@ -109,17 +108,17 @@ void System::Run() {
         }
 
         // DITHERING ON/OFF
-        if (m_actions.IsActionPressed(m_input, "Dithering")) {
+        if (m_input.IsPressed(Action::Dithering)) {
             m_desc.DITHERING = !m_desc.DITHERING;
         }
 
         // ASPECT RATIO
-        if (m_actions.IsActionPressed(m_input, "Aspect")) {
+        if (m_input.IsPressed(Action::Aspect)) {
             m_desc.ASPECT_RATIO = !m_desc.ASPECT_RATIO;
         }
 
         // FILTER
-        if (m_actions.IsActionPressed(m_input, "Filter")) {
+        if (m_input.IsPressed(Action::Filter)) {
             if (m_desc.FILTER == TextureFilter::Nearest) {
                 m_desc.FILTER = TextureFilter::Linear;
             } else {
@@ -128,13 +127,13 @@ void System::Run() {
         }
 
         // VSYNC
-        if (m_actions.IsActionPressed(m_input, "VSync")) {
+        if (m_input.IsPressed( Action::VSync)) {
             m_desc.VSYNC = !m_desc.VSYNC;
             m_graphics.GetRenderer().RecreateSwapchain(m_display, m_window, m_desc);
         }
 
         // WINDOWED
-        if (m_actions.IsActionPressed(m_input, "Windowed")) {
+        if (m_input.IsPressed(Action::Windowed)) {
             if (m_desc.FULLSCREEN) {
                 m_desc.FULLSCREEN = false;
                 m_window.SetWindowed(m_desc, m_display);
@@ -159,14 +158,14 @@ void System::Run() {
             i = std::distance(m.begin(), it);
         }
 
-        if (m_actions.IsActionPressed(m_input, "ResolutionDown")) {
+        if (m_input.IsPressed(Action::ResolutionDown)) {
             i++;
             if (i > (size-1)) i = (size-1);
             SetResolution(m[i]);
             std::cout << "Resolution set to: " << m[i].width << "x" << m[i].height << std::endl;
         }
 
-        if (m_actions.IsActionPressed(m_input, "ResolutionUp")) {
+        if (m_input.IsPressed(Action::ResolutionUp)) {
             i--;
             if (i < 0) i = 0;
             SetResolution(m[i]);
@@ -174,7 +173,7 @@ void System::Run() {
         }
 
         // ANTIALIASING
-        if (m_actions.IsActionPressed(m_input, "AA")) {
+        if (m_input.IsPressed(Action::AntiAliasing)) {
             switch (m_desc.AA_MODE) {
                 case AntiAliasing::None:
                     m_desc.AA_MODE = AntiAliasing::MSAA;
@@ -217,12 +216,12 @@ void System::Run() {
         }
 
         // TAKE SCREENSHOT
-        if (m_actions.IsActionPressed(m_input, "Screenshot")) {
+        if (m_input.IsPressed(Action::Screenshot)) {
             m_desc.TAKE_SCREENSHOT = true;
         }
 
         // QUIT
-        if (m_actions.IsActionPressed(m_input, "Quit")) break;
+        if (m_input.IsPressed(Action::Quit)) break;
 
     }
 

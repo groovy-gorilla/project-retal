@@ -1,27 +1,35 @@
 #pragma once
 
-#include "KeyCodes.h"
+enum class Action {
+    Quit,
+    Windowed,
+    Aspect,
+    Filter,
+    AntiAliasing,
+    VSync,
+    Screenshot,
+    Exposure,
+    HDR,
+    Dithering,
+    ResolutionUp,
+    ResolutionDown
+};
 
 class Input {
 
 public:
-    Input();
-    ~Input();
-
-    void Initialize(int keyCount);
-
-    void BeginFrame();
-    void SetKeyState(Key key, bool isDown);
+    void Initialize();
+    void Update();
 
     // KEYBOARD
-    bool IsKeyPressed(Key key) const;
-    bool IsKeyDown(Key key) const;
-    bool IsKeyReleased(Key key) const;
+    void SetKeyState(SDL_Scancode scancode, bool pressed);
+    bool IsPressed(Action action) const;
+    bool IsHeld(Action action) const;
+    bool IsReleased(Action action) const;
 
 private:
-    int keyCount = 0;
-
-    std::vector<uint8_t> currentKeys;
-    std::vector<uint8_t> prevKeys;
+    std::unordered_map<Action, SDL_Scancode> m_bindings;
+    std::vector<uint8_t> m_currentKeys;
+    std::vector<uint8_t> m_previousKeys;
 
 };

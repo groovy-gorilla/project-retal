@@ -17,13 +17,11 @@ find_package(PkgConfig REQUIRED)
 find_package(SDL3 REQUIRED)
 
 add_executable(IndigoEngine main.cpp
+        Engine/Core/Settings.h
         Engine/Input/Input.h
         Engine/Input/Input.cpp
         Engine/Platform/SDL/SDLInput.h
         Engine/Platform/SDL/SDLInput.cpp
-        Engine/Input/KeyCodes.h
-        Engine/Input/InputMapping.h
-        Engine/Input/InputMapping.cpp
         Engine/Debug/ErrorDialog.h
         Engine/Debug/ErrorDialog.cpp
         Engine/Core/System.h
@@ -50,7 +48,6 @@ add_executable(IndigoEngine main.cpp
         Engine/Graphics/Graphics.cpp
         Engine/Graphics/Vulkan/Core/VulkanDebug.h
         Engine/Graphics/Vulkan/Core/VulkanDebug.cpp
-        Engine/Core/ApplicationDesc.h
         Engine/Graphics/Vulkan/Utils/VulkanUtils.h
         Engine/Graphics/Vulkan/Utils/VulkanUtils.cpp
         Engine/Graphics/Vulkan/PostProcessRenderPass/VulkanPostRenderPass.cpp
@@ -103,6 +100,8 @@ add_executable(IndigoEngine main.cpp
         Engine/Graphics/Fps/Fps.cpp
         Engine/Core/System.cpp
         Engine/Core/System.h
+        Engine/Core/Settings.h
+        Engine/Core/Settings.h
 )
 
 

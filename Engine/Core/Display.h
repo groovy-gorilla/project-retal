@@ -20,8 +20,8 @@ public:
     float GetScaling();                                                             // Pobiera skalowanie
 
 private:
-    SDL_DisplayID m_currentDisplay;
-    const char* m_currentDisplayName;
+    SDL_DisplayID m_currentDisplay = 0;
+    const char* m_currentDisplayName = nullptr;
     SDL_DisplayMode* m_currentMode = nullptr;
     std::vector<Mode> m_videoModes;
 

@@ -5,7 +5,6 @@
 #include "Timer.h"
 #include "Window.h"
 #include "Input/Input.h"
-#include "Input/InputMapping.h"
 #include "Platform/SDL/SDLInput.h"
 #include "Graphics/Graphics.h"
 
@@ -27,7 +26,6 @@ private:
     Timer m_timer;
     Input m_input;
     SDLInput m_sdlInput;
-    InputMapping m_actions;
     Graphics m_graphics;
 
 };

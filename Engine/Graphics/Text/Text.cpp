@@ -114,7 +114,7 @@ void Text::BuildGeometry() {
 
         if(character == '\n') {
             penX = 0.0f;
-            penY -= (m_font->GetFontSize() + m_lineSpacing) * m_scale;
+            penY += (m_font->GetFontSize() + m_lineSpacing) * m_scale;
             continue;
         }
 

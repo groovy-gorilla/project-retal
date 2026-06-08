@@ -1,42 +1,50 @@
 #include "pch.h"
 #include "Input.h"
 
-Input::Input() {}
-Input::~Input() = default;
+void Input::Initialize() {
 
-void Input::Initialize(int count) {
-    keyCount = count;
+    m_currentKeys.resize(SDL_SCANCODE_COUNT);
+    m_previousKeys.resize(SDL_SCANCODE_COUNT);
 
-    currentKeys.resize(keyCount, 0);
-    prevKeys.resize(keyCount, 0);
+    m_bindings[Action::Quit]            = SDL_SCANCODE_ESCAPE;
+    m_bindings[Action::Windowed]        = SDL_SCANCODE_W;
+    m_bindings[Action::Aspect]          = SDL_SCANCODE_A;
+    m_bindings[Action::Filter]          = SDL_SCANCODE_F;
+    m_bindings[Action::AntiAliasing]    = SDL_SCANCODE_M;
+    m_bindings[Action::VSync]           = SDL_SCANCODE_V;
+    m_bindings[Action::Screenshot]      = SDL_SCANCODE_S;
+    m_bindings[Action::Exposure]        = SDL_SCANCODE_E;
+    m_bindings[Action::HDR]             = SDL_SCANCODE_H;
+    m_bindings[Action::Dithering]       = SDL_SCANCODE_D;
+    m_bindings[Action::ResolutionUp]    = SDL_SCANCODE_EQUALS;
+    m_bindings[Action::ResolutionDown]  = SDL_SCANCODE_MINUS;
+
 }
 
-void Input::BeginFrame() {
-    memcpy(prevKeys.data(), currentKeys.data(), keyCount);
+void Input::Update() {
+    m_previousKeys = m_currentKeys;
 }
 
-void Input::SetKeyState(Key key, bool isDown) {
-    int k = static_cast<int>(key);
-    if (k >= keyCount) return;
-    currentKeys[k] = isDown ? 1 : 0;
+void Input::SetKeyState(SDL_Scancode scancode, bool pressed) {
+    m_currentKeys[scancode] = pressed;
 }
 
-bool Input::IsKeyPressed(Key key) const {
-    int k = static_cast<int>(key);
-    if (k >= keyCount) return false;
-    return currentKeys[k] && !prevKeys[k];
+bool Input::IsPressed(Action action) const {
+    auto it = m_bindings.find(action);
+    if (it == m_bindings.end()) return false;
+    return m_currentKeys[it->second] && !m_previousKeys[it->second];
 }
 
-bool Input::IsKeyDown(Key key) const {
-    int k = static_cast<int>(key);
-    if (k >= keyCount) return false;
-    return currentKeys[k];
+bool Input::IsHeld(Action action) const {
+    auto it = m_bindings.find(action);
+    if (it == m_bindings.end()) return false;
+    return m_currentKeys[it->second];
 }
 
-bool Input::IsKeyReleased(Key key) const {
-    int k = static_cast<int>(key);
-    if (k >= keyCount) return false;
-    return !currentKeys[k] && prevKeys[k];
+bool Input::IsReleased(Action action) const {
+    auto it = m_bindings.find(action);
+    if (it == m_bindings.end()) return false;
+    return !m_currentKeys[it->second] && m_previousKeys[it->second];
 }
 
 

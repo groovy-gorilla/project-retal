@@ -17,7 +17,6 @@ find_package(PkgConfig REQUIRED)
 find_package(SDL3 REQUIRED)
 
 add_executable(IndigoEngine main.cpp
-        Engine/Core/Settings.h
         Engine/Input/Input.h
         Engine/Input/Input.cpp
         Engine/Platform/SDL/SDLInput.h
@@ -101,7 +100,11 @@ add_executable(IndigoEngine main.cpp
         Engine/Core/System.cpp
         Engine/Core/System.h
         Engine/Core/Settings.h
-        Engine/Core/Settings.h
+
+        gruvbox.ktx
+        smile.ktx
+        Engine/Graphics/Model/Model.h
+        Engine/Graphics/Model/Model.cpp
 )
 
 

@@ -53,7 +53,7 @@ void Graphics::Render(VkDevice device, Settings& settings, float deltaTime) {
     auto extent = m_renderer.GetRenderExtent();
     m_camera.SetOrthographic(0.0, extent.width, extent.height, 0.0, -1.0, 1.0);
 
-    m_sprite1.SetPosition(0,100);
+    m_sprite1.SetPosition(0,0);
     m_sprite1.SetSize(extent.width / 2, extent.height);
     m_spriteRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_sprite1, m_camera);
 

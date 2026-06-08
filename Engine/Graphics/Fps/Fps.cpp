@@ -6,11 +6,11 @@ void Fps::Update(float deltaTime) {
 
     m_accumulator += deltaTime;
 
-    if (m_accumulator >= 0.25f) {
+    if (m_accumulator >= 0.5f) {
 
         m_frameTimeOut = m_frameTime;
 
-        m_accumulator -= 0.25f;
+        m_accumulator -= 0.5f;
 
     }
 

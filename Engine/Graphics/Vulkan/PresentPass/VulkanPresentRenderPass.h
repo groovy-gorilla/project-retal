@@ -17,7 +17,8 @@ public:
         uint32_t frameIndex,
         VkCommandBuffer commandBuffer,
         RenderTarget& inputColor,
-        VkFramebuffer framebuffer,
+        VkImage swapchainImage,
+        VkImageView swapchainView,
         VkExtent2D extent,
         Settings& settings);
 

@@ -27,6 +27,12 @@ void VulkanDevice::Create(VkPhysicalDevice physicalDevice, uint32_t graphicsQueu
     dynamicRendering.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
     dynamicRendering.dynamicRendering = VK_TRUE;
 
+    VkPhysicalDeviceSynchronization2Features synchronization2{};
+    synchronization2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES;
+    synchronization2.synchronization2 = VK_TRUE;
+
+    dynamicRendering.pNext = &synchronization2;
+
     VkPhysicalDeviceFeatures features{};
 
     VkDeviceCreateInfo createInfo{};

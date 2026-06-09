@@ -7,14 +7,16 @@ public:
     void Create(VkPhysicalDevice physicalDevice, VkDevice device, VkSurfaceKHR surface, VkExtent2D extent, uint32_t graphicsQueueFamily, uint32_t presentQueueFamily, bool vsync);
     void Destroy(VkDevice device);
 
-    [[nodiscard]] VkSwapchainKHR Get() const { return m_swapchain; }
-    [[nodiscard]] const std::vector<VkImage>& GetImages() const { return m_images; }
-    [[nodiscard]] const std::vector<VkImageView>& GetImageViews() const { return m_imageViews; }
-    [[nodiscard]] VkFormat GetImageFormat() const { return m_imageFormat; }
-    [[nodiscard]] VkExtent2D GetExtent() const { return m_extent; }
+    VkSwapchainKHR Get() const { return m_swapchain; }
+    const std::vector<VkImage>& GetImages() const { return m_images; }
+    VkImage GetImage(uint32_t index) const { return m_images[index]; }
+    const std::vector<VkImageView>& GetImageViews() const { return m_imageViews; }
+    VkImageView GetImageView(uint32_t index) const { return m_imageViews[index]; }
+    VkFormat GetImageFormat() const { return m_imageFormat; }
+    VkExtent2D GetExtent() const { return m_extent; }
 
     void CreateFramebuffers(VkDevice device, VkRenderPass renderPass, VkExtent2D windowExtent);
-    [[nodiscard]] VkFramebuffer GetFramebuffer(uint32_t index) const { return m_framebuffers[index]; }
+    VkFramebuffer GetFramebuffer(uint32_t index) const { return m_framebuffers[index]; }
 
 private:
     VkSwapchainKHR m_swapchain = VK_NULL_HANDLE;

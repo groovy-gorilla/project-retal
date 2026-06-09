@@ -59,8 +59,14 @@ void TransitionImageLayout(
     VkCommandBuffer commandBuffer,
     VkImage image,
     VkImageLayout oldLayout,
-    VkImageLayout newLayout
-);
+    VkImageLayout newLayout);
+
+void TransitionImageLayout2(
+    VkCommandBuffer commandBuffer,
+    VkImage image,
+    VkImageLayout oldLayout,
+    VkImageLayout newLayout);
+
 
 void CopyBufferToImage(
     VkDevice device,

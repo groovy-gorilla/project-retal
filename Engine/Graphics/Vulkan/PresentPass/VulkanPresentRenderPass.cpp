@@ -1,53 +1,12 @@
 #include "pch.h"
 #include "VulkanPresentRenderPass.h"
-#include "Debug/ErrorDialog.h"
 #include "Core/Settings.h"
+#include "Graphics/Vulkan/Utils/VulkanUtils.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 
 void VulkanPresentRenderPass::Create(VkDevice device, VkFormat swapchainFormat, Settings& settings) {
 
     m_device = device;
-
-    // COLOR
-    VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = swapchainFormat;
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-    // ATTACHMENT
-    VkAttachmentReference colorRef{};
-    colorRef.attachment = 0;
-    colorRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-    // SUBPASS
-    VkSubpassDescription subpass{};
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = 1;
-    subpass.pColorAttachments = &colorRef;
-
-    VkSubpassDependency dependency{};
-    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    dependency.dstSubpass = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-    // CREATE RENDER PASS
-    VkRenderPassCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    createInfo.attachmentCount = 1;
-    createInfo.pAttachments = &colorAttachment;
-    createInfo.subpassCount = 1;
-    createInfo.pSubpasses = &subpass;
-    createInfo.dependencyCount = 1;
-    createInfo.pDependencies = &dependency;
-
-    VK_CHECK(vkCreateRenderPass(device, &createInfo, nullptr, &m_renderPass));
 
     // DESCRIPTOR
     std::vector<VkDescriptorSetLayoutBinding> bindings;
@@ -62,7 +21,9 @@ void VulkanPresentRenderPass::Create(VkDevice device, VkFormat swapchainFormat, 
     m_descriptor.Create(device, bindings, settings.MAX_FRAMES_IN_FLIGHT);
 
     PipelineDesc pdesc;
-    pdesc.renderPass = m_renderPass;
+    pdesc.renderPass = VK_NULL_HANDLE;
+    pdesc.colorFormat = swapchainFormat;
+    pdesc.depthFormat = VK_FORMAT_UNDEFINED;
     pdesc.descriptorLayout = m_descriptor.GetLayout();
     pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Present/present_vert.spv";
     pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/Present/present_frag.spv";
@@ -76,7 +37,7 @@ void VulkanPresentRenderPass::Create(VkDevice device, VkFormat swapchainFormat, 
 
 }
 
-void VulkanPresentRenderPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VkFramebuffer framebuffer, VkExtent2D extent, Settings& settings) {
+void VulkanPresentRenderPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VkImage swapchainImage, VkImageView swapchainView, VkExtent2D extent, Settings& settings) {
 
     // UPDATE DESCRIPTOR
     VkSampler sampler = settings.FILTER == TextureFilter::Nearest ? inputColor.GetNearestSampler() : inputColor.GetLinearSampler();
@@ -86,16 +47,25 @@ void VulkanPresentRenderPass::Render(uint32_t frameIndex, VkCommandBuffer comman
     VkClearValue clear{};
     clear.color = { 0.0f, 0.0f, 0.0f, 1.0f };
 
-    VkRenderPassBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    beginInfo.renderPass = m_renderPass;
-    beginInfo.framebuffer = framebuffer;
-    beginInfo.renderArea.offset = {0,0 };
-    beginInfo.renderArea.extent = extent;
-    beginInfo.clearValueCount = 1;
-    beginInfo.pClearValues = &clear;
+    VkRenderingAttachmentInfo colorAttachment{};
+    colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+    colorAttachment.imageView = swapchainView;
+    colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    colorAttachment.clearValue.color = {{0.0f, 0.0f, 0.0f, 1.0f}};
 
-    vkCmdBeginRenderPass(commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+    VkRenderingInfo renderingInfo{};
+    renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+    renderingInfo.renderArea.offset = {0,0};
+    renderingInfo.renderArea.extent = extent;
+    renderingInfo.layerCount = 1;
+    renderingInfo.colorAttachmentCount = 1;
+    renderingInfo.pColorAttachments = &colorAttachment;
+
+    TransitionImageLayout2(commandBuffer, swapchainImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+    vkCmdBeginRendering(commandBuffer, &renderingInfo);
 
     VkViewport viewport{};
     viewport.minDepth = 0.0f;
@@ -157,7 +127,9 @@ void VulkanPresentRenderPass::Render(uint32_t frameIndex, VkCommandBuffer comman
     // FULLSCREEN TRIANGLE
     vkCmdDraw(commandBuffer, 3, 1,0, 0);
 
-    vkCmdEndRenderPass(commandBuffer);
+    vkCmdEndRendering(commandBuffer);
+
+    TransitionImageLayout2(commandBuffer, swapchainImage, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
 }
 

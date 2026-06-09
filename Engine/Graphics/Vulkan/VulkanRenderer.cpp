@@ -60,7 +60,7 @@ void VulkanRenderer::Initialize(Display& display, Window& window, Settings& sett
     m_presentRenderPass.Create(m_device.Get(), m_swapchain.GetImageFormat(), settings);
 
     // SWAPCHAIN BUFFERS
-    m_swapchain.CreateFramebuffers(m_device.Get(), m_presentRenderPass.Get(), m_windowExtent);
+    //m_swapchain.CreateFramebuffers(m_device.Get(), m_presentRenderPass.Get(), m_windowExtent);
 
 }
 
@@ -163,7 +163,7 @@ void VulkanRenderer::EndOverlay() {
 
 void VulkanRenderer::RenderPresent(Settings& settings) {
 
-    m_presentRenderPass.Render(m_sync.GetCurrentFrame(), m_currentCommandBuffer, *m_currentColor, m_swapchain.GetFramebuffer(m_imageIndex), m_swapchain.GetExtent(), settings);
+    m_presentRenderPass.Render(m_sync.GetCurrentFrame(), m_currentCommandBuffer, *m_currentColor, m_swapchain.GetImage(m_imageIndex), m_swapchain.GetImageView(m_imageIndex), m_swapchain.GetExtent(), settings);
 
 }
 
@@ -179,7 +179,7 @@ void VulkanRenderer::EndFrame(Settings& settings) {
     }
 
     VkPipelineStageFlags waitStages[] = {
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT
     };
 
     m_sync.Reset(m_device.Get());

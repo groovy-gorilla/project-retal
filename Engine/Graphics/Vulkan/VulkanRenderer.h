@@ -59,8 +59,6 @@ public:
 
     VulkanContext GetContext() const { return m_context; }
 
-    VkRenderPass GetOverlayRenderPass() const { return m_overlayRenderPass.Get(); }
-
     VkCommandBuffer GetCommandBuffer() const { return m_currentCommandBuffer; }
 
     VkExtent2D GetRenderExtent() const { return m_renderExtent; }

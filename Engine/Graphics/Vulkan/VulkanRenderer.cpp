@@ -239,9 +239,6 @@ void VulkanRenderer::RecreateSwapchain(Display& display, Window& window, Setting
     // CREATE
     m_swapchain.Create(m_physicalDevice.Get(), m_device.Get(), m_surface.Get(), m_windowExtent, m_physicalDevice.GetGraphicsQueueFamily(), m_physicalDevice.GetPresentQueueFamily(), settings.VSYNC);
 
-    // SWAPCHAIN BUFFERS
-    m_swapchain.CreateFramebuffers(m_device.Get(), m_overlayRenderPass.Get(), m_windowExtent);
-
 }
 
 void VulkanRenderer::RecreateRenderer(Display& display, Window& window, Settings& settings) {
@@ -285,9 +282,6 @@ void VulkanRenderer::RecreateRenderer(Display& display, Window& window, Settings
 
     // PRESENT
     m_presentRenderPass.Create(m_device.Get(), m_swapchain.GetImageFormat(), settings);
-
-    // SWAPCHAIN BUFFERS
-    m_swapchain.CreateFramebuffers(m_device.Get(), m_overlayRenderPass.Get(), m_windowExtent);
 
 }
 

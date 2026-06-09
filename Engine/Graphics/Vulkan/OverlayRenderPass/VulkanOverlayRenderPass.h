@@ -25,7 +25,6 @@ public:
 
     void End(VkCommandBuffer commandBuffer);
 
-    [[nodiscard]] VkRenderPass Get() const { return m_renderPass; }
     [[nodiscard]] Descriptor GetDescriptor() const { return m_descriptor; }
     RenderTarget& GetColor() { return m_color; }
 
@@ -33,9 +32,6 @@ private:
 
     // DEVICE HANDLE
     VkDevice m_device = VK_NULL_HANDLE;
-
-    // PASS
-    VkRenderPass m_renderPass = VK_NULL_HANDLE;
 
     // PIPELINE
     Pipeline m_pipeline;
@@ -45,9 +41,6 @@ private:
 
     // DESCRIPTOR
     Descriptor m_descriptor;
-
-    // FRAMEBUFFER
-    VkFramebuffer m_framebuffer = VK_NULL_HANDLE;
 
 };
 

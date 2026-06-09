@@ -5,8 +5,8 @@ void Graphics::Initialize(Display& display, Window& window, Settings& settings) 
 
     m_renderer.Initialize(display, window, settings);
 
-    m_spriteRenderer.Create(m_renderer.GetContext().device, m_renderer.GetOverlayRenderPass());
-    m_textRenderer.Create(m_renderer.GetContext().device, m_renderer.GetOverlayRenderPass());
+    //m_spriteRenderer.Create(m_renderer.GetContext().device, m_renderer.GetOverlayRenderPass());
+    //m_textRenderer.Create(m_renderer.GetContext().device, m_renderer.GetOverlayRenderPass());
 
     m_sprite1.Create(m_renderer.GetContext(), "gruvbox.ktx", settings.MAX_FRAMES_IN_FLIGHT);
     m_sprite2.Create(m_renderer.GetContext(), "smile.ktx", settings.MAX_FRAMES_IN_FLIGHT);
@@ -21,8 +21,8 @@ void Graphics::Initialize(Display& display, Window& window, Settings& settings) 
 
 void Graphics::Shutdown() {
 
-    m_spriteRenderer.Shutdown();
-    m_textRenderer.Shutdown();
+    //m_spriteRenderer.Shutdown();
+    //m_textRenderer.Shutdown();
 
     m_sprite1.Shutdown();
     m_sprite2.Shutdown();
@@ -55,11 +55,11 @@ void Graphics::Render(VkDevice device, Settings& settings, float deltaTime) {
 
     m_sprite1.SetPosition(0,0);
     m_sprite1.SetSize(extent.width / 2, extent.height);
-    m_spriteRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_sprite1, m_camera);
+    //m_spriteRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_sprite1, m_camera);
 
     m_sprite2.SetPosition(extent.width / 2,0);
     m_sprite2.SetSize(extent.width / 2, extent.height);
-    m_spriteRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_sprite2, m_camera);
+    //m_spriteRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_sprite2, m_camera);
 
     std::ostringstream ss;
     ss << "FPS: " << m_fps.GetFPS()
@@ -69,7 +69,7 @@ void Graphics::Render(VkDevice device, Settings& settings, float deltaTime) {
        << m_fps.GetFrameTime()
        << " ms";
     m_Text.SetText(ss.str());
-    m_textRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_Text, m_camera);
+    //m_textRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_Text, m_camera);
 
     m_renderer.EndOverlay();
     m_renderer.RenderPresent(settings);

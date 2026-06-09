@@ -2,71 +2,15 @@
 #include "VulkanOverlayRenderPass.h"
 #include "Debug/ErrorDialog.h"
 #include "Core/Settings.h"
+#include "Graphics/Vulkan/Utils/VulkanUtils.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 
 void VulkanOverlayRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, Settings& settings) {
 
     m_device = device;
 
-    // COLOR
-    VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = colorFormat;
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-    // ATTACHMENT
-    VkAttachmentReference colorRef{};
-    colorRef.attachment = 0;
-    colorRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-    // SUBPASS
-    VkSubpassDescription subpass{};
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = 1;
-    subpass.pColorAttachments = &colorRef;
-
-    VkSubpassDependency dependency{};
-    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    dependency.dstSubpass = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-    // CREATE RENDER PASS
-    VkRenderPassCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    createInfo.attachmentCount = 1;
-    createInfo.pAttachments = &colorAttachment;
-    createInfo.subpassCount = 1;
-    createInfo.pSubpasses = &subpass;
-    createInfo.dependencyCount = 1;
-    createInfo.pDependencies = &dependency;
-
-    VK_CHECK(vkCreateRenderPass(device, &createInfo, nullptr, &m_renderPass));
-
     // CREATE RENDER TARGETS
     m_color.Create(device, physicalDevice, renderExtent.width, renderExtent.height, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_SAMPLE_COUNT_1_BIT);
-
-    // FRAMEBUFFER
-    std::vector<VkImageView> attachments = {
-        m_color.GetImageView()
-    };
-
-    VkFramebufferCreateInfo framebufferCreateInfo{};
-    framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    framebufferCreateInfo.renderPass = m_renderPass;
-    framebufferCreateInfo.attachmentCount = 1;
-    framebufferCreateInfo.pAttachments = attachments.data();
-    framebufferCreateInfo.width = renderExtent.width;
-    framebufferCreateInfo.height = renderExtent.height;
-    framebufferCreateInfo.layers = 1;
-
-    VK_CHECK(vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &m_framebuffer));
 
     // DESCRIPTOR
     std::vector<VkDescriptorSetLayoutBinding> bindings;
@@ -81,7 +25,9 @@ void VulkanOverlayRenderPass::Create(VkDevice device, VkPhysicalDevice physicalD
     m_descriptor.Create(device, bindings, settings.MAX_FRAMES_IN_FLIGHT);
 
     PipelineDesc pdesc;
-    pdesc.renderPass = m_renderPass;
+    pdesc.renderPass = VK_NULL_HANDLE;
+    pdesc.colorFormat = colorFormat;
+    pdesc.depthFormat = VK_FORMAT_UNDEFINED;
     pdesc.descriptorLayout = m_descriptor.GetLayout();
     pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Overlay/overlay_vert.spv";
     pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/Overlay/overlay_frag.spv";
@@ -105,16 +51,25 @@ void VulkanOverlayRenderPass::Begin(uint32_t frameIndex, VkCommandBuffer command
     VkClearValue clear{};
     clear.color = { 0.0f, 0.0f, 0.0f, 1.0f };
 
-    VkRenderPassBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    beginInfo.renderPass = m_renderPass;
-    beginInfo.framebuffer = m_framebuffer;
-    beginInfo.renderArea.offset = {0,0 };
-    beginInfo.renderArea.extent = extent;
-    beginInfo.clearValueCount = 1;
-    beginInfo.pClearValues = &clear;
+    TransitionImageLayout(commandBuffer, m_color.GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
-    vkCmdBeginRenderPass(commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+    VkRenderingAttachmentInfo colorAttachment{};
+    colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+    colorAttachment.imageView = m_color.GetImageView();
+    colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    colorAttachment.clearValue.color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+
+    VkRenderingInfo renderingInfo{};
+    renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+    renderingInfo.renderArea.offset = {0,0};
+    renderingInfo.renderArea.extent = extent;
+    renderingInfo.layerCount = 1;
+    renderingInfo.colorAttachmentCount = 1;
+    renderingInfo.pColorAttachments = &colorAttachment;
+
+    vkCmdBeginRendering(commandBuffer, &renderingInfo);
 
     VkViewport viewport{};
     viewport.x = 0.0f;
@@ -146,7 +101,9 @@ void VulkanOverlayRenderPass::Begin(uint32_t frameIndex, VkCommandBuffer command
 
 void VulkanOverlayRenderPass::End(VkCommandBuffer commandBuffer) {
 
-    vkCmdEndRenderPass(commandBuffer);
+    vkCmdEndRendering(commandBuffer);
+
+    TransitionImageLayout(commandBuffer, m_color.GetImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 }
 
@@ -154,18 +111,7 @@ void VulkanOverlayRenderPass::Destroy(VkDevice device) {
 
     m_descriptor.Destroy();
     m_color.Destroy(device);
-
-    if (m_framebuffer) {
-        vkDestroyFramebuffer(device, m_framebuffer, nullptr);
-        m_framebuffer = VK_NULL_HANDLE;
-    }
-
     m_pipeline.Destroy(m_device);
-
-    if (m_renderPass) {
-        vkDestroyRenderPass(m_device, m_renderPass, nullptr);
-        m_renderPass = VK_NULL_HANDLE;
-    }
 
 }
 

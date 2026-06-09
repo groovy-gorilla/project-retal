@@ -7,68 +7,8 @@
 
 void VulkanPostRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, Settings& settings) {
 
-    // COLOR
-    VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = colorFormat;
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;;
-
-    // ATTACHMENT
-    VkAttachmentReference colorRef{};
-    colorRef.attachment = 0;
-    colorRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-    // SUBPASS
-    VkSubpassDescription subpass{};
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = 1;
-    subpass.pColorAttachments = &colorRef;
-
-    // DEPENDENCIES
-    VkSubpassDependency dependency{};
-    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    dependency.dstSubpass = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-    dependency.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-    // CREATE RENDER PASS
-    VkRenderPassCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    createInfo.attachmentCount = 1;
-    createInfo.pAttachments = &colorAttachment;
-    createInfo.subpassCount = 1;
-    createInfo.pSubpasses = &subpass;
-    createInfo.dependencyCount = 1;
-    createInfo.pDependencies = &dependency;
-
-    VK_CHECK(vkCreateRenderPass(device, &createInfo, nullptr, &m_renderPass));
-
     // CREATE RENDER TARGETS
     m_color.Create(device, physicalDevice, renderExtent.width, renderExtent.height, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_SAMPLE_COUNT_1_BIT);
-
-
-    // FRAMEBUFFER
-    std::vector<VkImageView> attachments = {
-        m_color.GetImageView()
-    };
-
-    VkFramebufferCreateInfo framebufferCreateInfo{};
-    framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    framebufferCreateInfo.renderPass = m_renderPass;
-    framebufferCreateInfo.attachmentCount = 1;
-    framebufferCreateInfo.pAttachments = attachments.data();
-    framebufferCreateInfo.width = renderExtent.width;
-    framebufferCreateInfo.height = renderExtent.height;
-    framebufferCreateInfo.layers = 1;
-
-    VK_CHECK(vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &m_framebuffer));
 
     // DESCRIPTOR
     std::vector<VkDescriptorSetLayoutBinding> bindings;
@@ -180,19 +120,9 @@ void VulkanPostRenderPass::Render(uint32_t frameIndex, VkCommandBuffer commandBu
 
 void VulkanPostRenderPass::Destroy(VkDevice device) {
 
-    if (m_framebuffer != VK_NULL_HANDLE) {
-        vkDestroyFramebuffer(device, m_framebuffer, nullptr);
-        m_framebuffer = VK_NULL_HANDLE;
-    }
-
     m_color.Destroy(device);
     m_descriptor.Destroy();
     m_pipeline.Destroy(device);
-
-    if (m_renderPass) {
-        vkDestroyRenderPass(device, m_renderPass, nullptr);
-        m_renderPass = VK_NULL_HANDLE;
-    }
 
 }
 

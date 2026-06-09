@@ -2,6 +2,7 @@
 #include "VulkanPostRenderPass.h"
 #include "Debug/ErrorDialog.h"
 #include "Core/Settings.h"
+#include "Graphics/Vulkan/Utils/VulkanUtils.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 
 void VulkanPostRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, Settings& settings) {
@@ -95,7 +96,9 @@ void VulkanPostRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevi
     pushConstant.size = sizeof(PostPushConstants);
 
     PipelineDesc pdesc;
-    pdesc.renderPass = m_renderPass;
+    pdesc.renderPass = VK_NULL_HANDLE;
+    pdesc.colorFormat = colorFormat;
+    pdesc.depthFormat = VK_FORMAT_UNDEFINED;
     pdesc.descriptorLayout = m_descriptor.GetLayout();
     pdesc.pushConstants = &pushConstant;
     pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Post/post_vert.spv";
@@ -118,15 +121,25 @@ void VulkanPostRenderPass::Render(uint32_t frameIndex, VkCommandBuffer commandBu
     VkClearValue clear{};
     clear.color = { 0.0f, 0.0f, 0.0f, 1.0f };
 
-    VkRenderPassBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    beginInfo.renderPass = m_renderPass;
-    beginInfo.framebuffer = m_framebuffer;
-    beginInfo.renderArea.extent = extent;
-    beginInfo.clearValueCount = 1;
-    beginInfo.pClearValues = &clear;
+    VkRenderingAttachmentInfo colorAttachment{};
+    colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+    colorAttachment.imageView = m_color.GetImageView();
+    colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    colorAttachment.clearValue.color = {{0.0f, 0.0f, 0.0f, 1.0f}};
 
-    vkCmdBeginRenderPass(commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+    VkRenderingInfo renderingInfo{};
+    renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+    renderingInfo.renderArea.offset = {0,0};
+    renderingInfo.renderArea.extent = extent;
+    renderingInfo.layerCount = 1;
+    renderingInfo.colorAttachmentCount = 1;
+    renderingInfo.pColorAttachments = &colorAttachment;
+
+    TransitionImageLayout(commandBuffer, m_color.GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+    vkCmdBeginRendering(commandBuffer, &renderingInfo);
 
     VkViewport viewport{};
     viewport.x = 0.0f;
@@ -159,7 +172,9 @@ void VulkanPostRenderPass::Render(uint32_t frameIndex, VkCommandBuffer commandBu
 
     vkCmdDraw(commandBuffer, 3, 1,0, 0);
 
-    vkCmdEndRenderPass(commandBuffer);
+    vkCmdEndRendering(commandBuffer);
+
+    TransitionImageLayout(commandBuffer, m_color.GetImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 }
 

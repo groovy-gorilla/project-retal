@@ -23,6 +23,10 @@ void VulkanDevice::Create(VkPhysicalDevice physicalDevice, uint32_t graphicsQueu
         queueInfos.push_back(queueInfo);
     }
 
+    VkPhysicalDeviceDynamicRenderingFeatures dynamicRendering{};
+    dynamicRendering.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
+    dynamicRendering.dynamicRendering = VK_TRUE;
+
     VkPhysicalDeviceFeatures features{};
 
     VkDeviceCreateInfo createInfo{};
@@ -33,6 +37,7 @@ void VulkanDevice::Create(VkPhysicalDevice physicalDevice, uint32_t graphicsQueu
     createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
     createInfo.ppEnabledExtensionNames = deviceExtensions.data();
     createInfo.enabledLayerCount = 0;
+    createInfo.pNext = &dynamicRendering;
 
     const char* layers[] = { "VK_LAYER_KHRONOS_validation" };
     #ifndef NDEBUG

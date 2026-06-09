@@ -3,6 +3,10 @@
 
 struct PipelineDesc {
     VkRenderPass renderPass = VK_NULL_HANDLE;
+
+    VkFormat colorFormat = VK_FORMAT_UNDEFINED;
+    VkFormat depthFormat = VK_FORMAT_UNDEFINED;
+
     VkDescriptorSetLayout descriptorLayout = VK_NULL_HANDLE;
     VkPushConstantRange* pushConstants = nullptr;
     VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_1_BIT;
@@ -19,6 +23,8 @@ struct PipelineDesc {
     VkVertexInputBindingDescription* bindingDescription = nullptr;
     VkVertexInputAttributeDescription* attributeDescriptions = nullptr;
     uint32_t attributeCount = 0;
+
+
 };
 
 class Pipeline {

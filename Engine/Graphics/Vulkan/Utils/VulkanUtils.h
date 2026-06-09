@@ -29,8 +29,9 @@ void CreateImageViewResource(
     VkImageAspectFlags aspect,
     VkImageView& imageView);
 
-VkSampler CreateSamplerResource(
-    VkDevice& device);
+void CreateSamplerResource(
+    VkDevice& device,
+    VkSampler& sampler);
 
 VkShaderModule CreateShaderModule(
     VkDevice device,
@@ -53,6 +54,13 @@ void TransitionImageLayout(
     VkImage image,
     VkImageLayout oldLayout,
     VkImageLayout newLayout);
+
+void TransitionImageLayout(
+    VkCommandBuffer commandBuffer,
+    VkImage image,
+    VkImageLayout oldLayout,
+    VkImageLayout newLayout
+);
 
 void CopyBufferToImage(
     VkDevice device,

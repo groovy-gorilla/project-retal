@@ -138,10 +138,5 @@ void VulkanPresentRenderPass::Destroy() {
     m_descriptor.Destroy();
     m_pipeline.Destroy(m_device);
 
-    if (m_renderPass) {
-        vkDestroyRenderPass(m_device, m_renderPass, nullptr);
-        m_renderPass = VK_NULL_HANDLE;
-    }
-
 }
 

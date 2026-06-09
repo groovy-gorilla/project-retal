@@ -22,16 +22,10 @@ public:
         VkExtent2D extent,
         Settings& settings);
 
-    [[nodiscard]] VkRenderPass Get() const { return m_renderPass; }
-    [[nodiscard]] Descriptor GetDescriptor() const { return m_descriptor; }
-
 private:
 
     // DEVICE HANDLE
     VkDevice m_device = VK_NULL_HANDLE;
-
-    // PASS
-    VkRenderPass m_renderPass = VK_NULL_HANDLE;
 
     // PIPELINE
     Pipeline m_pipeline;

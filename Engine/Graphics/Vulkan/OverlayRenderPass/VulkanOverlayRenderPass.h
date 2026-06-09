@@ -25,7 +25,7 @@ public:
 
     void End(VkCommandBuffer commandBuffer);
 
-    [[nodiscard]] Descriptor GetDescriptor() const { return m_descriptor; }
+    Descriptor GetDescriptor() const { return m_descriptor; }
     RenderTarget& GetColor() { return m_color; }
 
 private:

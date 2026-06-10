@@ -33,6 +33,7 @@ void VulkanPhysicalDevice::Pick(VkInstance instance, VkSurfaceKHR surface) {
 
     // Sprawdza każdą kartę pod względem używalności
     for (auto& gpu : GPU_List) {
+
         VkPhysicalDeviceProperties deviceProperties;
         vkGetPhysicalDeviceProperties(gpu.physicalDevice, &deviceProperties);
 
@@ -58,10 +59,19 @@ void VulkanPhysicalDevice::Pick(VkInstance instance, VkSurfaceKHR surface) {
             gpu.usable = false;
         }
 
+        // Jeśli nie obsługuje Vulklan 1.3 - odpada
+        if (deviceProperties.apiVersion < VK_API_VERSION_1_3) {
+            gpu.usable = false;
+        }
+
+        // Jeśli nie obsługuje tekstur do 16384 - odpada
+        if (deviceProperties.limits.maxImageDimension2D < 16384) {
+            gpu.usable = false;
+        }
+
     }
 
-    // Sprawdza właściwości każdego używalnego urządzenia
-    VkPhysicalDevice integrated = VK_NULL_HANDLE;
+    // Sprawdza właściwości każdego używalnego urządzenia i wybiera najlepszą opcję
     for (auto& gpu : GPU_List) {
 
         if (gpu.usable) {
@@ -76,15 +86,10 @@ void VulkanPhysicalDevice::Pick(VkInstance instance, VkSurfaceKHR surface) {
 
             // lub zintegrowaną jak nie ma discrete gpu
             if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU) {
-                integrated = gpu.physicalDevice;
+                m_physicalDevice = gpu.physicalDevice;
             }
         }
 
-    }
-
-    // Jeśli jest zinegrowana a nie ma dedykowanej to wybiera zintegrowaną
-    if (m_physicalDevice == VK_NULL_HANDLE && integrated != VK_NULL_HANDLE) {
-        m_physicalDevice = integrated;
     }
 
     // Jeśli nie ma w ogóle to znaczy, że nie ma GPU spełniającego wymagania
@@ -96,11 +101,6 @@ void VulkanPhysicalDevice::Pick(VkInstance instance, VkSurfaceKHR surface) {
     vkGetPhysicalDeviceProperties(m_physicalDevice, &physicalDeviceProperties);
     std::cout << "[Vulkan] Physical device selected: " << physicalDeviceProperties.deviceName << std::endl;
 
-    // Sprawdza czy karta obsłuży tekstury do 16384
-    std::cout << "Max 2D texture size: " << physicalDeviceProperties.limits.maxImageDimension2D << std::endl;
-    if (physicalDeviceProperties.limits.maxImageDimension2D < 16384) {
-        throw std::runtime_error("This hardware configuration does not meet the minimum system requirements.");
-    }
 }
 
 

@@ -55,9 +55,11 @@ void VulkanPostRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevi
 
 void VulkanPostRenderPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VkExtent2D extent, Settings& settings, float exposure) {
 
+    // UPDATE DESCRIPTOR
     VkSampler sampler = settings.FILTER == TextureFilter::Nearest ? inputColor.GetNearestSampler() : inputColor.GetLinearSampler();
     m_descriptor.UpdateTexture(frameIndex, 0, inputColor.GetImageView(), sampler);
 
+    // CLEAR
     VkClearValue clear{};
     clear.color = { 0.0f, 0.0f, 0.0f, 1.0f };
 
@@ -110,6 +112,7 @@ void VulkanPostRenderPass::Render(uint32_t frameIndex, VkCommandBuffer commandBu
 
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.GetLayout(), 0, 1, &descriptorSet, 0, nullptr);
 
+    // FULLSCREEN TRIANGLE
     vkCmdDraw(commandBuffer, 3, 1,0, 0);
 
     vkCmdEndRendering(commandBuffer);

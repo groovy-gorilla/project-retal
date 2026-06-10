@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "VulkanSMAARenderPass.h"
+#include "SMAAPass.h"
 
 #include "Core/Settings.h"
 #include "Graphics/Vulkan/Utils/VulkanUtils.h"
@@ -8,7 +8,7 @@
 #include "Debug/ErrorDialog.h"
 #include "Graphics/Vulkan/Wrappers/Buffer.h"
 
-void VulkanSMAARenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, Settings& settings, VkCommandPool commandPool, VkQueue graphicsQueue) {
+void SMAAPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, Settings& settings, VkCommandPool commandPool, VkQueue graphicsQueue) {
 
     m_device = device;
     m_commandPool = commandPool;
@@ -80,7 +80,7 @@ void VulkanSMAARenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevi
 
 }
 
-void VulkanSMAARenderPass::Render(VkCommandBuffer commandBuffer, VkExtent2D extent, uint32_t currentFrame, RenderTarget& inputColor) {
+void SMAAPass::Render(VkCommandBuffer commandBuffer, VkExtent2D extent, uint32_t currentFrame, RenderTarget& inputColor) {
 
     // EDGE
     m_edgeDescriptor.UpdateTexture(currentFrame, 0, inputColor.GetImageView(), inputColor.GetLinearSampler());
@@ -99,7 +99,7 @@ void VulkanSMAARenderPass::Render(VkCommandBuffer commandBuffer, VkExtent2D exte
 
 }
 
-void VulkanSMAARenderPass::Destroy(VkDevice device) {
+void SMAAPass::Destroy(VkDevice device) {
 
     // DESCRIPTORS
     m_edgeDescriptor.Destroy();
@@ -158,7 +158,7 @@ void VulkanSMAARenderPass::Destroy(VkDevice device) {
 
 }
 
-void VulkanSMAARenderPass::RenderEdgePass(VkCommandBuffer commandBuffer, VkExtent2D extent, uint32_t currentFrame) {
+void SMAAPass::RenderEdgePass(VkCommandBuffer commandBuffer, VkExtent2D extent, uint32_t currentFrame) {
 
     // CLEAR
     VkClearValue clear{};
@@ -191,7 +191,7 @@ void VulkanSMAARenderPass::RenderEdgePass(VkCommandBuffer commandBuffer, VkExten
 
 }
 
-void VulkanSMAARenderPass::RenderBlendPass(VkCommandBuffer commandBuffer, VkExtent2D extent, uint32_t currentFrame) {
+void SMAAPass::RenderBlendPass(VkCommandBuffer commandBuffer, VkExtent2D extent, uint32_t currentFrame) {
 
     // CLEAR
     VkClearValue clear{};
@@ -224,7 +224,7 @@ void VulkanSMAARenderPass::RenderBlendPass(VkCommandBuffer commandBuffer, VkExte
 
 }
 
-void VulkanSMAARenderPass::RenderNeighborhoodPass(VkCommandBuffer commandBuffer, VkExtent2D extent, uint32_t currentFrame) {
+void SMAAPass::RenderNeighborhoodPass(VkCommandBuffer commandBuffer, VkExtent2D extent, uint32_t currentFrame) {
 
     // CLEAR
     VkClearValue clear{};
@@ -257,7 +257,7 @@ void VulkanSMAARenderPass::RenderNeighborhoodPass(VkCommandBuffer commandBuffer,
 
 }
 
-void VulkanSMAARenderPass::CreateEdgeRenderPass(VkDevice device) {
+void SMAAPass::CreateEdgeRenderPass(VkDevice device) {
 
     // COLOR ATTACHMENT
     VkAttachmentDescription colorAttachment{};
@@ -317,7 +317,7 @@ void VulkanSMAARenderPass::CreateEdgeRenderPass(VkDevice device) {
 
 }
 
-void VulkanSMAARenderPass::CreateEdgeFramebuffer(VkDevice device, VkExtent2D extent) {
+void SMAAPass::CreateEdgeFramebuffer(VkDevice device, VkExtent2D extent) {
 
     // ATTACHMENTS
     VkImageView attachments[] = {
@@ -339,7 +339,7 @@ void VulkanSMAARenderPass::CreateEdgeFramebuffer(VkDevice device, VkExtent2D ext
 
 }
 
-void VulkanSMAARenderPass::CreateEdgeDescriptors(VkDevice device, Settings& settings) {
+void SMAAPass::CreateEdgeDescriptors(VkDevice device, Settings& settings) {
 
     // DESCRIPTORS
     std::vector<VkDescriptorSetLayoutBinding> bindings;
@@ -358,7 +358,7 @@ void VulkanSMAARenderPass::CreateEdgeDescriptors(VkDevice device, Settings& sett
 
 }
 
-void VulkanSMAARenderPass::CreateEdgePipeline(VkDevice device, VkExtent2D extent) {
+void SMAAPass::CreateEdgePipeline(VkDevice device, VkExtent2D extent) {
 
     struct SMAASpecializationData {
         float width;
@@ -419,7 +419,7 @@ void VulkanSMAARenderPass::CreateEdgePipeline(VkDevice device, VkExtent2D extent
 
 }
 
-void VulkanSMAARenderPass::CreateBlendRenderPass(VkDevice device) {
+void SMAAPass::CreateBlendRenderPass(VkDevice device) {
 
     // COLOR ATTACHMENT
     VkAttachmentDescription colorAttachment{};
@@ -465,7 +465,7 @@ void VulkanSMAARenderPass::CreateBlendRenderPass(VkDevice device) {
 
 }
 
-void VulkanSMAARenderPass::CreateBlendFramebuffer(VkDevice device, VkExtent2D extent) {
+void SMAAPass::CreateBlendFramebuffer(VkDevice device, VkExtent2D extent) {
 
     // ATTACHMENTS
     VkImageView attachments[] = {
@@ -487,7 +487,7 @@ void VulkanSMAARenderPass::CreateBlendFramebuffer(VkDevice device, VkExtent2D ex
 
 }
 
-void VulkanSMAARenderPass::CreateBlendDescriptors(VkDevice device, Settings& settings) {
+void SMAAPass::CreateBlendDescriptors(VkDevice device, Settings& settings) {
 
     // DESCRIPTORS
     std::vector<VkDescriptorSetLayoutBinding> bindings;
@@ -520,7 +520,7 @@ void VulkanSMAARenderPass::CreateBlendDescriptors(VkDevice device, Settings& set
 
 }
 
-void VulkanSMAARenderPass::CreateBlendPipeline(VkDevice device, VkExtent2D extent) {
+void SMAAPass::CreateBlendPipeline(VkDevice device, VkExtent2D extent) {
 
     struct SMAASpecializationData {
         float width;
@@ -581,7 +581,7 @@ void VulkanSMAARenderPass::CreateBlendPipeline(VkDevice device, VkExtent2D exten
 
 }
 
-void VulkanSMAARenderPass::CreateNeighborhoodRenderPass(VkDevice device, RenderTarget& outputColor) {
+void SMAAPass::CreateNeighborhoodRenderPass(VkDevice device, RenderTarget& outputColor) {
 
     // COLOR ATTACHMENT
     VkAttachmentDescription colorAttachment{};
@@ -627,7 +627,7 @@ void VulkanSMAARenderPass::CreateNeighborhoodRenderPass(VkDevice device, RenderT
 
 }
 
-void VulkanSMAARenderPass::CreateNeighborhoodFramebuffer(VkDevice device, VkExtent2D extent, RenderTarget& outputColor) {
+void SMAAPass::CreateNeighborhoodFramebuffer(VkDevice device, VkExtent2D extent, RenderTarget& outputColor) {
 
     // ATTACHMENTS
     VkImageView attachments[] = {
@@ -649,7 +649,7 @@ void VulkanSMAARenderPass::CreateNeighborhoodFramebuffer(VkDevice device, VkExte
 
 }
 
-void VulkanSMAARenderPass::CreateNeighborhoodDescriptors(VkDevice device, Settings& settings) {
+void SMAAPass::CreateNeighborhoodDescriptors(VkDevice device, Settings& settings) {
 
     // DESCRIPTORS
     std::vector<VkDescriptorSetLayoutBinding> bindings;
@@ -675,7 +675,7 @@ void VulkanSMAARenderPass::CreateNeighborhoodDescriptors(VkDevice device, Settin
 
 }
 
-void VulkanSMAARenderPass::CreateNeighborhoodPipeline(VkDevice device, VkExtent2D extent) {
+void SMAAPass::CreateNeighborhoodPipeline(VkDevice device, VkExtent2D extent) {
 
     struct SMAASpecializationData {
         float width;

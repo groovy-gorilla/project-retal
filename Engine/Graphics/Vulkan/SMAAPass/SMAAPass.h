@@ -8,7 +8,7 @@
 
 class Settings;
 
-class VulkanSMAARenderPass {
+class SMAAPass {
 public:
 
     void Create(VkDevice device,

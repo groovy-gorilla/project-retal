@@ -3,24 +3,30 @@
 #include "Core/Settings.h"
 #include "Graphics/Vulkan/Wrappers/Descriptor.h"
 #include "Graphics/Vulkan/Wrappers/Pipeline.h"
+#include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 
-class VulkanPresentRenderPass {
+class OverlayPass {
 public:
     void Create(
         VkDevice device,
-        VkFormat swapchainFormat,
+        VkPhysicalDevice physicalDevice,
+        VkExtent2D renderExtent,
+        VkFormat colorFormat,
         Settings& settings);
 
-    void Destroy();
+    void Destroy(VkDevice device);
 
-    void Render(
+    void Begin(
         uint32_t frameIndex,
         VkCommandBuffer commandBuffer,
         RenderTarget& inputColor,
-        VkImage swapchainImage,
-        VkImageView swapchainView,
         VkExtent2D extent,
         Settings& settings);
+
+    void End(VkCommandBuffer commandBuffer);
+
+    Descriptor GetDescriptor() const { return m_descriptor; }
+    RenderTarget& GetColor() { return m_color; }
 
 private:
 
@@ -29,6 +35,9 @@ private:
 
     // PIPELINE
     Pipeline m_pipeline;
+
+    // ATTACHMENTS
+    RenderTarget m_color;
 
     // DESCRIPTOR
     Descriptor m_descriptor;

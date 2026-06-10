@@ -4,7 +4,7 @@
 #include "Graphics/Vulkan/Wrappers/Pipeline.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 
-class VulkanSceneRenderPass {
+class ScenePass {
 public:
     void Create(
         VkDevice device,

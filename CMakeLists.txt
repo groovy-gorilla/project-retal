@@ -39,8 +39,8 @@ add_executable(IndigoEngine main.cpp
         Engine/Graphics/Vulkan/Core/VulkanDevice.cpp
         Engine/Graphics/Vulkan/Core/VulkanSwapchain.h
         Engine/Graphics/Vulkan/Core/VulkanSwapchain.cpp
-        Engine/Graphics/Vulkan/SceneRenderPass/VulkanSceneRenderPass.h
-        Engine/Graphics/Vulkan/SceneRenderPass/VulkanSceneRenderPass.cpp
+        Engine/Graphics/Vulkan/ScenePass/ScenePass.h
+        Engine/Graphics/Vulkan/ScenePass/ScenePass.cpp
         Engine/Graphics/Vulkan/VulkanRenderer.h
         Engine/Graphics/Vulkan/VulkanRenderer.cpp
         Engine/Graphics/Graphics.h
@@ -49,8 +49,8 @@ add_executable(IndigoEngine main.cpp
         Engine/Graphics/Vulkan/Core/VulkanDebug.cpp
         Engine/Graphics/Vulkan/Utils/VulkanUtils.h
         Engine/Graphics/Vulkan/Utils/VulkanUtils.cpp
-        Engine/Graphics/Vulkan/PostProcessRenderPass/VulkanPostRenderPass.cpp
-        Engine/Graphics/Vulkan/PostProcessRenderPass/VulkanPostRenderPass.h
+        Engine/Graphics/Vulkan/PostProcessPass/PostProcessPass.cpp
+        Engine/Graphics/Vulkan/PostProcessPass/PostProcessPass.h
         Engine/Graphics/Vulkan/Core/VulkanValidation.h
         Engine/Graphics/Vulkan/Core/VulkanValidation.cpp
         Engine/Graphics/Vulkan/Wrappers/RenderTarget.h
@@ -62,13 +62,13 @@ add_executable(IndigoEngine main.cpp
         Engine/Graphics/Vulkan/Core/VulkanQueues.cpp
         Engine/Graphics/Vulkan/Wrappers/Descriptor.h
         Engine/Graphics/Vulkan/Wrappers/Descriptor.cpp
-        Engine/Graphics/Vulkan/SSAARenderPass/VulkanSSAARenderPass.h
-        Engine/Graphics/Vulkan/SSAARenderPass/VulkanSSAARenderPass.cpp
+        Engine/Graphics/Vulkan/SSAAPass/SSAAPass.h
+        Engine/Graphics/Vulkan/SSAAPass/SSAAPass.cpp
         ThirdParty/stb/stb_image_write.h
         Engine/pch.h
         Engine/pch.cpp
-        Engine/Graphics/Vulkan/SMAARenderPass/VulkanSMAARenderPass.cpp
-        Engine/Graphics/Vulkan/SMAARenderPass/VulkanSMAARenderPass.h
+        Engine/Graphics/Vulkan/SMAAPass/SMAAPass.cpp
+        Engine/Graphics/Vulkan/SMAAPass/SMAAPass.h
         Engine/Graphics/Vulkan/Wrappers/RenderTarget.cpp
         Engine/Core/Timer.h
         Engine/Core/Timer.cpp
@@ -79,16 +79,16 @@ add_executable(IndigoEngine main.cpp
         Engine/Graphics/Vulkan/Wrappers/Pipeline.cpp
         Engine/Graphics/Vulkan/Wrappers/Buffer.h
         Engine/Graphics/Vulkan/Wrappers/Buffer.cpp
-        Engine/Graphics/Vulkan/OverlayRenderPass/VulkanOverlayRenderPass.h
-        Engine/Graphics/Vulkan/OverlayRenderPass/VulkanOverlayRenderPass.cpp
+        Engine/Graphics/Vulkan/OverlayPass/OverlayPass.h
+        Engine/Graphics/Vulkan/OverlayPass/OverlayPass.cpp
         Engine/Graphics/Sprite/Sprite.cpp
         Engine/Graphics/Sprite/Sprite.h
         Engine/Graphics/Sprite/SpriteRenderer.cpp
         Engine/Graphics/Sprite/SpriteRenderer.h
         Engine/Graphics/Camera/Camera.cpp
         Engine/Graphics/Camera/Camera.h
-        Engine/Graphics/Vulkan/PresentPass/VulkanPresentRenderPass.cpp
-        Engine/Graphics/Vulkan/PresentPass/VulkanPresentRenderPass.h
+        Engine/Graphics/Vulkan/PresentPass/PresentPass.cpp
+        Engine/Graphics/Vulkan/PresentPass/PresentPass.h
         Engine/Graphics/Font/Font.h
         Engine/Graphics/Font/Font.cpp
         Engine/Graphics/Text/Text.h

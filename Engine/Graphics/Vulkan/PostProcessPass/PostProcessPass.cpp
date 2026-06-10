@@ -1,13 +1,11 @@
 #include "pch.h"
-#include "VulkanOverlayRenderPass.h"
+#include "PostProcessPass.h"
 #include "Debug/ErrorDialog.h"
 #include "Core/Settings.h"
 #include "Graphics/Vulkan/Utils/VulkanUtils.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 
-void VulkanOverlayRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, Settings& settings) {
-
-    m_device = device;
+void PostProcessPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, Settings& settings) {
 
     // CREATE RENDER TARGETS
     m_color.Create(device, physicalDevice, renderExtent.width, renderExtent.height, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_SAMPLE_COUNT_1_BIT);
@@ -22,26 +20,40 @@ void VulkanOverlayRenderPass::Create(VkDevice device, VkPhysicalDevice physicalD
     colorBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     bindings.push_back(colorBinding);
 
+    VkDescriptorSetLayoutBinding depthBinding{};
+    depthBinding.binding = 1;
+    depthBinding.descriptorCount = 1;
+    depthBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    depthBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    bindings.push_back(depthBinding);
+
     m_descriptor.Create(device, bindings, settings.MAX_FRAMES_IN_FLIGHT);
+
+    // PUSH CONSTANT
+    VkPushConstantRange pushConstant{};
+    pushConstant.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    pushConstant.offset = 0;
+    pushConstant.size = sizeof(PostPushConstants);
 
     PipelineDesc pdesc;
     pdesc.renderPass = VK_NULL_HANDLE;
     pdesc.colorFormat = colorFormat;
     pdesc.depthFormat = VK_FORMAT_UNDEFINED;
     pdesc.descriptorLayout = m_descriptor.GetLayout();
-    pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Overlay/overlay_vert.spv";
-    pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/Overlay/overlay_frag.spv";
+    pdesc.pushConstants = &pushConstant;
+    pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Post/post_vert.spv";
+    pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/Post/post_frag.spv";
     pdesc.depthTest = false;
     pdesc.blending = false;
 
     // PIPELINE
     m_pipeline.Create(device, pdesc);
 
-    std::cout << "[Vulkan] Overlay-render pass created" << std::endl;
+    std::cout << "[Vulkan] Post-render pass created" << std::endl;
 
 }
 
-void VulkanOverlayRenderPass::Begin(uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VkExtent2D extent, Settings& settings) {
+void PostProcessPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VkExtent2D extent, Settings& settings, float exposure) {
 
     // UPDATE DESCRIPTOR
     VkSampler sampler = settings.FILTER == TextureFilter::Nearest ? inputColor.GetNearestSampler() : inputColor.GetLinearSampler();
@@ -50,8 +62,6 @@ void VulkanOverlayRenderPass::Begin(uint32_t frameIndex, VkCommandBuffer command
     // CLEAR
     VkClearValue clear{};
     clear.color = { 0.0f, 0.0f, 0.0f, 1.0f };
-
-    TransitionImageLayout(commandBuffer, m_color.GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     VkRenderingAttachmentInfo colorAttachment{};
     colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
@@ -68,6 +78,8 @@ void VulkanOverlayRenderPass::Begin(uint32_t frameIndex, VkCommandBuffer command
     renderingInfo.layerCount = 1;
     renderingInfo.colorAttachmentCount = 1;
     renderingInfo.pColorAttachments = &colorAttachment;
+
+    TransitionImageLayout(commandBuffer, m_color.GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     vkCmdBeginRendering(commandBuffer, &renderingInfo);
 
@@ -87,8 +99,14 @@ void VulkanOverlayRenderPass::Begin(uint32_t frameIndex, VkCommandBuffer command
 
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
+    PostPushConstants PC;
+    PC.hdrEnable = settings.HDR;
+    PC.exposure = exposure;
+    PC.dithering = settings.DITHERING;
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.Get());
+    vkCmdPushConstants(commandBuffer, m_pipeline.GetLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PostPushConstants), &PC);
+
 
     VkDescriptorSet descriptorSet = m_descriptor.GetSet(frameIndex);
 
@@ -97,21 +115,17 @@ void VulkanOverlayRenderPass::Begin(uint32_t frameIndex, VkCommandBuffer command
     // FULLSCREEN TRIANGLE
     vkCmdDraw(commandBuffer, 3, 1,0, 0);
 
-}
-
-void VulkanOverlayRenderPass::End(VkCommandBuffer commandBuffer) {
-
     vkCmdEndRendering(commandBuffer);
 
     TransitionImageLayout(commandBuffer, m_color.GetImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 }
 
-void VulkanOverlayRenderPass::Destroy(VkDevice device) {
+void PostProcessPass::Destroy(VkDevice device) {
 
-    m_descriptor.Destroy();
     m_color.Destroy(device);
-    m_pipeline.Destroy(m_device);
+    m_descriptor.Destroy();
+    m_pipeline.Destroy(device);
 
 }
 

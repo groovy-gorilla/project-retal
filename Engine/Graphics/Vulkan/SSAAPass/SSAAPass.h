@@ -6,7 +6,7 @@
 
 struct Settings;
 
-class VulkanSSAARenderPass {
+class SSAAPass {
 public:
 
     void Create(

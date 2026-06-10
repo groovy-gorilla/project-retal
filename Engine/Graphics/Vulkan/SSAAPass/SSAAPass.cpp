@@ -1,12 +1,12 @@
 #include "pch.h"
-#include "VulkanSSAARenderPass.h"
+#include "SSAAPass.h"
 #include "Graphics/Vulkan/Utils/VulkanUtils.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 #include "Core/Settings.h"
 #include "Debug/ErrorDialog.h"
 
 
-void VulkanSSAARenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, /*IN*/RenderTarget& sceneColor, Settings& settings) {
+void SSAAPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, /*IN*/RenderTarget& sceneColor, Settings& settings) {
 
     // COLOR
     VkAttachmentDescription colorAttachment{};
@@ -99,7 +99,7 @@ void VulkanSSAARenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevi
 
 }
 
-void VulkanSSAARenderPass::Render(VkCommandBuffer commandBuffer, VkExtent2D extent, uint32_t currentFrame) {
+void SSAAPass::Render(VkCommandBuffer commandBuffer, VkExtent2D extent, uint32_t currentFrame) {
 
     VkClearValue clear{};
     clear.color = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -143,7 +143,7 @@ void VulkanSSAARenderPass::Render(VkCommandBuffer commandBuffer, VkExtent2D exte
 }
 
 
-void VulkanSSAARenderPass::Destroy(VkDevice device) {
+void SSAAPass::Destroy(VkDevice device) {
 
     m_descriptor.Destroy();
 

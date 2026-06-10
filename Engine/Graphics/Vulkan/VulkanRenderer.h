@@ -9,15 +9,15 @@
 #include "Core/VulkanPhysicalDevice.h"
 #include "Core/VulkanDevice.h"
 #include "Core/VulkanSwapchain.h"
-#include "SceneRenderPass/VulkanSceneRenderPass.h"
-#include "PostProcessRenderPass/VulkanPostRenderPass.h"
+#include "ScenePass/ScenePass.h"
+#include "PostProcessPass/PostProcessPass.h"
 #include "Core/VulkanCommands.h"
 #include "Core/VulkanSync.h"
 #include "Core/VulkanQueues.h"
-#include "OverlayRenderPass/VulkanOverlayRenderPass.h"
-#include "PresentPass/VulkanPresentRenderPass.h"
-#include "SMAARenderPass/VulkanSMAARenderPass.h"
-#include "SSAARenderPass/VulkanSSAARenderPass.h"
+#include "OverlayPass/OverlayPass.h"
+#include "PresentPass/PresentPass.h"
+#include "SMAAPass/SMAAPass.h"
+#include "SSAAPass/SSAAPass.h"
 
 struct VulkanContext {
     VkDevice device = VK_NULL_HANDLE;
@@ -78,14 +78,14 @@ private:
     VulkanContext m_context;
 
     // SCENE
-    VulkanSceneRenderPass m_sceneRenderPass;
+    ScenePass m_sceneRenderPass;
 
     // SCREEN
-    VulkanSMAARenderPass m_smaaRenderPass;
-    VulkanSSAARenderPass m_ssaaRenderPass;
-    VulkanPostRenderPass m_postRenderPass;
-    VulkanOverlayRenderPass m_overlayRenderPass;
-    VulkanPresentRenderPass m_presentRenderPass;
+    SMAAPass m_smaaRenderPass;
+    SSAAPass m_ssaaRenderPass;
+    PostProcessPass m_postRenderPass;
+    OverlayPass m_overlayRenderPass;
+    PresentPass m_presentRenderPass;
 
     VulkanCommands m_commands;
     VulkanSync m_sync;

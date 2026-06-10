@@ -12,7 +12,7 @@ struct PostPushConstants {
     int dithering;
 };
 
-class VulkanPostRenderPass {
+class PostProcessPass {
 public:
     void Create(
         VkDevice device,

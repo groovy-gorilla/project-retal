@@ -1,8 +1,8 @@
 #include "pch.h"
-#include "VulkanSceneRenderPass.h"
+#include "ScenePass.h"
 #include "Debug/ErrorDialog.h"
 
-void VulkanSceneRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, VkFormat depthFormat, AntiAliasing aaMode, VkSampleCountFlagBits samples, Settings& settings) {
+void ScenePass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, VkFormat depthFormat, AntiAliasing aaMode, VkSampleCountFlagBits samples, Settings& settings) {
 
   m_renderExtent = renderExtent;
 
@@ -139,7 +139,7 @@ void VulkanSceneRenderPass::Create(VkDevice device, VkPhysicalDevice physicalDev
 
 }
 
-void VulkanSceneRenderPass::Destroy(VkDevice device) {
+void ScenePass::Destroy(VkDevice device) {
 
     m_pipeline.Destroy(device);
 
@@ -160,7 +160,7 @@ void VulkanSceneRenderPass::Destroy(VkDevice device) {
 
 }
 
-void VulkanSceneRenderPass::Begin(VkCommandBuffer commandBuffer) {
+void ScenePass::Begin(VkCommandBuffer commandBuffer) {
 
     VkClearValue clearValues[3]{};
 
@@ -205,13 +205,13 @@ void VulkanSceneRenderPass::Begin(VkCommandBuffer commandBuffer) {
 
 }
 
-void VulkanSceneRenderPass::End(VkCommandBuffer commandBuffer) {
+void ScenePass::End(VkCommandBuffer commandBuffer) {
 
     vkCmdEndRenderPass(commandBuffer);
 
 }
 
-void VulkanSceneRenderPass::PipelineBind(VkCommandBuffer commandBuffer) {
+void ScenePass::PipelineBind(VkCommandBuffer commandBuffer) {
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.Get());
 

@@ -1,10 +1,10 @@
 #include "pch.h"
-#include "VulkanPresentRenderPass.h"
+#include "PresentPass.h"
 #include "Core/Settings.h"
 #include "Graphics/Vulkan/Utils/VulkanUtils.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 
-void VulkanPresentRenderPass::Create(VkDevice device, VkFormat swapchainFormat, Settings& settings) {
+void PresentPass::Create(VkDevice device, VkFormat swapchainFormat, Settings& settings) {
 
     m_device = device;
 
@@ -37,7 +37,7 @@ void VulkanPresentRenderPass::Create(VkDevice device, VkFormat swapchainFormat, 
 
 }
 
-void VulkanPresentRenderPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VkImage swapchainImage, VkImageView swapchainView, VkExtent2D extent, Settings& settings) {
+void PresentPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VkImage swapchainImage, VkImageView swapchainView, VkExtent2D extent, Settings& settings) {
 
     // UPDATE DESCRIPTOR
     VkSampler sampler = settings.FILTER == TextureFilter::Nearest ? inputColor.GetNearestSampler() : inputColor.GetLinearSampler();
@@ -133,7 +133,7 @@ void VulkanPresentRenderPass::Render(uint32_t frameIndex, VkCommandBuffer comman
 
 }
 
-void VulkanPresentRenderPass::Destroy() {
+void PresentPass::Destroy() {
 
     m_descriptor.Destroy();
     m_pipeline.Destroy(m_device);

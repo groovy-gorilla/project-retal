@@ -183,25 +183,7 @@ void ScenePass::Begin(VkCommandBuffer commandBuffer) {
 
     vkCmdBeginRenderPass(commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    // ************ COLOR TRIANGLE *************************
-
-    VkViewport viewport{};
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    viewport.width = m_renderExtent.width;
-    viewport.height = m_renderExtent.height;
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
-    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-    VkExtent2D extent;
-    extent.width = m_renderExtent.width;
-    extent.height = m_renderExtent.height;
-    VkRect2D scissor{};
-    scissor.offset = {0, 0};
-    scissor.extent = extent;
-    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.Get());
-    //vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 
 }
 

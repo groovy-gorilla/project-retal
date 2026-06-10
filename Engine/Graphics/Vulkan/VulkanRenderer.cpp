@@ -126,31 +126,52 @@ void VulkanRenderer::EndScene() {
 
 }
 
-void VulkanRenderer::BeginOverlay(Settings& settings) {
+void VulkanRenderer::BeginOverlay(Settings& set) {
 
-    // MSAA
-    if (settings.AA_MODE == AntiAliasing::MSAA || settings.AA_MODE == AntiAliasing::MSAA_SMAA) {
-        m_currentColor = &m_sceneRenderPass.GetResolve();
-    }
+    // ANTIALIASING LOGIC
+    switch(set.AA_MODE) {
 
-    // SSAA
-    if (settings.AA_MODE == AntiAliasing::SSAA || settings.AA_MODE == AntiAliasing::SSAA_SMAA) {
-        m_ssaaRenderPass.Render(m_currentCommandBuffer, m_renderExtent, m_sync.GetCurrentFrame());
-        m_currentColor = &m_ssaaRenderPass.GetColor();
-    }
+        case AntiAliasing::None:
+            break;
 
-    // SMAA
-    if (settings.AA_MODE == AntiAliasing::SMAA || settings.AA_MODE == AntiAliasing::MSAA_SMAA || settings.AA_MODE == AntiAliasing::SSAA_SMAA) {
-        m_smaaRenderPass.Render(m_currentCommandBuffer, m_renderExtent, m_sync.GetCurrentFrame(), *m_currentColor);
-        m_currentColor = &m_smaaRenderPass.GetColor();
+        case AntiAliasing::MSAA:
+            m_currentColor = &m_sceneRenderPass.GetResolve();
+            break;
+
+        case AntiAliasing::SMAA:
+            m_smaaRenderPass.Render(m_currentCommandBuffer, m_renderExtent, m_sync.GetCurrentFrame(), *m_currentColor);
+            m_currentColor = &m_smaaRenderPass.GetColor();
+            break;
+
+        case AntiAliasing::SSAA:
+            m_ssaaRenderPass.Render(m_currentCommandBuffer, m_renderExtent, m_sync.GetCurrentFrame());
+            m_currentColor = &m_ssaaRenderPass.GetColor();
+            break;
+
+        case AntiAliasing::MSAA_SMAA:
+            m_currentColor = &m_sceneRenderPass.GetResolve();
+            m_smaaRenderPass.Render(m_currentCommandBuffer, m_renderExtent, m_sync.GetCurrentFrame(), *m_currentColor);
+            m_currentColor = &m_smaaRenderPass.GetColor();
+            break;
+
+        case AntiAliasing::SSAA_SMAA:
+            m_ssaaRenderPass.Render(m_currentCommandBuffer, m_renderExtent, m_sync.GetCurrentFrame());
+            m_currentColor = &m_ssaaRenderPass.GetColor();
+            m_smaaRenderPass.Render(m_currentCommandBuffer, m_renderExtent, m_sync.GetCurrentFrame(), *m_currentColor);
+            m_currentColor = &m_smaaRenderPass.GetColor();
+            break;
+
+        default:
+            break;
+
     }
 
     // POST PASS
-    m_postRenderPass.Render(m_sync.GetCurrentFrame(), m_currentCommandBuffer, *m_currentColor, m_renderExtent, settings, m_exposure);
+    m_postRenderPass.Render(m_sync.GetCurrentFrame(), m_currentCommandBuffer, *m_currentColor, m_renderExtent, set, m_exposure);
     m_currentColor = &m_postRenderPass.GetColor();
 
     // OVERLAY PASS
-    m_overlayRenderPass.Begin(m_sync.GetCurrentFrame(), m_currentCommandBuffer, *m_currentColor, m_renderExtent, settings);
+    m_overlayRenderPass.Begin(m_sync.GetCurrentFrame(), m_currentCommandBuffer, *m_currentColor, m_renderExtent, set);
     m_currentColor = &m_overlayRenderPass.GetColor();
 
 }

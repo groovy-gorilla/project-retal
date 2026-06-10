@@ -50,25 +50,25 @@ void Graphics::Render(VkDevice device, Settings& settings, float deltaTime) {
     m_renderer.BeginOverlay(settings);
 
     // TUTAJ OVERLAY
-    auto extent = m_renderer.GetRenderExtent();
-    m_camera.SetOrthographic(0.0, extent.width, extent.height, 0.0, -1.0, 1.0);
+    //auto extent = m_renderer.GetRenderExtent();
+    //m_camera.SetOrthographic(0.0, extent.width, extent.height, 0.0, -1.0, 1.0);
 
-    m_sprite1.SetPosition(0,0);
-    m_sprite1.SetSize(extent.width / 2, extent.height);
+    //m_sprite1.SetPosition(0,0);
+    //m_sprite1.SetSize(extent.width / 2, extent.height);
     //m_spriteRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_sprite1, m_camera);
 
-    m_sprite2.SetPosition(extent.width / 2,0);
-    m_sprite2.SetSize(extent.width / 2, extent.height);
+    //m_sprite2.SetPosition(extent.width / 2,0);
+    //m_sprite2.SetSize(extent.width / 2, extent.height);
     //m_spriteRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_sprite2, m_camera);
 
-    std::ostringstream ss;
+    /*std::ostringstream ss;
     ss << "FPS: " << m_fps.GetFPS()
        << "\nFrame: "
        << std::fixed
        << std::setprecision(1)
        << m_fps.GetFrameTime()
        << " ms";
-    m_Text.SetText(ss.str());
+    m_Text.SetText(ss.str());*/
     //m_textRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_Text, m_camera);
 
     m_renderer.EndOverlay();

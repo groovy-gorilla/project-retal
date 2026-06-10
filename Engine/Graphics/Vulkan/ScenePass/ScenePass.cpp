@@ -14,7 +14,6 @@ void ScenePass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExten
 
     // PIPELINE
     PipelineDesc pdesc;
-    pdesc.renderPass = VK_NULL_HANDLE;
     pdesc.colorFormat = colorFormat;
     pdesc.depthFormat = depthFormat;
     pdesc.samples = samples;

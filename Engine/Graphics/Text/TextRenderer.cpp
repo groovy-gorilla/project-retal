@@ -42,7 +42,7 @@ void TextRenderer::Create(VkDevice device, VkRenderPass renderPass) {
     pushConstants.size = sizeof(TextPushConstants);
 
     PipelineDesc pdesc;
-    pdesc.renderPass = m_renderPass;
+    //pdesc.renderPass = m_renderPass;
     pdesc.descriptorLayout = m_descriptorLayout;
     pdesc.pushConstants = &pushConstants;
     pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Text/text_vert.spv";

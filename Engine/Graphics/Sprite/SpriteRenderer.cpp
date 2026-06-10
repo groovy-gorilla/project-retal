@@ -27,7 +27,7 @@ void SpriteRenderer::Create(VkDevice device, VkRenderPass renderPass) {
     pushConstants.size = sizeof(SpritePushConstants);
 
     PipelineDesc pdesc;
-    pdesc.renderPass = m_renderPass;
+    //pdesc.renderPass = m_renderPass;
     pdesc.descriptorLayout = m_descriptorLayout;
     pdesc.pushConstants = &pushConstants;
     pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Sprite/sprite_vert.spv";

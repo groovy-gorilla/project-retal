@@ -117,41 +117,12 @@ VkExtent2D VulkanSwapchain::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& cap
 
 void VulkanSwapchain::Destroy(VkDevice device) {
 
-    for (auto framebuffer : m_framebuffers) {
-        vkDestroyFramebuffer(device, framebuffer, nullptr);
-    }
-
-    m_framebuffers.clear();
-
     DestroyImageViews(device);
 
     if (m_swapchain != VK_NULL_HANDLE) {
         vkDestroySwapchainKHR(device, m_swapchain, nullptr);
         m_swapchain = VK_NULL_HANDLE;
         std::cout << "[Vulkan] Swapchain destroyed" << std::endl;
-    }
-
-}
-
-void VulkanSwapchain::CreateFramebuffers(VkDevice device, VkRenderPass renderPass, VkExtent2D windowExtent) {
-
-    for (auto view : m_imageViews) {
-
-        VkFramebuffer framebuffer;
-
-        VkFramebufferCreateInfo fb{};
-        fb.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        fb.renderPass = renderPass;
-        fb.attachmentCount = 1;
-        fb.pAttachments = &view;
-        fb.width = windowExtent.width;
-        fb.height = windowExtent.height;
-        fb.layers = 1;
-
-        vkCreateFramebuffer(device, &fb, nullptr, &framebuffer);
-
-        m_framebuffers.push_back(framebuffer);
-
     }
 
 }

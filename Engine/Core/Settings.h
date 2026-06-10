@@ -38,10 +38,10 @@ struct Settings {
     bool DITHERING                      = false;
 
     // ANTIALIASING
-    AntiAliasing AA_MODE                = AntiAliasing::MSAA;
+    AntiAliasing AA_MODE                = AntiAliasing::SSAA;
 
     // MSAA
-    VkSampleCountFlagBits MSAA_SAMPLES  = VK_SAMPLE_COUNT_4_BIT;
+    VkSampleCountFlagBits MSAA_SAMPLES  = VK_SAMPLE_COUNT_1_BIT;
 
     // SSAA
     float SSAA_SCALE                    = 1.0f;                                                 // scale choice: 1.0 - 1.25 - 1.5 - 2.0

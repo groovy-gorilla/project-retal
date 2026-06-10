@@ -15,18 +15,12 @@ public:
     VkFormat GetImageFormat() const { return m_imageFormat; }
     VkExtent2D GetExtent() const { return m_extent; }
 
-    void CreateFramebuffers(VkDevice device, VkRenderPass renderPass, VkExtent2D windowExtent);
-    VkFramebuffer GetFramebuffer(uint32_t index) const { return m_framebuffers[index]; }
-
 private:
     VkSwapchainKHR m_swapchain = VK_NULL_HANDLE;
     std::vector<VkImage> m_images;
     std::vector<VkImageView> m_imageViews;
     VkFormat m_imageFormat = VK_FORMAT_UNDEFINED;
     VkExtent2D m_extent = {};
-
-    std::vector<VkFramebuffer> m_framebuffers;
-
 
     VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& formats);
     VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& modes, bool vsync);

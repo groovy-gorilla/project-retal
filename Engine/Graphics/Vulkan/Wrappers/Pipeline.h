@@ -2,11 +2,8 @@
 #include "pch.h"
 
 struct PipelineDesc {
-    VkRenderPass renderPass = VK_NULL_HANDLE;
-
     VkFormat colorFormat = VK_FORMAT_UNDEFINED;
     VkFormat depthFormat = VK_FORMAT_UNDEFINED;
-
     VkDescriptorSetLayout descriptorLayout = VK_NULL_HANDLE;
     VkPushConstantRange* pushConstants = nullptr;
     VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_1_BIT;

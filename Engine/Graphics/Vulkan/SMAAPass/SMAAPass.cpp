@@ -5,7 +5,6 @@
 #include "Graphics/Vulkan/Utils/VulkanUtils.h"
 #include "ThirdParty/smaa_textures/AreaTex.h"
 #include "ThirdParty/smaa_textures/SearchTex.h"
-#include "Debug/ErrorDialog.h"
 #include "Graphics/Vulkan/Wrappers/Buffer.h"
 
 void SMAAPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, Settings& settings, VkCommandPool commandPool, VkQueue graphicsQueue) {
@@ -59,20 +58,14 @@ void SMAAPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent
 
 
     // EDGE PASS
-    CreateEdgeRenderPass(device);
-    CreateEdgeFramebuffer(device, renderExtent);
     CreateEdgeDescriptors(device, settings);
     CreateEdgePipeline(device, renderExtent);
 
     // BLEND PASS
-    CreateBlendRenderPass(device);
-    CreateBlendFramebuffer(device, renderExtent);
     CreateBlendDescriptors(device, settings);
     CreateBlendPipeline(device, renderExtent);
 
     // NEIGHBORHOOD PASS
-    CreateNeighborhoodRenderPass(device, m_color);
-    CreateNeighborhoodFramebuffer(device, renderExtent, m_color);
     CreateNeighborhoodDescriptors(device, settings);
     CreateNeighborhoodPipeline(device, renderExtent);
 
@@ -110,41 +103,11 @@ void SMAAPass::Destroy(VkDevice device) {
     // EDGE PASS
     m_edgePipeline.Destroy(device);
 
-    if (m_edgeFramebuffer) {
-        vkDestroyFramebuffer(device, m_edgeFramebuffer, nullptr);
-        m_edgeFramebuffer = VK_NULL_HANDLE;
-    }
-
-    if (m_edgeRenderPass) {
-        vkDestroyRenderPass(device, m_edgeRenderPass, nullptr);
-        m_edgeRenderPass = VK_NULL_HANDLE;
-    }
-
     // BLEND PASS
     m_blendPipeline.Destroy(device);
 
-    if (m_blendFramebuffer) {
-        vkDestroyFramebuffer(device, m_blendFramebuffer, nullptr);
-        m_blendFramebuffer = VK_NULL_HANDLE;
-    }
-
-    if (m_blendRenderPass) {
-        vkDestroyRenderPass(device, m_blendRenderPass, nullptr);
-        m_blendRenderPass = VK_NULL_HANDLE;
-    }
-
     // NEIGHBORHOOD PASS
     m_neighborhoodPipeline.Destroy(device);
-
-    if (m_neighborhoodFramebuffer) {
-        vkDestroyFramebuffer(device, m_neighborhoodFramebuffer, nullptr);
-        m_neighborhoodFramebuffer = VK_NULL_HANDLE;
-    }
-
-    if (m_neighborhoodRenderPass) {
-        vkDestroyRenderPass(device, m_neighborhoodRenderPass, nullptr);
-        m_neighborhoodRenderPass = VK_NULL_HANDLE;
-    }
 
     // TARGETS
     m_edgeColor.Destroy(device);
@@ -160,21 +123,25 @@ void SMAAPass::Destroy(VkDevice device) {
 
 void SMAAPass::RenderEdgePass(VkCommandBuffer commandBuffer, VkExtent2D extent, uint32_t currentFrame) {
 
-    // CLEAR
-    VkClearValue clear{};
-    clear.color = { 0.0f, 0.0f, 0.0f, 0.0f };
+    VkRenderingAttachmentInfo colorAttachment{};
+    colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+    colorAttachment.imageView = m_edgeColor.GetImageView();
+    colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    colorAttachment.clearValue.color = {{0.0f, 0.0f, 0.0f, 0.0f}};
 
-    // RENDER PASS BEGIN
-    VkRenderPassBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    beginInfo.renderPass = m_edgeRenderPass;
-    beginInfo.framebuffer = m_edgeFramebuffer;
-    beginInfo.renderArea.offset = { 0, 0 };
-    beginInfo.renderArea.extent = extent;
-    beginInfo.clearValueCount = 1;
-    beginInfo.pClearValues = &clear;
+    VkRenderingInfo renderingInfo{};
+    renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+    renderingInfo.renderArea.offset = {0, 0};
+    renderingInfo.renderArea.extent = extent;
+    renderingInfo.layerCount = 1;
+    renderingInfo.colorAttachmentCount = 1;
+    renderingInfo.pColorAttachments = &colorAttachment;
 
-    vkCmdBeginRenderPass(commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+    TransitionImageLayout2(commandBuffer, m_edgeColor, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+    vkCmdBeginRendering(commandBuffer, &renderingInfo);
 
     // PIPELINE
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_edgePipeline.Get());
@@ -187,27 +154,33 @@ void SMAAPass::RenderEdgePass(VkCommandBuffer commandBuffer, VkExtent2D extent, 
     vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 
     // END
-    vkCmdEndRenderPass(commandBuffer);
+    vkCmdEndRendering(commandBuffer);
+
+    TransitionImageLayout2(commandBuffer, m_edgeColor, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 }
 
 void SMAAPass::RenderBlendPass(VkCommandBuffer commandBuffer, VkExtent2D extent, uint32_t currentFrame) {
 
-    // CLEAR
-    VkClearValue clear{};
-    clear.color = { 0.0f, 0.0f, 0.0f, 0.0f };
+    VkRenderingAttachmentInfo colorAttachment{};
+    colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+    colorAttachment.imageView = m_blendColor.GetImageView();
+    colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    colorAttachment.clearValue.color = {{0.0f, 0.0f, 0.0f, 0.0f}};
 
-    // RENDER PASS BEGIN
-    VkRenderPassBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    beginInfo.renderPass = m_blendRenderPass;
-    beginInfo.framebuffer = m_blendFramebuffer;
-    beginInfo.renderArea.offset = { 0, 0 };
-    beginInfo.renderArea.extent = extent;
-    beginInfo.clearValueCount = 1;
-    beginInfo.pClearValues = &clear;
+    VkRenderingInfo renderingInfo{};
+    renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+    renderingInfo.renderArea.offset = {0, 0};
+    renderingInfo.renderArea.extent = extent;
+    renderingInfo.layerCount = 1;
+    renderingInfo.colorAttachmentCount = 1;
+    renderingInfo.pColorAttachments = &colorAttachment;
 
-    vkCmdBeginRenderPass(commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+    TransitionImageLayout2(commandBuffer, m_blendColor, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+    vkCmdBeginRendering(commandBuffer, &renderingInfo);
 
     // PIPELINE
     vkCmdBindPipeline(commandBuffer,VK_PIPELINE_BIND_POINT_GRAPHICS, m_blendPipeline.Get());
@@ -220,27 +193,33 @@ void SMAAPass::RenderBlendPass(VkCommandBuffer commandBuffer, VkExtent2D extent,
     vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 
     // END
-    vkCmdEndRenderPass(commandBuffer);
+    vkCmdEndRendering(commandBuffer);
+
+    TransitionImageLayout2(commandBuffer, m_blendColor, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 }
 
 void SMAAPass::RenderNeighborhoodPass(VkCommandBuffer commandBuffer, VkExtent2D extent, uint32_t currentFrame) {
 
-    // CLEAR
-    VkClearValue clear{};
-    clear.color = { 0.0f, 0.0f, 0.0f, 1.0f };
+    VkRenderingAttachmentInfo colorAttachment{};
+    colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+    colorAttachment.imageView = m_color.GetImageView();
+    colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    colorAttachment.clearValue.color = {{0.0f, 0.0f, 0.0f, 1.0f}};
 
-    // RENDER PASS BEGIN
-    VkRenderPassBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    beginInfo.renderPass = m_neighborhoodRenderPass;
-    beginInfo.framebuffer = m_neighborhoodFramebuffer;
-    beginInfo.renderArea.offset = { 0, 0 };
-    beginInfo.renderArea.extent = extent;
-    beginInfo.clearValueCount = 1;
-    beginInfo.pClearValues = &clear;
+    VkRenderingInfo renderingInfo{};
+    renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+    renderingInfo.renderArea.offset = {0, 0};
+    renderingInfo.renderArea.extent = extent;
+    renderingInfo.layerCount = 1;
+    renderingInfo.colorAttachmentCount = 1;
+    renderingInfo.pColorAttachments = &colorAttachment;
 
-    vkCmdBeginRenderPass(commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+    TransitionImageLayout2(commandBuffer, m_color, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+    vkCmdBeginRendering(commandBuffer, &renderingInfo);
 
     // PIPELINE
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_neighborhoodPipeline.Get());
@@ -253,89 +232,9 @@ void SMAAPass::RenderNeighborhoodPass(VkCommandBuffer commandBuffer, VkExtent2D 
     vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 
     // END
-    vkCmdEndRenderPass(commandBuffer);
+    vkCmdEndRendering(commandBuffer);
 
-}
-
-void SMAAPass::CreateEdgeRenderPass(VkDevice device) {
-
-    // COLOR ATTACHMENT
-    VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = m_edgeColor.GetFormat();
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-    // ATTACHMENT REFERENCE
-    VkAttachmentReference colorRef{};
-    colorRef.attachment = 0;
-    colorRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-    // SUBPASS
-    VkSubpassDescription subpass{};
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = 1;
-    subpass.pColorAttachments = &colorRef;
-
-    // DEPENDENCY
-    VkSubpassDependency dependency{};
-    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    dependency.dstSubpass = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-    dependency.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-    VkSubpassDependency dependency2{};
-    dependency2.srcSubpass = 0;
-    dependency2.dstSubpass = VK_SUBPASS_EXTERNAL;
-    dependency2.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency2.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    dependency2.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-    dependency2.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-    VkSubpassDependency dependencies[] = {
-        dependency,
-        dependency2
-    };
-
-    // RENDER PASS
-    VkRenderPassCreateInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = 1;
-    renderPassInfo.pAttachments = &colorAttachment;
-    renderPassInfo.subpassCount = 1;
-    renderPassInfo.pSubpasses = &subpass;
-    renderPassInfo.dependencyCount = 2;
-    renderPassInfo.pDependencies = dependencies;
-
-    VK_CHECK(vkCreateRenderPass(device, &renderPassInfo, nullptr, &m_edgeRenderPass));
-
-}
-
-void SMAAPass::CreateEdgeFramebuffer(VkDevice device, VkExtent2D extent) {
-
-    // ATTACHMENTS
-    VkImageView attachments[] = {
-        m_edgeColor.GetImageView()
-    };
-
-    // FRAMEBUFFER INFO
-    VkFramebufferCreateInfo framebufferInfo{};
-    framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    framebufferInfo.renderPass = m_edgeRenderPass;
-    framebufferInfo.attachmentCount = 1;
-    framebufferInfo.pAttachments = attachments;
-    framebufferInfo.width = extent.width;
-    framebufferInfo.height = extent.height;
-    framebufferInfo.layers = 1;
-
-    // CREATE
-    VK_CHECK(vkCreateFramebuffer(device, &framebufferInfo, nullptr, &m_edgeFramebuffer));
+    TransitionImageLayout2(commandBuffer, m_color, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 }
 
@@ -406,7 +305,8 @@ void SMAAPass::CreateEdgePipeline(VkDevice device, VkExtent2D extent) {
     specializationInfo.pData = &specData;
 
     PipelineDesc pdesc;
-    pdesc.renderPass = m_edgeRenderPass;
+    pdesc.colorFormat = m_edgeColor.GetFormat();
+    pdesc.depthFormat = VK_FORMAT_UNDEFINED;
     pdesc.descriptorLayout = m_edgeDescriptorLayout;
     pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/SMAA/smaa_edge_vert.spv";
     pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/SMAA/smaa_edge_frag.spv";
@@ -416,74 +316,6 @@ void SMAAPass::CreateEdgePipeline(VkDevice device, VkExtent2D extent) {
     pdesc.fragSpec = &specializationInfo;
 
     m_edgePipeline.Create(device, pdesc);
-
-}
-
-void SMAAPass::CreateBlendRenderPass(VkDevice device) {
-
-    // COLOR ATTACHMENT
-    VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = m_blendColor.GetFormat();
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-    // ATTACHMENT REF
-    VkAttachmentReference colorRef{};
-    colorRef.attachment = 0;
-    colorRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-    // SUBPASS
-    VkSubpassDescription subpass{};
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = 1;
-    subpass.pColorAttachments = &colorRef;
-
-    // DEPENDENCY
-    VkSubpassDependency dependency{};
-    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    dependency.dstSubpass = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-    // RENDER PASS
-    VkRenderPassCreateInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = 1;
-    renderPassInfo.pAttachments = &colorAttachment;
-    renderPassInfo.subpassCount = 1;
-    renderPassInfo.pSubpasses = &subpass;
-    renderPassInfo.dependencyCount = 1;
-    renderPassInfo.pDependencies = &dependency;
-
-    VK_CHECK(vkCreateRenderPass(device, &renderPassInfo, nullptr, &m_blendRenderPass));
-
-}
-
-void SMAAPass::CreateBlendFramebuffer(VkDevice device, VkExtent2D extent) {
-
-    // ATTACHMENTS
-    VkImageView attachments[] = {
-        m_blendColor.GetImageView()
-    };
-
-    // FRAMEBUFFER INFO
-    VkFramebufferCreateInfo framebufferInfo{};
-    framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    framebufferInfo.renderPass = m_blendRenderPass;
-    framebufferInfo.attachmentCount = 1;
-    framebufferInfo.pAttachments = attachments;
-    framebufferInfo.width = extent.width;
-    framebufferInfo.height = extent.height;
-    framebufferInfo.layers = 1;
-
-    // CREATE
-    VK_CHECK(vkCreateFramebuffer(device, &framebufferInfo, nullptr, &m_blendFramebuffer));
 
 }
 
@@ -568,7 +400,8 @@ void SMAAPass::CreateBlendPipeline(VkDevice device, VkExtent2D extent) {
     specializationInfo.pData = &specData;
 
     PipelineDesc pdesc;
-    pdesc.renderPass = m_blendRenderPass;
+    pdesc.colorFormat = m_blendColor.GetFormat();
+    pdesc.depthFormat = VK_FORMAT_UNDEFINED;
     pdesc.descriptorLayout = m_blendDescriptorLayout;
     pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/SMAA/smaa_blend_vert.spv";
     pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/SMAA/smaa_blend_frag.spv";
@@ -578,74 +411,6 @@ void SMAAPass::CreateBlendPipeline(VkDevice device, VkExtent2D extent) {
     pdesc.fragSpec = &specializationInfo;
 
     m_blendPipeline.Create(device, pdesc);
-
-}
-
-void SMAAPass::CreateNeighborhoodRenderPass(VkDevice device, RenderTarget& outputColor) {
-
-    // COLOR ATTACHMENT
-    VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = outputColor.GetFormat();
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-    // ATTACHMENT REF
-    VkAttachmentReference colorRef{};
-    colorRef.attachment = 0;
-    colorRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-    // SUBPASS
-    VkSubpassDescription subpass{};
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = 1;
-    subpass.pColorAttachments = &colorRef;
-
-    // DEPENDENCY
-    VkSubpassDependency dependency{};
-    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    dependency.dstSubpass = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-    // RENDER PASS
-    VkRenderPassCreateInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = 1;
-    renderPassInfo.pAttachments = &colorAttachment;
-    renderPassInfo.subpassCount = 1;
-    renderPassInfo.pSubpasses = &subpass;
-    renderPassInfo.dependencyCount = 1;
-    renderPassInfo.pDependencies = &dependency;
-
-    VK_CHECK(vkCreateRenderPass(device, &renderPassInfo, nullptr, &m_neighborhoodRenderPass));
-
-}
-
-void SMAAPass::CreateNeighborhoodFramebuffer(VkDevice device, VkExtent2D extent, RenderTarget& outputColor) {
-
-    // ATTACHMENTS
-    VkImageView attachments[] = {
-        outputColor.GetImageView()
-    };
-
-    // FRAMEBUFFER INFO
-    VkFramebufferCreateInfo framebufferInfo{};
-    framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    framebufferInfo.renderPass = m_neighborhoodRenderPass;
-    framebufferInfo.attachmentCount = 1;
-    framebufferInfo.pAttachments = attachments;
-    framebufferInfo.width = extent.width;
-    framebufferInfo.height = extent.height;
-    framebufferInfo.layers = 1;
-
-    // CREATE
-    VK_CHECK(vkCreateFramebuffer(device, &framebufferInfo, nullptr, &m_neighborhoodFramebuffer));
 
 }
 
@@ -723,7 +488,8 @@ void SMAAPass::CreateNeighborhoodPipeline(VkDevice device, VkExtent2D extent) {
     specializationInfo.pData = &specData;
 
     PipelineDesc pdesc;
-    pdesc.renderPass = m_neighborhoodRenderPass;
+    pdesc.colorFormat = m_color.GetFormat();
+    pdesc.depthFormat = VK_FORMAT_UNDEFINED;
     pdesc.descriptorLayout = m_neighborhoodDescriptorLayout;
     pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/SMAA/smaa_neighborhood_vert.spv";
     pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/SMAA/smaa_neighborhood_frag.spv";

@@ -173,30 +173,11 @@ void Pipeline::Create(VkDevice device, const PipelineDesc& desc) {
     pipelineInfo.pColorBlendState = &colorBlend;
     pipelineInfo.pDepthStencilState = &depthStencil;
     pipelineInfo.layout = m_layout;
-    pipelineInfo.renderPass = desc.renderPass;
-    pipelineInfo.subpass = 0;
     pipelineInfo.pDynamicState = &dynamicState;
+    pipelineInfo.renderPass = VK_NULL_HANDLE;
+    pipelineInfo.subpass = 0;
+    pipelineInfo.pNext = &renderingInfo;
 
-    if (desc.renderPass != VK_NULL_HANDLE) {
-
-        std::cout << "[Pipeline] RenderPass mode" << std::endl;
-
-        // STARY SYSTEM
-        pipelineInfo.renderPass = desc.renderPass;
-        pipelineInfo.subpass = 0;
-
-    } else {
-
-        std::cout << "[Pipeline] Dynamic Rendering mode" << std::endl;
-
-        // DYNAMIC RENDERING
-        pipelineInfo.renderPass = VK_NULL_HANDLE;
-        pipelineInfo.subpass = 0;
-        pipelineInfo.pNext = &renderingInfo;
-
-    }
-
-    pipelineInfo.pStages = stages;
     VK_CHECK(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline));
 
     vkDestroyShaderModule(device, vertShader, nullptr);

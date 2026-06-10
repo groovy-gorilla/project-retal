@@ -21,7 +21,6 @@ void PresentPass::Create(VkDevice device, VkFormat swapchainFormat, Settings& se
     m_descriptor.Create(device, bindings, settings.MAX_FRAMES_IN_FLIGHT);
 
     PipelineDesc pdesc;
-    pdesc.renderPass = VK_NULL_HANDLE;
     pdesc.colorFormat = swapchainFormat;
     pdesc.depthFormat = VK_FORMAT_UNDEFINED;
     pdesc.descriptorLayout = m_descriptor.GetLayout();

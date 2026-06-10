@@ -24,15 +24,11 @@ public:
         VkExtent2D extent,
         uint32_t currentFrame);
 
-    [[nodiscard]] VkRenderPass Get() const { return m_renderPass; }
-    [[nodiscard]] Descriptor GetDescriptor() const { return m_descriptor; }
+    Descriptor GetDescriptor() const { return m_descriptor; }
 
     RenderTarget& GetColor() { return m_color; }
 
 private:
-
-    //PASS
-    VkRenderPass m_renderPass = VK_NULL_HANDLE;
 
     // PIPELINE
     Pipeline m_pipeline;
@@ -42,9 +38,6 @@ private:
 
     // DESCRIPTOR
     Descriptor m_descriptor;
-
-    // FRAMEBUFFER
-    VkFramebuffer m_framebuffer = VK_NULL_HANDLE;
 
 
 };

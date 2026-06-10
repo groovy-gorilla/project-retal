@@ -25,7 +25,6 @@ void OverlayPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExt
     m_descriptor.Create(device, bindings, settings.MAX_FRAMES_IN_FLIGHT);
 
     PipelineDesc pdesc;
-    pdesc.renderPass = VK_NULL_HANDLE;
     pdesc.colorFormat = colorFormat;
     pdesc.depthFormat = VK_FORMAT_UNDEFINED;
     pdesc.descriptorLayout = m_descriptor.GetLayout();

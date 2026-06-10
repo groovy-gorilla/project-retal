@@ -44,11 +44,6 @@ private:
                                 uint32_t currentFrame);
 
     // EDGE PASS
-    void CreateEdgeRenderPass(VkDevice device);
-
-    void CreateEdgeFramebuffer(VkDevice device,
-                               VkExtent2D extent);
-
     void CreateEdgeDescriptors(VkDevice device,
                                Settings& settings);
 
@@ -56,11 +51,6 @@ private:
                             VkExtent2D extent);
 
     // BLEND PASS
-    void CreateBlendRenderPass(VkDevice device);
-
-    void CreateBlendFramebuffer(VkDevice device,
-                                VkExtent2D extent);
-
     void CreateBlendDescriptors(VkDevice device,
                                  Settings& settings);
 
@@ -68,12 +58,6 @@ private:
                              VkExtent2D extent);
 
     // NEIGHBORHOOD PASS
-    void CreateNeighborhoodRenderPass(VkDevice device, RenderTarget& outputColor);
-
-    void CreateNeighborhoodFramebuffer(VkDevice device,
-                                       VkExtent2D extent,
-                                       RenderTarget& outputColor);
-
     void CreateNeighborhoodDescriptors(VkDevice device,
                                        Settings& settings);
 
@@ -94,22 +78,16 @@ private:
     RenderTarget m_searchTexture{};
 
     // EDGE PASS
-    VkRenderPass m_edgeRenderPass = VK_NULL_HANDLE;
-    VkFramebuffer m_edgeFramebuffer = VK_NULL_HANDLE;
     Descriptor m_edgeDescriptor{};
     VkDescriptorSetLayout m_edgeDescriptorLayout = VK_NULL_HANDLE;
     Pipeline m_edgePipeline;
 
     // BLEND PASS
-    VkRenderPass m_blendRenderPass = VK_NULL_HANDLE;
-    VkFramebuffer m_blendFramebuffer = VK_NULL_HANDLE;
     Descriptor m_blendDescriptor{};
     VkDescriptorSetLayout m_blendDescriptorLayout = VK_NULL_HANDLE;
     Pipeline m_blendPipeline;
 
     // NEIGHBORHOOD PASS
-    VkRenderPass m_neighborhoodRenderPass = VK_NULL_HANDLE;
-    VkFramebuffer m_neighborhoodFramebuffer = VK_NULL_HANDLE;
     Descriptor m_neighborhoodDescriptor{};
     VkDescriptorSetLayout m_neighborhoodDescriptorLayout = VK_NULL_HANDLE;
     Pipeline m_neighborhoodPipeline;

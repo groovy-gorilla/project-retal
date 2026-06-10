@@ -64,6 +64,7 @@ void TransitionImageLayout(
 void TransitionImageLayout2(
     VkCommandBuffer commandBuffer,
     VkImage image,
+    VkImageAspectFlags aspectMask,
     VkImageLayout oldLayout,
     VkImageLayout newLayout);
 

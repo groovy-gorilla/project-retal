@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "ScenePass.h"
 #include "Debug/ErrorDialog.h"
+#include "Graphics/Vulkan/Utils/VulkanUtils.h"
 
 void ScenePass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, VkFormat depthFormat, AntiAliasing aaMode, VkSampleCountFlagBits samples, Settings& settings) {
 
@@ -125,7 +126,9 @@ void ScenePass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExten
     VK_CHECK(vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &m_framebuffer));
 
     PipelineDesc pdesc;
-    pdesc.renderPass = m_renderPass;
+    pdesc.renderPass = VK_NULL_HANDLE;
+    pdesc.colorFormat = colorFormat;
+    pdesc.depthFormat = depthFormat;
     pdesc.samples = samples;
     pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Scene/scene_vert.spv";
     pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/Scene/scene_frag.spv";
@@ -162,26 +165,35 @@ void ScenePass::Destroy(VkDevice device) {
 
 void ScenePass::Begin(VkCommandBuffer commandBuffer) {
 
-    VkClearValue clearValues[3]{};
+    VkRenderingAttachmentInfo colorAttachment{};
+    colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+    colorAttachment.imageView = m_color.GetImageView();
+    colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    colorAttachment.clearValue.color = {{0.05f, 0.05f, 0.08f, 1.0f}};
 
-    // COLOR
-    clearValues[0].color = {0.05f, 0.05f, 0.08f, 1.0f};
+    VkRenderingAttachmentInfo depthAttachment{};
+    depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+    depthAttachment.imageView = m_depth.GetImageView();
+    depthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+    depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    depthAttachment.clearValue.depthStencil = {0.0f, 0};
 
-    // DEPTH
-    clearValues[1].depthStencil = { 0.0f, 0 };
+    VkRenderingInfo renderingInfo{};
+    renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+    renderingInfo.renderArea.offset = {0, 0};
+    renderingInfo.renderArea.extent = m_renderExtent;
+    renderingInfo.layerCount = 1;
+    renderingInfo.colorAttachmentCount = 1;
+    renderingInfo.pColorAttachments = &colorAttachment;
+    renderingInfo.pDepthAttachment = &depthAttachment;
 
-    // RESOLVE COLOR
-    clearValues[2].color = { 0.0f, 0.0f, 0.0f, 1.0f };
+    TransitionImageLayout2(commandBuffer, m_color.GetImage(), VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    //TransitionImageLayout2(commandBuffer, m_depth.GetImage(), VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
 
-    VkRenderPassBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    beginInfo.renderPass = m_renderPass;
-    beginInfo.framebuffer = m_framebuffer;
-    beginInfo.renderArea.extent = m_renderExtent;
-    beginInfo.clearValueCount = 3;
-    beginInfo.pClearValues = clearValues;
-
-    vkCmdBeginRenderPass(commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBeginRendering(commandBuffer, &renderingInfo);
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.Get());
 
@@ -189,7 +201,9 @@ void ScenePass::Begin(VkCommandBuffer commandBuffer) {
 
 void ScenePass::End(VkCommandBuffer commandBuffer) {
 
-    vkCmdEndRenderPass(commandBuffer);
+    vkCmdEndRendering(commandBuffer);
+
+    TransitionImageLayout2(commandBuffer, m_color.GetImage(), VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 }
 

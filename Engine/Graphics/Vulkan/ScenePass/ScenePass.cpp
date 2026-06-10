@@ -1,11 +1,11 @@
 #include "pch.h"
 #include "ScenePass.h"
-#include "Debug/ErrorDialog.h"
 #include "Graphics/Vulkan/Utils/VulkanUtils.h"
 
 void ScenePass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D renderExtent, VkFormat colorFormat, VkFormat depthFormat, AntiAliasing aaMode, VkSampleCountFlagBits samples, Settings& settings) {
 
     m_renderExtent = renderExtent;
+    m_samples = samples;
 
     // CREATE RENDER TARGETS
     m_color.Create(device, physicalDevice, m_renderExtent.width, m_renderExtent.height, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, samples);
@@ -48,6 +48,12 @@ void ScenePass::Begin(VkCommandBuffer commandBuffer) {
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     colorAttachment.clearValue.color = {{0.05f, 0.05f, 0.08f, 1.0f}};
 
+    if (m_samples != VK_SAMPLE_COUNT_1_BIT) {
+        colorAttachment.resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
+        colorAttachment.resolveImageView = m_resolve.GetImageView();
+        colorAttachment.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    }
+
     VkRenderingAttachmentInfo depthAttachment{};
     depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
     depthAttachment.imageView = m_depth.GetImageView();
@@ -65,8 +71,11 @@ void ScenePass::Begin(VkCommandBuffer commandBuffer) {
     renderingInfo.pColorAttachments = &colorAttachment;
     renderingInfo.pDepthAttachment = &depthAttachment;
 
-    TransitionImageLayout2(commandBuffer, m_color.GetImage(), VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-    //TransitionImageLayout2(commandBuffer, m_depth.GetImage(), VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+    TransitionImageLayout2(commandBuffer, m_color, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+    if (m_samples != VK_SAMPLE_COUNT_1_BIT) {
+        TransitionImageLayout2(commandBuffer, m_resolve, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    }
 
     vkCmdBeginRendering(commandBuffer, &renderingInfo);
 
@@ -78,8 +87,15 @@ void ScenePass::End(VkCommandBuffer commandBuffer) {
 
     vkCmdEndRendering(commandBuffer);
 
-    TransitionImageLayout2(commandBuffer, m_color.GetImage(), VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    if (m_samples == VK_SAMPLE_COUNT_1_BIT) {
 
+        TransitionImageLayout2(commandBuffer, m_color, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+    } else {
+
+        TransitionImageLayout2(commandBuffer, m_resolve, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+    }
 }
 
 void ScenePass::PipelineBind(VkCommandBuffer commandBuffer) {

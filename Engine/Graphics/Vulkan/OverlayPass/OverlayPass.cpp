@@ -51,8 +51,6 @@ void OverlayPass::Begin(uint32_t frameIndex, VkCommandBuffer commandBuffer, Rend
     VkClearValue clear{};
     clear.color = { 0.0f, 0.0f, 0.0f, 1.0f };
 
-    TransitionImageLayout(commandBuffer, m_color.GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-
     VkRenderingAttachmentInfo colorAttachment{};
     colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
     colorAttachment.imageView = m_color.GetImageView();
@@ -68,6 +66,8 @@ void OverlayPass::Begin(uint32_t frameIndex, VkCommandBuffer commandBuffer, Rend
     renderingInfo.layerCount = 1;
     renderingInfo.colorAttachmentCount = 1;
     renderingInfo.pColorAttachments = &colorAttachment;
+
+    TransitionImageLayout2(commandBuffer, m_color, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     vkCmdBeginRendering(commandBuffer, &renderingInfo);
 
@@ -103,7 +103,7 @@ void OverlayPass::End(VkCommandBuffer commandBuffer) {
 
     vkCmdEndRendering(commandBuffer);
 
-    TransitionImageLayout(commandBuffer, m_color.GetImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    TransitionImageLayout2(commandBuffer, m_color, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 }
 

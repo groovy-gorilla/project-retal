@@ -21,6 +21,9 @@ public:
     VkSampler GetLinearSampler() { return m_linearSampler; }
     uint32_t GetWidth() { return m_width; }
     uint32_t GetHeight() { return m_height; }
+    VkImageLayout GetLayout() const { return m_layout; }
+    void SetLayout(VkImageLayout layout) { m_layout = layout; }
+    VkImageAspectFlags GetAspectMask() const { return m_aspectMask; }
 
 private:
     VkImage m_image = VK_NULL_HANDLE;
@@ -33,6 +36,9 @@ private:
 
     uint32_t m_width = 0;
     uint32_t m_height = 0;
+
+    VkImageLayout m_layout = VK_IMAGE_LAYOUT_UNDEFINED;
+    VkImageAspectFlags m_aspectMask = 0;
 
     void CreateSamplers(VkDevice device);
     void CreateImage(VkDevice device, VkPhysicalDevice physicalDevice, VkImageUsageFlags usage, VkSampleCountFlagBits samples);

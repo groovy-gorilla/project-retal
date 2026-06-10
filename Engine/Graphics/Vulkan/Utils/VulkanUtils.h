@@ -1,4 +1,5 @@
 #pragma once
+#include "Graphics/Vulkan/Wrappers/RenderTarget.h"
 
 std::vector<char> ReadFile(
     const std::string& filename);
@@ -59,6 +60,11 @@ void TransitionImageLayout(
     VkCommandBuffer commandBuffer,
     VkImage image,
     VkImageLayout oldLayout,
+    VkImageLayout newLayout);
+
+void TransitionImageLayout2(
+    VkCommandBuffer commandBuffer,
+    RenderTarget& target,
     VkImageLayout newLayout);
 
 void TransitionImageLayout2(

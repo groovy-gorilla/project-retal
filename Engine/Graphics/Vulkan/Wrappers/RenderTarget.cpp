@@ -8,6 +8,7 @@ void RenderTarget::Create(VkDevice device, VkPhysicalDevice physicalDevice, uint
     m_width = width;
     m_height = height;
     m_format = format;
+    m_aspectMask = aspect;
 
     CreateImage(device, physicalDevice, usage, samples);
     CreateImageView(device, format, aspect);
@@ -16,6 +17,11 @@ void RenderTarget::Create(VkDevice device, VkPhysicalDevice physicalDevice, uint
 }
 
 void RenderTarget::Destroy(VkDevice device) {
+
+    m_layout = VK_IMAGE_LAYOUT_UNDEFINED;
+    m_aspectMask = 0;
+    m_width = 0;
+    m_height = 0;
 
     if (m_nearestSampler) {
         vkDestroySampler(device, m_nearestSampler, nullptr);

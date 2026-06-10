@@ -42,6 +42,7 @@ private:
     RenderTarget m_resolve;
 
     VkExtent2D m_renderExtent = {};
+    VkSampleCountFlagBits m_samples = VK_SAMPLE_COUNT_1_BIT;
 
 };
 

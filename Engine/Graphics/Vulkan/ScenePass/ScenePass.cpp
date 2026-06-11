@@ -21,6 +21,8 @@ void ScenePass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExten
     pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/Scene/scene_frag.spv";
     pdesc.depthTest = true;
     pdesc.blending = false;
+    pdesc.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    pdesc.cullMode = VK_CULL_MODE_NONE;
 
     m_pipeline.Create(device, pdesc);
 
@@ -70,15 +72,31 @@ void ScenePass::Begin(VkCommandBuffer commandBuffer) {
     renderingInfo.pColorAttachments = &colorAttachment;
     renderingInfo.pDepthAttachment = &depthAttachment;
 
-    TransitionImageLayout2(commandBuffer, m_color, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    TransitionImageLayout(commandBuffer, m_color, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     if (m_samples != VK_SAMPLE_COUNT_1_BIT) {
-        TransitionImageLayout2(commandBuffer, m_resolve, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        TransitionImageLayout(commandBuffer, m_resolve, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
     }
 
     vkCmdBeginRendering(commandBuffer, &renderingInfo);
 
+    VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = static_cast<float>(m_renderExtent.width);
+    viewport.height = static_cast<float>(m_renderExtent.height);
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+
+    VkRect2D scissor{};
+    scissor.offset = { 0, 0 };
+    scissor.extent = m_renderExtent;
+    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.Get());
+
+    vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 
 }
 
@@ -88,11 +106,11 @@ void ScenePass::End(VkCommandBuffer commandBuffer) {
 
     if (m_samples == VK_SAMPLE_COUNT_1_BIT) {
 
-        TransitionImageLayout2(commandBuffer, m_color, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        TransitionImageLayout(commandBuffer, m_color, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
     } else {
 
-        TransitionImageLayout2(commandBuffer, m_resolve, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        TransitionImageLayout(commandBuffer, m_resolve, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
     }
 }

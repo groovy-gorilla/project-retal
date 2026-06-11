@@ -36,7 +36,11 @@ void PresentPass::Create(VkDevice device, VkFormat swapchainFormat, Settings& se
 
 }
 
-void PresentPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VkImage swapchainImage, VkImageView swapchainView, VkExtent2D extent, Settings& settings) {
+void PresentPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VulkanSwapchain& swapchain, uint32_t imageIndex,VkExtent2D extent, Settings& settings) {
+
+    VkImage swapchainImage = swapchain.GetImage(imageIndex);
+    VkImageView swapchainView = swapchain.GetImageView(imageIndex);
+    VkImageLayout oldLayout = swapchain.GetLayout(imageIndex);
 
     // UPDATE DESCRIPTOR
     VkSampler sampler = settings.FILTER == TextureFilter::Nearest ? inputColor.GetNearestSampler() : inputColor.GetLinearSampler();
@@ -62,14 +66,8 @@ void PresentPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer, Ren
     renderingInfo.colorAttachmentCount = 1;
     renderingInfo.pColorAttachments = &colorAttachment;
 
-    //TransitionImageLayout2(commandBuffer, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-    TransitionImageLayout2(
-        commandBuffer,
-        swapchainImage,
-        VK_IMAGE_ASPECT_COLOR_BIT,
-        VK_IMAGE_LAYOUT_UNDEFINED,
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-    );
+    TransitionImageLayout(commandBuffer, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT, oldLayout, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    swapchain.SetLayout(imageIndex, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     vkCmdBeginRendering(commandBuffer, &renderingInfo);
 
@@ -135,7 +133,8 @@ void PresentPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer, Ren
 
     vkCmdEndRendering(commandBuffer);
 
-    TransitionImageLayout2(commandBuffer, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    TransitionImageLayout(commandBuffer, swapchainImage, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    swapchain.SetLayout(imageIndex, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
 }
 

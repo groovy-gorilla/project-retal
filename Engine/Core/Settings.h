@@ -38,7 +38,7 @@ struct Settings {
     bool DITHERING                      = false;
 
     // ANTIALIASING
-    AntiAliasing AA_MODE                = AntiAliasing::SSAA;
+    AntiAliasing AA_MODE                = AntiAliasing::None;
 
     // MSAA
     VkSampleCountFlagBits MSAA_SAMPLES  = VK_SAMPLE_COUNT_1_BIT;

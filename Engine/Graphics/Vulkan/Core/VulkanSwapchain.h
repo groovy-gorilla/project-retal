@@ -14,6 +14,8 @@ public:
     VkImageView GetImageView(uint32_t index) const { return m_imageViews[index]; }
     VkFormat GetImageFormat() const { return m_imageFormat; }
     VkExtent2D GetExtent() const { return m_extent; }
+    VkImageLayout GetLayout(uint32_t index) const { return m_layouts[index]; }
+    void SetLayout(uint32_t index, VkImageLayout layout) { m_layouts[index] = layout; }
 
 private:
     VkSwapchainKHR m_swapchain = VK_NULL_HANDLE;
@@ -21,6 +23,7 @@ private:
     std::vector<VkImageView> m_imageViews;
     VkFormat m_imageFormat = VK_FORMAT_UNDEFINED;
     VkExtent2D m_extent = {};
+    std::vector<VkImageLayout> m_layouts;
 
     VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& formats);
     VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& modes, bool vsync);

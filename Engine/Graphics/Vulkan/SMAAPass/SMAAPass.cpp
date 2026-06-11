@@ -13,6 +13,7 @@ void SMAAPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent
     m_commandPool = commandPool;
     m_graphicsQueue = graphicsQueue;
 
+
     // AREA TEXTURE
     m_areaTexture.Create(device, physicalDevice, 160, 560, VK_FORMAT_R8G8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_SAMPLE_COUNT_1_BIT);
 
@@ -25,10 +26,12 @@ void SMAAPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent
     void* data = areaStagingBuffer.Map();
     memcpy(data, areaTexBytes, static_cast<size_t>(areaSize));
     areaStagingBuffer.Unmap();
-    TransitionImageLayout(device, m_commandPool, m_graphicsQueue, m_areaTexture.GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    TransitionImageLayoutImmediate(device, m_commandPool, m_graphicsQueue, m_areaTexture.GetImage(), VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
     CopyBufferToImage(device, m_commandPool, m_graphicsQueue, areaStagingBuffer.Get(), m_areaTexture.GetImage(), m_areaTexture.GetWidth(), m_areaTexture.GetHeight());
-    TransitionImageLayout(device, m_commandPool, m_graphicsQueue, m_areaTexture.GetImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    TransitionImageLayoutImmediate(device, m_commandPool, m_graphicsQueue, m_areaTexture.GetImage(), VK_IMAGE_ASPECT_COLOR_BIT,VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     areaStagingBuffer.Destroy();
+    m_areaTexture.SetLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
 
     // SEARCH TEXTURE
     m_searchTexture.Create(device, physicalDevice, 64, 16, VK_FORMAT_R8_UNORM, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_SAMPLE_COUNT_1_BIT);
@@ -42,10 +45,12 @@ void SMAAPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent
     data = searchStagingBuffer.Map();
     memcpy(data, searchTexBytes, static_cast<size_t>(searchSize));
     searchStagingBuffer.Unmap();
-    TransitionImageLayout(device, m_commandPool, m_graphicsQueue, m_searchTexture.GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    TransitionImageLayoutImmediate(device, m_commandPool, m_graphicsQueue, m_searchTexture.GetImage(), VK_IMAGE_ASPECT_COLOR_BIT,VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
     CopyBufferToImage(device, m_commandPool, m_graphicsQueue, searchStagingBuffer.Get(), m_searchTexture.GetImage(), m_searchTexture.GetWidth(), m_searchTexture.GetHeight());
-    TransitionImageLayout(device, m_commandPool, m_graphicsQueue, m_searchTexture.GetImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    TransitionImageLayoutImmediate(device, m_commandPool, m_graphicsQueue, m_searchTexture.GetImage(), VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     searchStagingBuffer.Destroy();
+    m_searchTexture.SetLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
 
     // EDGE TARGET
     m_edgeColor.Create(device, physicalDevice, renderExtent.width, renderExtent.height, VK_FORMAT_R8G8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_SAMPLE_COUNT_1_BIT);
@@ -139,7 +144,7 @@ void SMAAPass::RenderEdgePass(VkCommandBuffer commandBuffer, VkExtent2D extent, 
     renderingInfo.colorAttachmentCount = 1;
     renderingInfo.pColorAttachments = &colorAttachment;
 
-    TransitionImageLayout2(commandBuffer, m_edgeColor, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    TransitionImageLayout(commandBuffer, m_edgeColor, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     vkCmdBeginRendering(commandBuffer, &renderingInfo);
 
@@ -156,7 +161,7 @@ void SMAAPass::RenderEdgePass(VkCommandBuffer commandBuffer, VkExtent2D extent, 
     // END
     vkCmdEndRendering(commandBuffer);
 
-    TransitionImageLayout2(commandBuffer, m_edgeColor, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    TransitionImageLayout(commandBuffer, m_edgeColor, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 }
 
@@ -178,7 +183,7 @@ void SMAAPass::RenderBlendPass(VkCommandBuffer commandBuffer, VkExtent2D extent,
     renderingInfo.colorAttachmentCount = 1;
     renderingInfo.pColorAttachments = &colorAttachment;
 
-    TransitionImageLayout2(commandBuffer, m_blendColor, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    TransitionImageLayout(commandBuffer, m_blendColor, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     vkCmdBeginRendering(commandBuffer, &renderingInfo);
 
@@ -195,7 +200,7 @@ void SMAAPass::RenderBlendPass(VkCommandBuffer commandBuffer, VkExtent2D extent,
     // END
     vkCmdEndRendering(commandBuffer);
 
-    TransitionImageLayout2(commandBuffer, m_blendColor, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    TransitionImageLayout(commandBuffer, m_blendColor, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 }
 
@@ -217,7 +222,7 @@ void SMAAPass::RenderNeighborhoodPass(VkCommandBuffer commandBuffer, VkExtent2D 
     renderingInfo.colorAttachmentCount = 1;
     renderingInfo.pColorAttachments = &colorAttachment;
 
-    TransitionImageLayout2(commandBuffer, m_color, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    TransitionImageLayout(commandBuffer, m_color, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     vkCmdBeginRendering(commandBuffer, &renderingInfo);
 
@@ -234,7 +239,7 @@ void SMAAPass::RenderNeighborhoodPass(VkCommandBuffer commandBuffer, VkExtent2D 
     // END
     vkCmdEndRendering(commandBuffer);
 
-    TransitionImageLayout2(commandBuffer, m_color, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    TransitionImageLayout(commandBuffer, m_color, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 }
 

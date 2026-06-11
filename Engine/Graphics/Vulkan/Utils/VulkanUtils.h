@@ -48,26 +48,22 @@ void EndSingleTimeCommands(
     VkQueue queue,
     VkCommandBuffer commandBuffer);
 
-void TransitionImageLayout(
+void TransitionImageLayoutImmediate(
     VkDevice device,
     VkCommandPool commandPool,
     VkQueue queue,
     VkImage image,
+    VkImageAspectFlags aspectMask,
     VkImageLayout oldLayout,
-    VkImageLayout newLayout);
+    VkImageLayout newLayout
+);
 
 void TransitionImageLayout(
-    VkCommandBuffer commandBuffer,
-    VkImage image,
-    VkImageLayout oldLayout,
-    VkImageLayout newLayout);
-
-void TransitionImageLayout2(
     VkCommandBuffer commandBuffer,
     RenderTarget& target,
     VkImageLayout newLayout);
 
-void TransitionImageLayout2(
+void TransitionImageLayout(
     VkCommandBuffer commandBuffer,
     VkImage image,
     VkImageAspectFlags aspectMask,

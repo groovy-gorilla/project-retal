@@ -113,10 +113,6 @@ void VulkanRenderer::BeginScene() {
 
     // SCENE PASS
     m_sceneRenderPass.Begin(m_currentCommandBuffer);
-    m_sceneRenderPass.PipelineBind(m_currentCommandBuffer);
-
-    m_commands.SetViewport(m_currentCommandBuffer, m_sceneRenderPass.GetExtent());
-    m_commands.SetScissor(m_currentCommandBuffer, m_sceneRenderPass.GetExtent());
 
 }
 
@@ -184,7 +180,7 @@ void VulkanRenderer::EndOverlay() {
 
 void VulkanRenderer::RenderPresent(Settings& settings) {
 
-    m_presentRenderPass.Render(m_sync.GetCurrentFrame(), m_currentCommandBuffer, *m_currentColor, m_swapchain.GetImage(m_imageIndex), m_swapchain.GetImageView(m_imageIndex), m_swapchain.GetExtent(), settings);
+    m_presentRenderPass.Render(m_sync.GetCurrentFrame(), m_currentCommandBuffer, *m_currentColor, m_swapchain, m_imageIndex, m_swapchain.GetExtent(), settings);
 
 }
 

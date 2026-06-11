@@ -78,7 +78,7 @@ void PostProcessPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer,
     renderingInfo.colorAttachmentCount = 1;
     renderingInfo.pColorAttachments = &colorAttachment;
 
-    TransitionImageLayout2(commandBuffer, m_color, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    TransitionImageLayout(commandBuffer, m_color, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     vkCmdBeginRendering(commandBuffer, &renderingInfo);
 
@@ -116,7 +116,7 @@ void PostProcessPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer,
 
     vkCmdEndRendering(commandBuffer);
 
-    TransitionImageLayout2(commandBuffer, m_color, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    TransitionImageLayout(commandBuffer, m_color, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 }
 

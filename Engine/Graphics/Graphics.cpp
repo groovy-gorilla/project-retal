@@ -46,6 +46,7 @@ void Graphics::Render(VkDevice device, Settings& settings, float deltaTime) {
     // TUTAJ SCENA
     // ...
 
+
     m_renderer.EndScene();
     m_renderer.BeginOverlay(settings);
 

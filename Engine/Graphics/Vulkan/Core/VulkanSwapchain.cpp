@@ -53,6 +53,8 @@ void VulkanSwapchain::Create(VkPhysicalDevice physicalDevice, VkDevice device, V
     m_images.resize(count);
     VK_CHECK(vkGetSwapchainImagesKHR(device, m_swapchain, &count, m_images.data()));
 
+    m_layouts.resize(count, VK_IMAGE_LAYOUT_UNDEFINED);
+
     m_imageFormat = surfaceFormat.format;
     m_extent = ext;
 
@@ -116,6 +118,8 @@ VkExtent2D VulkanSwapchain::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& cap
 }
 
 void VulkanSwapchain::Destroy(VkDevice device) {
+
+    m_layouts.clear();
 
     DestroyImageViews(device);
 

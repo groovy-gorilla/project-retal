@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "SMAAPass.h"
-
 #include "Core/Settings.h"
 #include "Graphics/Vulkan/Utils/VulkanUtils.h"
 #include "ThirdParty/smaa_textures/AreaTex.h"

@@ -21,7 +21,7 @@ void ScenePass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExten
     pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/Scene/scene_frag.spv";
     pdesc.depthTest = true;
     pdesc.blending = false;
-    pdesc.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    pdesc.frontFace = VK_FRONT_FACE_CLOCKWISE;
     pdesc.cullMode = VK_CULL_MODE_NONE;
 
     m_pipeline.Create(device, pdesc);

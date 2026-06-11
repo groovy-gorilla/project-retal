@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "OverlayPass.h"
-#include "Debug/ErrorDialog.h"
 #include "Core/Settings.h"
 #include "Graphics/Vulkan/Utils/VulkanUtils.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"

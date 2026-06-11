@@ -59,9 +59,6 @@ void VulkanRenderer::Initialize(Display& display, Window& window, Settings& sett
     // PRESENT
     m_presentRenderPass.Create(m_device.Get(), m_swapchain.GetImageFormat(), settings);
 
-    // SWAPCHAIN BUFFERS
-    //m_swapchain.CreateFramebuffers(m_device.Get(), m_presentRenderPass.Get(), m_windowExtent);
-
 }
 
 void VulkanRenderer::Shutdown() {

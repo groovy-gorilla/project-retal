@@ -105,6 +105,8 @@ add_executable(IndigoEngine main.cpp
         smile.ktx
         Engine/Graphics/Model/Model.h
         Engine/Graphics/Model/Model.cpp
+        Engine/Graphics/Model/ModelRenderer.h
+        Engine/Graphics/Model/ModelRenderer.cpp
 )
 
 

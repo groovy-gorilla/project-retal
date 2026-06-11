@@ -77,7 +77,42 @@ namespace lina {
 
     // FLOAT MAT4 STRUCTURE
     struct fmat4 {
-        fvec4 r[4];
+        fvec4 col[4];
+
+        fmat4 operator*(const fmat4& other) const {
+
+            fmat4 result{};
+
+            for (int c = 0; c < 4; c++) {
+
+                result.col[c].x =
+                    col[0].x * other.col[c].x +
+                    col[1].x * other.col[c].y +
+                    col[2].x * other.col[c].z +
+                    col[3].x * other.col[c].w;
+
+                result.col[c].y =
+                    col[0].y * other.col[c].x +
+                    col[1].y * other.col[c].y +
+                    col[2].y * other.col[c].z +
+                    col[3].y * other.col[c].w;
+
+                result.col[c].z =
+                    col[0].z * other.col[c].x +
+                    col[1].z * other.col[c].y +
+                    col[2].z * other.col[c].z +
+                    col[3].z * other.col[c].w;
+
+                result.col[c].w =
+                    col[0].w * other.col[c].x +
+                    col[1].w * other.col[c].y +
+                    col[2].w * other.col[c].z +
+                    col[3].w * other.col[c].w;
+
+            }
+
+            return result;
+        }
     };
 
     // DOUBLE VEC2 STRUCTURE
@@ -158,37 +193,37 @@ namespace lina {
     // DOUBLE MAT4 STRUCTURE
     struct mat4 {
 
-        vec4 r[4]{};
+        vec4 col[4]{};
 
         mat4() {}
         explicit mat4(const vec4 *pArray) {
-            r[0] = pArray[0]; r[1] = pArray[1]; r[2] = pArray[2]; r[3] = pArray[3];
+            col[0] = pArray[0]; col[1] = pArray[1]; col[2] = pArray[2]; col[3] = pArray[3];
         }
 
         static mat4 Identity() {
             mat4 result{};
-            result.r[0].x = 1.0;
-            result.r[1].y = 1.0;
-            result.r[2].z = 1.0;
-            result.r[3].w = 1.0;
+            result.col[0].x = 1.0;
+            result.col[1].y = 1.0;
+            result.col[2].z = 1.0;
+            result.col[3].w = 1.0;
             return result;
         }
 
         mat4 operator+(const mat4& other) const {
             vec4 v[4];
-            for (int i=0; i<4; ++i) v[i] = this->r[i] + other.r[i];
+            for (int i=0; i<4; ++i) v[i] = this->col[i] + other.col[i];
             return mat4(v);
         }
 
         mat4 operator-(const mat4& other) const {
             vec4 v[4];
-            for (int i=0; i<4; ++i) v[i] = this->r[i] - other.r[i];
+            for (int i=0; i<4; ++i) v[i] = this->col[i] - other.col[i];
             return mat4(v);
         }
 
         mat4 operator*(double scalar) const {
             vec4 v[4];
-            for (int i=0; i<4; ++i) v[i] = this->r[i] * scalar;
+            for (int i=0; i<4; ++i) v[i] = this->col[i] * scalar;
             return mat4(v);
         }
 
@@ -380,9 +415,9 @@ namespace lina {
     inline mat4 Translate(const vec3& translation) {
         mat4 result = mat4::Identity();
 
-        result.r[3].x = translation.x;
-        result.r[3].y = translation.y;
-        result.r[3].z = translation.z;
+        result.col[3].x = translation.x;
+        result.col[3].y = translation.y;
+        result.col[3].z = translation.z;
 
         return result;
     }
@@ -513,10 +548,10 @@ namespace lina {
 
     inline fmat4 ToFloat(const mat4& m) {
         return {
-            ToFloat(m.r[0]),
-            ToFloat(m.r[1]),
-            ToFloat(m.r[2]),
-            ToFloat(m.r[3])
+            ToFloat(m.col[0]),
+            ToFloat(m.col[1]),
+            ToFloat(m.col[2]),
+            ToFloat(m.col[3])
         };
     }
 
@@ -538,10 +573,10 @@ namespace lina {
 
     inline simd_fmat Load(const fmat4& m) {
         simd_fmat result;
-        result.r[0] = _mm_loadu_ps(&m.r[0].x);
-        result.r[1] = _mm_loadu_ps(&m.r[1].x);
-        result.r[2] = _mm_loadu_ps(&m.r[2].x);
-        result.r[3] = _mm_loadu_ps(&m.r[3].x);
+        result.r[0] = _mm_loadu_ps(&m.col[0].x);
+        result.r[1] = _mm_loadu_ps(&m.col[1].x);
+        result.r[2] = _mm_loadu_ps(&m.col[2].x);
+        result.r[3] = _mm_loadu_ps(&m.col[3].x);
         return result;
     }
 
@@ -563,10 +598,10 @@ namespace lina {
 
     inline simd_mat Load(const mat4& m) {
         simd_mat result;
-        result.r[0] = _mm256_loadu_pd(&m.r[0].x);
-        result.r[1] = _mm256_loadu_pd(&m.r[1].x);
-        result.r[2] = _mm256_loadu_pd(&m.r[2].x);
-        result.r[3] = _mm256_loadu_pd(&m.r[3].x);
+        result.r[0] = _mm256_loadu_pd(&m.col[0].x);
+        result.r[1] = _mm256_loadu_pd(&m.col[1].x);
+        result.r[2] = _mm256_loadu_pd(&m.col[2].x);
+        result.r[3] = _mm256_loadu_pd(&m.col[3].x);
         return result;
     }
 
@@ -591,10 +626,10 @@ namespace lina {
 
     inline fmat4 Store(const simd_fmat& m) {
         fmat4 result;
-        result.r[0] = Store4(simd_fvec{ m.r[0] });
-        result.r[1] = Store4(simd_fvec{ m.r[1] });
-        result.r[2] = Store4(simd_fvec{ m.r[2] });
-        result.r[3] = Store4(simd_fvec{ m.r[3] });
+        result.col[0] = Store4(simd_fvec{ m.r[0] });
+        result.col[1] = Store4(simd_fvec{ m.r[1] });
+        result.col[2] = Store4(simd_fvec{ m.r[2] });
+        result.col[3] = Store4(simd_fvec{ m.r[3] });
         return result;
     }
 
@@ -618,10 +653,10 @@ namespace lina {
 
     inline mat4 Store(const simd_mat& m) {
         mat4 result;
-        result.r[0] = Store4(simd_vec{ m.r[0] });
-        result.r[1] = Store4(simd_vec{ m.r[1] });
-        result.r[2] = Store4(simd_vec{ m.r[2] });
-        result.r[3] = Store4(simd_vec{ m.r[3] });
+        result.col[0] = Store4(simd_vec{ m.r[0] });
+        result.col[1] = Store4(simd_vec{ m.r[1] });
+        result.col[2] = Store4(simd_vec{ m.r[2] });
+        result.col[3] = Store4(simd_vec{ m.r[3] });
         return result;
     }
 

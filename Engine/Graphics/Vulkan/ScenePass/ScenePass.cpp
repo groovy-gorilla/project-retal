@@ -6,25 +6,13 @@ void ScenePass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExten
 
     m_renderExtent = renderExtent;
     m_samples = samples;
+    m_colorFormat = colorFormat;
+    m_depthFormat = depthFormat;
 
     // CREATE RENDER TARGETS
     m_color.Create(device, physicalDevice, m_renderExtent.width, m_renderExtent.height, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, samples);
     m_depth.Create(device, physicalDevice, m_renderExtent.width, m_renderExtent.height, depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_IMAGE_ASPECT_DEPTH_BIT, samples);
     m_resolve.Create(device, physicalDevice, m_renderExtent.width, m_renderExtent.height, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_SAMPLE_COUNT_1_BIT);
-
-    // PIPELINE
-    PipelineDesc pdesc;
-    pdesc.colorFormat = colorFormat;
-    pdesc.depthFormat = depthFormat;
-    pdesc.samples = samples;
-    pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Scene/scene_vert.spv";
-    pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/Scene/scene_frag.spv";
-    pdesc.depthTest = true;
-    pdesc.blending = false;
-    pdesc.frontFace = VK_FRONT_FACE_CLOCKWISE;
-    pdesc.cullMode = VK_CULL_MODE_NONE;
-
-    m_pipeline.Create(device, pdesc);
 
     std::cout << "[Vulkan] Scene-render pass created" << std::endl;
 
@@ -32,7 +20,6 @@ void ScenePass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExten
 
 void ScenePass::Destroy(VkDevice device) {
 
-    m_pipeline.Destroy(device);
     m_color.Destroy(device);
     m_depth.Destroy(device);
     m_resolve.Destroy(device);
@@ -73,6 +60,7 @@ void ScenePass::Begin(VkCommandBuffer commandBuffer) {
     renderingInfo.pDepthAttachment = &depthAttachment;
 
     TransitionImageLayout(commandBuffer, m_color, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    TransitionImageLayout(commandBuffer,m_depth, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
 
     if (m_samples != VK_SAMPLE_COUNT_1_BIT) {
         TransitionImageLayout(commandBuffer, m_resolve, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
@@ -94,10 +82,6 @@ void ScenePass::Begin(VkCommandBuffer commandBuffer) {
     scissor.extent = m_renderExtent;
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.Get());
-
-    vkCmdDraw(commandBuffer, 3, 1, 0, 0);
-
 }
 
 void ScenePass::End(VkCommandBuffer commandBuffer) {
@@ -115,8 +99,3 @@ void ScenePass::End(VkCommandBuffer commandBuffer) {
     }
 }
 
-void ScenePass::PipelineBind(VkCommandBuffer commandBuffer) {
-
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.Get());
-
-}

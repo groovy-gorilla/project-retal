@@ -27,7 +27,7 @@ public:
 
     Descriptor GetDescriptor() const { return m_descriptor; }
     RenderTarget& GetColor() { return m_color; }
-    VkFormat GetFormat() { return m_colorFormat; }
+    VkFormat GetColorFormat() { return m_colorFormat; }
 
 private:
 

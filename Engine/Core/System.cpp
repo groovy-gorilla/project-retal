@@ -219,7 +219,7 @@ void System::Run() {
                     std::cout << "AA_MODE: NONE" << std::endl;
                     break;
             }
-            m_graphics.GetRenderer().RecreateRenderer(m_display, m_window, m_desc);
+            m_graphics.Recreate(m_display, m_window, m_desc);
         }
 
         // TAKE SCREENSHOT

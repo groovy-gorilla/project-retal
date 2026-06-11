@@ -66,6 +66,7 @@ public:
     VulkanSync GetSync() const { return m_sync; }
 
     OverlayPass GetOverlayRenderPass() const { return m_overlayRenderPass; }
+    ScenePass GetSceneRenderPass() const { return m_sceneRenderPass; }
 
 private:
 

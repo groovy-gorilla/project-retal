@@ -22,19 +22,17 @@ public:
 
     void End(VkCommandBuffer commandBuffer);
 
-    void PipelineBind(VkCommandBuffer commandBuffer);
-
     VkExtent2D GetExtent() const { return m_renderExtent; }
 
     RenderTarget& GetColor() { return m_color; }
     RenderTarget& GetDepth() { return m_depth; }
     RenderTarget& GetResolve() { return m_resolve; }
 
+    VkFormat GetColorFormat() const { return m_colorFormat; }
+    VkFormat GetDepthFormat() const { return m_depthFormat; }
+
 
 private:
-
-    // PIPELINE
-    Pipeline m_pipeline;
 
     // ATTACHMENTS
     RenderTarget m_color;
@@ -43,6 +41,9 @@ private:
 
     VkExtent2D m_renderExtent = {};
     VkSampleCountFlagBits m_samples = VK_SAMPLE_COUNT_1_BIT;
+
+    VkFormat m_colorFormat = {};
+    VkFormat m_depthFormat = {};
 
 };
 

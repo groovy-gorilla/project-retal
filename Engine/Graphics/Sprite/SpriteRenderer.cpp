@@ -3,10 +3,9 @@
 
 #include "Sprite.h"
 
-void SpriteRenderer::Create(VkDevice device, VkRenderPass renderPass) {
+void SpriteRenderer::Create(VkDevice device, VkFormat colorFormat) {
 
     m_device = device;
-    m_renderPass = renderPass;
 
     VkDescriptorSetLayoutBinding binding{};
     binding.binding = 0;
@@ -27,7 +26,6 @@ void SpriteRenderer::Create(VkDevice device, VkRenderPass renderPass) {
     pushConstants.size = sizeof(SpritePushConstants);
 
     PipelineDesc pdesc;
-    //pdesc.renderPass = m_renderPass;
     pdesc.descriptorLayout = m_descriptorLayout;
     pdesc.pushConstants = &pushConstants;
     pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Sprite/sprite_vert.spv";
@@ -37,6 +35,7 @@ void SpriteRenderer::Create(VkDevice device, VkRenderPass renderPass) {
     pdesc.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
     pdesc.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     pdesc.cullMode = VK_CULL_MODE_NONE;
+    pdesc.colorFormat = colorFormat;
 
     m_pipeline.Create(device, pdesc);
 

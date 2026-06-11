@@ -3,10 +3,9 @@
 
 #include "Text.h"
 
-void TextRenderer::Create(VkDevice device, VkRenderPass renderPass) {
+void TextRenderer::Create(VkDevice device, VkFormat colorFormat) {
 
     m_device = device;
-    m_renderPass = renderPass;
 
     VkVertexInputBindingDescription vertexBinding{};
     vertexBinding.binding = 0;
@@ -42,7 +41,6 @@ void TextRenderer::Create(VkDevice device, VkRenderPass renderPass) {
     pushConstants.size = sizeof(TextPushConstants);
 
     PipelineDesc pdesc;
-    //pdesc.renderPass = m_renderPass;
     pdesc.descriptorLayout = m_descriptorLayout;
     pdesc.pushConstants = &pushConstants;
     pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Text/text_vert.spv";
@@ -55,6 +53,7 @@ void TextRenderer::Create(VkDevice device, VkRenderPass renderPass) {
     pdesc.bindingDescription = &vertexBinding;
     pdesc.attributeDescriptions = attributes;
     pdesc.attributeCount = 2;
+    pdesc.colorFormat = colorFormat;
 
     m_pipeline.Create(device, pdesc);
 

@@ -18,6 +18,7 @@
 #include "PresentPass/PresentPass.h"
 #include "SMAAPass/SMAAPass.h"
 #include "SSAAPass/SSAAPass.h"
+#include "Wrappers/Buffer.h"
 
 struct VulkanContext {
     VkDevice device = VK_NULL_HANDLE;
@@ -111,5 +112,8 @@ private:
     uint32_t m_imageIndex = 0;
     VkCommandBuffer m_currentCommandBuffer = VK_NULL_HANDLE;
     RenderTarget* m_currentColor = nullptr;
+
+    // SCREENSHOT
+    Buffer m_stagingBuffer;
 
 };

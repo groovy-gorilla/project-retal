@@ -46,10 +46,6 @@ void OverlayPass::Begin(uint32_t frameIndex, VkCommandBuffer commandBuffer, Rend
     VkSampler sampler = settings.FILTER == TextureFilter::Nearest ? inputColor.GetNearestSampler() : inputColor.GetLinearSampler();
     m_descriptor.UpdateTexture(frameIndex, 0, inputColor.GetImageView(), sampler);
 
-    // CLEAR
-    VkClearValue clear{};
-    clear.color = { 0.0f, 0.0f, 0.0f, 1.0f };
-
     VkRenderingAttachmentInfo colorAttachment{};
     colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
     colorAttachment.imageView = m_color.GetImageView();

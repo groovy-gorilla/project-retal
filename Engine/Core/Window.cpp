@@ -30,6 +30,8 @@ void Window::Create(Settings &desc, Display& display) {
     SDL_SetWindowFullscreen(m_window, desc.FULLSCREEN);
     SDL_SyncWindow(m_window);
 
+    SDL_SetWindowRelativeMouseMode(m_window, true);
+
 }
 
 void Window::Destroy() {

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "System.h"
 #include <cpuid.h>
-#include <immintrin.h>
+
 
 void System::Run() {
 
@@ -66,12 +66,17 @@ void System::Run() {
                     break;
                 case SDL_EVENT_WINDOW_FOCUS_LOST:                                       // utrata fokusa --> robimy pauzę
                     m_paused = false;
+                    //SDL_SetWindowRelativeMouseMode(m_window.GetHandle(), false);
                     break;
                 case SDL_EVENT_WINDOW_FOCUS_GAINED:                                     // przywrócenie fokusa
                     m_paused = true;                                                    // ale co jeśli podczas utraty fokusa doszło np. do zmiany skali?
+                    //SDL_SetWindowRelativeMouseMode(m_window.GetHandle(), true);
                     break;
                 case SDL_EVENT_MOUSE_BUTTON_DOWN:                                       // uchwycenie myszy po kliknięciu nią w okno
                     // SDL_SetRelativeMouseMode(SDL_TRUE);
+                    break;
+                case SDL_EVENT_MOUSE_MOTION:
+                    m_input.SetMouseDelta(event.motion.xrel, event.motion.yrel);
                     break;
                 case SDL_EVENT_WINDOW_LEAVE_FULLSCREEN:
                     // ...
@@ -95,7 +100,7 @@ void System::Run() {
         }
 
         // RENDER
-        m_graphics.Render(m_graphics.GetRenderer().GetContext().device, m_desc, m_timer.GetDeltaTime());
+        m_graphics.Render(m_graphics.GetRenderer().GetContext().device, m_desc, m_timer.GetDeltaTime(), m_input);
 
         // HDR ON/OFF
         if (m_input.IsPressed(Action::HDR)) {
@@ -220,6 +225,16 @@ void System::Run() {
                     break;
             }
             m_graphics.Recreate(m_display, m_window, m_desc);
+        }
+
+        // MOUSE CAPTURED
+        if (m_input.IsPressed(Action::ToggleMouse)) {
+            m_mouseCaptured = !m_mouseCaptured;
+
+            SDL_SetWindowRelativeMouseMode(
+                m_window.GetHandle(),
+                m_mouseCaptured
+            );
         }
 
         // TAKE SCREENSHOT

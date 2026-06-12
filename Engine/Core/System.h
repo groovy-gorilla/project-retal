@@ -19,6 +19,7 @@ public:
 private:
     bool m_running = true;
     bool m_paused = true;
+    bool m_mouseCaptured = true;
 
     Settings m_desc;
     Display m_display;

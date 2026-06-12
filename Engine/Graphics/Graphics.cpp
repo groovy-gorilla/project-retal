@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Graphics.h"
 
+#include "Input/Input.h"
+
 void Graphics::Initialize(Display& display, Window& window, Settings& set) {
 
     m_renderer.Initialize(display, window, set);
@@ -19,6 +21,8 @@ void Graphics::Initialize(Display& display, Window& window, Settings& set) {
     m_Text.SetColor(lina::fvec4(1,1,0,1));
 
     m_model.CreateCube(m_renderer.GetContext().device, m_renderer.GetContext().physicalDevice);
+
+    m_camera.SetPosition(vec3(0.0, 0.0, 3.0));
 
 }
 
@@ -41,10 +45,28 @@ void Graphics::Shutdown() {
 
 }
 
-void Graphics::Render(VkDevice device, Settings& settings, float deltaTime) {
+void Graphics::Render(VkDevice device, Settings& settings, float deltaTime, Input& input) {
 
     m_renderer.Update(deltaTime, settings.HDR);
     m_fps.Update(deltaTime);
+
+    // MOUSE ROTATE CAMERA
+    double sensitivity = 0.002;
+    m_camera.AddRotation(
+        input.GetMouseDelta().y * sensitivity,
+         input.GetMouseDelta().x * sensitivity
+    );
+
+    // WSAD
+    double moveSpeed = 5.0;
+    double moveStep = moveSpeed * deltaTime;
+    if (input.IsHeld(Action::Forward)) m_camera.MoveForward(moveStep);
+    if (input.IsHeld(Action::Backward)) m_camera.MoveForward(-moveStep);
+    if (input.IsHeld(Action::Right)) m_camera.MoveRight(moveStep);
+    if (input.IsHeld(Action::Left)) m_camera.MoveRight(-moveStep);
+    if (input.IsHeld(Action::Up)) m_camera.MoveUp(moveStep);
+    if (input.IsHeld(Action::Down)) m_camera.MoveUp(-moveStep);
+
 
     m_renderer.BeginFrame();
     m_renderer.BeginScene();
@@ -52,7 +74,6 @@ void Graphics::Render(VkDevice device, Settings& settings, float deltaTime) {
         // TUTAJ SCENA
         auto extent = m_renderer.GetRenderExtent();
         m_camera.SetPerspective(120.0, static_cast<double>(extent.width) / static_cast<double>(extent.height), 0.1, 1000.0);
-        m_camera.SetPosition(vec3(0.0, 0.0, 3.0));
 
         m_modelRenderer.Render(m_renderer.GetCommandBuffer(), m_model, m_camera);
 
@@ -69,11 +90,11 @@ void Graphics::Render(VkDevice device, Settings& settings, float deltaTime) {
 
         m_sprite1.SetPosition(0,0);
         m_sprite1.SetSize(extent.width / 2, extent.height);
-        m_spriteRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_sprite1, m_camera);
+        //m_spriteRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_sprite1, m_camera);
 
         m_sprite2.SetPosition(extent.width / 2,0);
         m_sprite2.SetSize(extent.width / 2, extent.height);
-        m_spriteRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_sprite2, m_camera);
+        //m_spriteRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_sprite2, m_camera);
 
         std::ostringstream ss;
         ss << "FPS: " << m_fps.GetFPS()

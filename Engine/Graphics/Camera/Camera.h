@@ -44,6 +44,15 @@ public:
 
     CameraProjection GetProjectionType() const { return m_projectionType; }
 
+    vec3 GetForward() const;
+    vec3 GetRight() const;
+    vec3 GetUp() const;
+    void MoveForward(double distance);
+    void MoveRight(double distance);
+    void MoveUp(double distance);
+    void AddRotation(double pitch, double yaw, double roll = 0.0);
+    void AddPosition(const vec3& delta);
+
 private:
 
     CameraProjection m_projectionType;

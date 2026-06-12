@@ -2,6 +2,7 @@
 
 #include "Font/Font.h"
 #include "Fps/Fps.h"
+#include "Input/Input.h"
 #include "Model/ModelRenderer.h"
 #include "Sprite/Sprite.h"
 #include "Sprite/SpriteRenderer.h"
@@ -17,7 +18,7 @@ class Graphics {
 public:
     void Initialize(Display& display, Window& window, Settings& set);
     void Shutdown();
-    void Render(VkDevice device, Settings& settings, float deltaTime);
+    void Render(VkDevice device, Settings& settings, float deltaTime, Input& input);
 
     VulkanRenderer& GetRenderer();
 

@@ -1161,14 +1161,14 @@ namespace lina {
         result.col[2] = fvec4(
             0.0f,
             0.0f,
-            nearPlane / (farPlane - nearPlane),
+            farPlane / (nearPlane - farPlane),
             -1.0f
         );
 
         result.col[3] = fvec4(
             0.0f,
             0.0f,
-            (farPlane * nearPlane) / (farPlane - nearPlane),
+            (nearPlane * farPlane) / (nearPlane - farPlane),
             0.0f
         );
 
@@ -1203,14 +1203,14 @@ namespace lina {
         result.col[2] = vec4(
             0.0,
             0.0,
-            nearPlane / (farPlane - nearPlane),
+            farPlane / (nearPlane - farPlane),
             -1.0
         );
 
         result.col[3] = vec4(
             0.0,
             0.0,
-            (farPlane * nearPlane) / (farPlane - nearPlane),
+            (nearPlane * farPlane) / (nearPlane - farPlane),
             0.0
         );
 
@@ -1232,11 +1232,11 @@ namespace lina {
 
         result.col[1].y = 2.0f / (top - bottom);
 
-        result.col[2].z = 1.0f / (nearPlane - farPlane);
+        result.col[2].z = 1.0f / (farPlane - nearPlane);
 
         result.col[3].x = -(right + left) / (right - left);
         result.col[3].y = -(top + bottom) / (top - bottom);
-        result.col[3].z = nearPlane / (nearPlane - farPlane);
+        result.col[3].z = -nearPlane / (farPlane - nearPlane);
 
         return result;
     }
@@ -1254,13 +1254,13 @@ namespace lina {
 
         result.col[0].x = 2.0 / (right - left);
 
-        result.col[1].y = 2.0f / (bottom - top);
+        result.col[1].y = 2.0 / (bottom - top);
 
-        result.col[2].z = 1.0 / (nearPlane - farPlane);
+        result.col[2].z = 1.0 / (farPlane - nearPlane);
 
         result.col[3].x = -(right + left) / (right - left);
         result.col[3].y = -(top + bottom) / (bottom - top);
-        result.col[3].z = nearPlane / (nearPlane - farPlane);
+        result.col[3].z = -nearPlane / (farPlane - nearPlane);
 
         return result;
     }

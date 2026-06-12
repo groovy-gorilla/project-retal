@@ -3,8 +3,8 @@
 layout(push_constant) uniform PushConstants
 {
     mat4 projection;
-    vec2 position;
-    vec2 size;
+    vec4 position;
+    vec4 size;
 
 } push;
 
@@ -28,10 +28,9 @@ void main() {
 
     vec2 localPos = positions[gl_VertexIndex];
 
-    vec2 worldPos = push.position + localPos * push.size;
+    vec2 worldPos = push.position.xy + localPos * push.size.xy;
 
     gl_Position = push.projection * vec4(worldPos, 0.0, 1.0);
-
 
     fragUV = uvs[gl_VertexIndex];
 }

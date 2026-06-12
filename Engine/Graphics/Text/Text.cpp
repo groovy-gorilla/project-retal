@@ -144,12 +144,12 @@ void Text::BuildGeometry() {
         m_vertices.push_back({{left, top, 0.0f}, {u0, v1}});
 
         m_indices.push_back(base + 0);
-        m_indices.push_back(base + 1);
         m_indices.push_back(base + 2);
+        m_indices.push_back(base + 1);
 
         m_indices.push_back(base + 2);
-        m_indices.push_back(base + 3);
         m_indices.push_back(base + 0);
+        m_indices.push_back(base + 3);
 
         penX += (glyph.advance + m_characterSpacing) * m_scale;
 

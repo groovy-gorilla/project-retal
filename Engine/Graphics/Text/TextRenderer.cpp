@@ -49,7 +49,7 @@ void TextRenderer::Create(VkDevice device, VkFormat colorFormat) {
     pdesc.blending = true;
     pdesc.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     pdesc.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-    pdesc.cullMode = VK_CULL_MODE_NONE;
+    pdesc.cullMode = VK_CULL_MODE_BACK_BIT;
     pdesc.bindingDescription = &vertexBinding;
     pdesc.attributeDescriptions = attributes;
     pdesc.attributeCount = 2;

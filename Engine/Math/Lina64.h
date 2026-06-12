@@ -13,6 +13,30 @@ constexpr double TWO_PI_D  = PI_D * 2.0;
 
 namespace lina {
 
+    union vec3;
+    union fvec3;
+    union mat4;
+    union fmat4;
+    inline mat4 Translate(double x, double y, double z);
+    inline mat4 Translate(const vec3& t);
+    inline fmat4 Translate(float x, float y, float z);
+    inline fmat4 Translate(const fvec3& t);
+    inline fmat4 Scale(float x, float y, float z);
+    inline fmat4 Scale(const fvec3& s);
+    inline mat4 Scale(double x, double y, double z);
+    inline mat4 Scale(const vec3& s);
+    inline fmat4 RotateX(float angle);
+    inline mat4 RotateX(double angle);
+    inline fmat4 RotateY(float angle);
+    inline mat4 RotateY(double angle);
+    inline fmat4 RotateZ(float angle);
+    inline mat4 RotateZ(double angle);
+    inline fmat4 RotateXYZ(float pitch, float yaw, float roll);
+    inline mat4 RotateXYZ(double pitch, double yaw, double roll);
+
+
+
+
     // FLOAT VECTORS
     union alignas(16) fvec2 {
 
@@ -642,6 +666,21 @@ namespace lina {
         }
 
     };
+
+    struct Transform {
+
+        vec3 position;
+        vec3 rotation;
+        vec3 scale;
+
+        Transform() : position(0.0, 0.0, 0.0), rotation(0.0, 0.0, 0.0), scale(1.0, 1.0, 1.0) {}
+
+        mat4 GetLocalMatrix() const {
+            return  Translate(position) * RotateXYZ(rotation.x, rotation.y, rotation.z) * Scale(scale);
+        }
+    };
+
+    // ***********************************************************************************************************
 
     // DOT FVEC2/FVEC2
     inline float Dot(const fvec2& a, const fvec2& b) {
@@ -1440,7 +1479,6 @@ namespace lina {
     inline constexpr double ToDegrees(double radians) {
         return radians * (180.0 / PI_D);
     }
-
 
 
 

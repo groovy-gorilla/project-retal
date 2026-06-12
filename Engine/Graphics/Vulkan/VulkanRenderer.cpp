@@ -186,12 +186,6 @@ void VulkanRenderer::EndFrame(Settings& settings) {
     // END COMMAND BUFFER
     vkEndCommandBuffer(m_currentCommandBuffer);
 
-    // TAKE SCREENSHOT
-    if (settings.TAKE_SCREENSHOT) {
-        TakeScreenshot(m_imageIndex);
-        settings.TAKE_SCREENSHOT = false;
-    }
-
     VkPipelineStageFlags waitStages[] = {
         VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT
     };
@@ -229,6 +223,12 @@ void VulkanRenderer::EndFrame(Settings& settings) {
     presentInfo.pWaitSemaphores = &finishedSemaphore;
 
     VK_CHECK(vkQueuePresentKHR(m_queues.GetPresent(), &presentInfo));
+
+    // TAKE SCREENSHOT
+    if (settings.TAKE_SCREENSHOT) {
+        TakeScreenshot(m_imageIndex);
+        settings.TAKE_SCREENSHOT = false;
+    }
 
     m_sync.NextFrame(settings.MAX_FRAMES_IN_FLIGHT);
 
@@ -315,7 +315,7 @@ void VulkanRenderer::SetTargetExposure(float exposure) {
 
 void VulkanRenderer::TakeScreenshot(uint32_t imageIndex) {
 
-    VkImage srcImage = m_swapchain.GetImages()[imageIndex];
+    VkImage srcImage = m_swapchain.GetImage(imageIndex);
 
     VkDeviceSize imageSize = static_cast<VkDeviceSize>(m_windowExtent.width) * static_cast<VkDeviceSize>(m_windowExtent.height) * 4;
 

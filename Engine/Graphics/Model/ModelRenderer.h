@@ -21,7 +21,8 @@ public:
     void Render(
         VkCommandBuffer commandBuffer,
         Model& model,
-        const Camera& camera
+        const Camera& camera,
+        const lina::Transform& transform
     );
 
     void RecreatePipeline(VkDevice device, VkSampleCountFlagBits samples);

@@ -75,7 +75,9 @@ void Graphics::Render(VkDevice device, Settings& settings, float deltaTime, Inpu
         auto extent = m_renderer.GetRenderExtent();
         m_camera.SetPerspective(120.0, static_cast<double>(extent.width) / static_cast<double>(extent.height), 0.1, 1000.0);
 
-        m_modelRenderer.Render(m_renderer.GetCommandBuffer(), m_model, m_camera);
+        static Transform cubeTransform;
+        cubeTransform.rotation.y += 0.001;
+        m_modelRenderer.Render(m_renderer.GetCommandBuffer(), m_model, m_camera, cubeTransform);
 
 
 

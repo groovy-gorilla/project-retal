@@ -55,15 +55,12 @@ void ModelRenderer::Destroy() {
 
 }
 
-void ModelRenderer::Render(VkCommandBuffer commandBuffer, Model& model, const Camera& camera) {
+void ModelRenderer::Render(VkCommandBuffer commandBuffer, Model& model, const Camera& camera, const lina::Transform& transform) {
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.Get());
 
-    static float angle = 0.0f;
-    angle += 0.01f;
-
     // MACIERZE
-    fmat4 modelMatrix = RotateY(angle);
+    fmat4 modelMatrix = ToFloat(transform.GetLocalMatrix());
     fmat4 viewMatrix = ToFloat(camera.GetView());
     fmat4 projectionMatrix = ToFloat(camera.GetProjection());
 

@@ -10,7 +10,7 @@ void OverlayPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExt
     m_colorFormat = colorFormat;
 
     // CREATE RENDER TARGETS
-    m_color.Create(device, physicalDevice, renderExtent.width, renderExtent.height, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_SAMPLE_COUNT_1_BIT);
+    m_color.Create(device, physicalDevice, renderExtent.width, renderExtent.height, colorFormat, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_SAMPLE_COUNT_1_BIT);
 
     // DESCRIPTOR
     std::vector<VkDescriptorSetLayoutBinding> bindings;

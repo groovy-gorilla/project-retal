@@ -3,664 +3,1446 @@
 #include "immintrin.h"
 #include <cmath>
 
+constexpr float  PI_F      = 3.14159265358979323846f;
+constexpr float  HALF_PI_F = PI_F * 0.5f;
+constexpr float  TWO_PI_F  = PI_F * 2.0f;
+
+constexpr double PI_D      = 3.1415926535897932384626433832795;
+constexpr double HALF_PI_D = PI_D * 0.5;
+constexpr double TWO_PI_D  = PI_D * 2.0;
+
 namespace lina {
 
-    typedef __m128 simd_fvec;
-    typedef __m256d simd_vec;
+    // FLOAT VECTORS
+    union alignas(16) fvec2 {
 
-    struct simd_fmat {
-        simd_fvec r[4];
+        __m128 v;
+
+        struct {
+            float x;
+            float y;
+        };
+
+        fvec2() : v(_mm_setzero_ps()) {}
+        explicit fvec2(float scalar) : v(_mm_set_ps(0.0f, 0.0f, scalar, scalar)) {}
+        fvec2(float x, float y) : v(_mm_set_ps(0.0f, 0.0f, y, x)) {}
+
+        fvec2 operator+(const fvec2& rhs) const {
+            fvec2 result;
+            result.v = _mm_add_ps(v, rhs.v);
+            return result;
+        }
+
+        fvec2 operator-(const fvec2& rhs) const {
+            fvec2 result;
+            result.v = _mm_sub_ps(v, rhs.v);
+            return result;
+        }
+
+        fvec2 operator*(float scalar) const {
+            fvec2 result;
+            result.v = _mm_mul_ps(v, _mm_set1_ps(scalar));
+            return result;
+        }
+
+        fvec2 operator/(float scalar) const {
+            fvec2 result;
+            result.v = _mm_div_ps(v, _mm_set1_ps(scalar));
+            return result;
+        }
+
+        fvec2& operator+=(const fvec2& rhs) {
+            v = _mm_add_ps(v, rhs.v);
+            return *this;
+        }
+
+        fvec2& operator-=(const fvec2& rhs) {
+            v = _mm_sub_ps(v, rhs.v);
+            return *this;
+        }
+
+        fvec2& operator*=(float scalar) {
+            v = _mm_mul_ps(v, _mm_set1_ps(scalar));
+            return *this;
+        }
+
+        fvec2& operator/=(float scalar) {
+            v = _mm_div_ps(v, _mm_set1_ps(scalar));
+            return *this;
+        }
+
+        fvec2 operator-() const {
+            fvec2 result;
+            result.v = _mm_sub_ps(_mm_setzero_ps(), v);
+            return result;
+        }
+
+        bool operator==(const fvec2& rhs) const {
+            return x == rhs.x && y == rhs.y;
+        }
+
+        bool operator!=(const fvec2& rhs) const {
+            return !(*this == rhs);
+        }
+
     };
 
-    struct simd_mat {
-        simd_vec r[4];
+    union alignas(16) fvec3 {
+
+        __m128 v;
+
+        struct {
+            float x;
+            float y;
+            float z;
+        };
+
+        fvec3() : v(_mm_setzero_ps()) {}
+        explicit fvec3(float scalar) : v(_mm_set_ps(0.0f, scalar, scalar, scalar)) {}
+        fvec3(float x, float y, float z) : v(_mm_set_ps(0.0f, z, y, x)) {}
+
+        fvec3 operator+(const fvec3& rhs) const {
+            fvec3 result;
+            result.v = _mm_add_ps(v, rhs.v);
+            return result;
+        }
+
+        fvec3 operator-(const fvec3& rhs) const {
+            fvec3 result;
+            result.v = _mm_sub_ps(v, rhs.v);
+            return result;
+        }
+
+        fvec3 operator*(float scalar) const {
+            fvec3 result;
+            result.v = _mm_mul_ps(v, _mm_set1_ps(scalar));
+            return result;
+        }
+
+        fvec3 operator/(float scalar) const {
+            fvec3 result;
+            result.v = _mm_div_ps(v, _mm_set1_ps(scalar));
+            return result;
+        }
+
+        fvec3& operator+=(const fvec3& rhs) {
+            v = _mm_add_ps(v, rhs.v);
+            return *this;
+        }
+
+        fvec3& operator-=(const fvec3& rhs) {
+            v = _mm_sub_ps(v, rhs.v);
+            return *this;
+        }
+
+        fvec3& operator*=(float scalar) {
+            v = _mm_mul_ps(v, _mm_set1_ps(scalar));
+            return *this;
+        }
+
+        fvec3& operator/=(float scalar) {
+            v = _mm_div_ps(v, _mm_set1_ps(scalar));
+            return *this;
+        }
+
+        fvec3 operator-() const {
+            fvec3 result;
+            result.v = _mm_sub_ps(_mm_setzero_ps(), v);
+            return result;
+        }
+
+        bool operator==(const fvec3& rhs) const {
+            return x == rhs.x && y == rhs.y && z == rhs.z;
+        }
+
+        bool operator!=(const fvec3& rhs) const {
+            return !(*this == rhs);
+        }
+
     };
 
-    // FORWARD DECLARATION
-    struct fvec2;
-    struct fvec3;
-    struct fvec4;
-    struct fmat4;
-    struct vec2;
-    struct vec3;
-    struct vec4;
-    struct mat4;
+    union alignas(16) fvec4 {
 
-    simd_fvec Load(const fvec2&);
-    simd_fvec Load(const fvec3&);
-    simd_fvec Load(const fvec4&);
-    simd_fmat Load(const fmat4&);
+        __m128 v;
 
-    simd_vec Load(const vec2&);
-    simd_vec Load(const vec3&);
-    simd_vec Load(const vec4&);
-    simd_mat Load(const mat4&);
+        struct {
+            float x;
+            float y;
+            float z;
+            float w;
+        };
 
-    fvec2 Store2(const simd_fvec&);
-    fvec3 Store3(const simd_fvec&);
-    fvec4 Store4(const simd_fvec&);
-    fmat4 Store(const simd_fmat&);
+        fvec4() : v(_mm_setzero_ps()) {}
+        explicit fvec4(float scalar) : v(_mm_set_ps(scalar, scalar, scalar, scalar)) {}
+        fvec4(float x, float y, float z, float w) : v(_mm_set_ps(w, z, y, x)) {}
 
-    vec2 Store2(const simd_vec&);
-    vec3 Store3(const simd_vec&);
-    vec4 Store4(const simd_vec&);
-    mat4 Store(const simd_mat&);
+        fvec4 operator+(const fvec4& rhs) const {
+            fvec4 result;
+            result.v = _mm_add_ps(v, rhs.v);
+            return result;
+        }
 
-    constexpr double PI = 3.14159265358979323846;
+        fvec4 operator-(const fvec4& rhs) const {
+            fvec4 result;
+            result.v = _mm_sub_ps(v, rhs.v);
+            return result;
+        }
 
-    // FLOAT VEC2 STRUCTURE
-    struct fvec2 {
-        float x;
-        float y;
-        fvec2() : x(0.0f), y(0.0f) {}
-        fvec2(float x, float y) : x(x), y(y) {}
+        fvec4 operator*(float scalar) const {
+            fvec4 result;
+            result.v = _mm_mul_ps(v, _mm_set1_ps(scalar));
+            return result;
+        }
+
+        fvec4 operator/(float scalar) const {
+            fvec4 result;
+            result.v = _mm_div_ps(v, _mm_set1_ps(scalar));
+            return result;
+        }
+
+        fvec4& operator+=(const fvec4& rhs) {
+            v = _mm_add_ps(v, rhs.v);
+            return *this;
+        }
+
+        fvec4& operator-=(const fvec4& rhs) {
+            v = _mm_sub_ps(v, rhs.v);
+            return *this;
+        }
+
+        fvec4& operator*=(float scalar) {
+            v = _mm_mul_ps(v, _mm_set1_ps(scalar));
+            return *this;
+        }
+
+        fvec4& operator/=(float scalar) {
+            v = _mm_div_ps(v, _mm_set1_ps(scalar));
+            return *this;
+        }
+
+        fvec4 operator-() const {
+            fvec4 result;
+            result.v = _mm_sub_ps(_mm_setzero_ps(), v);
+            return result;
+        }
+
+        bool operator==(const fvec4& rhs) const {
+            return x == rhs.x && y == rhs.y && z == rhs.z && w == rhs.w;
+        }
+
+        bool operator!=(const fvec4& rhs) const {
+            return !(*this == rhs);
+        }
+
     };
 
-    // FLOAT VEC3 STRUCTURE
-    struct fvec3 {
-        float x;
-        float y;
-        float z;
-        fvec3() : x(0.0f), y(0.0f), z(0.0f) {}
-        fvec3(float x, float y, float z) : x(x), y(y), z(z) {}
+    // DOUBLE VECTORS
+    union alignas(32) vec2 {
+
+        __m256d v;
+
+        struct {
+            double x;
+            double y;
+        };
+
+        vec2() : v(_mm256_setzero_pd()) {}
+        explicit vec2(double scalar) : v(_mm256_set_pd(0.0, 0.0, scalar, scalar)) {}
+        vec2(double x, double y) : v(_mm256_set_pd(0.0, 0.0, y, x)) {}
+
+        vec2 operator+(const vec2& rhs) const {
+            vec2 result;
+            result.v = _mm256_add_pd(v, rhs.v);
+            return result;
+        }
+
+        vec2 operator-(const vec2& rhs) const {
+            vec2 result;
+            result.v = _mm256_sub_pd(v, rhs.v);
+            return result;
+        }
+
+        vec2 operator*(float scalar) const {
+            vec2 result;
+            result.v = _mm256_mul_pd(v, _mm256_set1_pd(scalar));
+            return result;
+        }
+
+        vec2 operator/(float scalar) const {
+            vec2 result;
+            result.v = _mm256_div_pd(v, _mm256_set1_pd(scalar));
+            return result;
+        }
+
+        vec2& operator+=(const vec2& rhs) {
+            v = _mm256_add_pd(v, rhs.v);
+            return *this;
+        }
+
+        vec2& operator-=(const vec2& rhs) {
+            v = _mm256_sub_pd(v, rhs.v);
+            return *this;
+        }
+
+        vec2& operator*=(float scalar) {
+            v = _mm256_mul_pd(v, _mm256_set1_pd(scalar));
+            return *this;
+        }
+
+        vec2& operator/=(float scalar) {
+            v = _mm256_div_pd(v, _mm256_set1_pd(scalar));
+            return *this;
+        }
+
+        vec2 operator-() const {
+            vec2 result;
+            result.v = _mm256_sub_pd(_mm256_setzero_pd(), v);
+            return result;
+        }
+
+        bool operator==(const vec2& rhs) const {
+            return x == rhs.x && y == rhs.y;
+        }
+
+        bool operator!=(const vec2& rhs) const {
+            return !(*this == rhs);
+        }
+
     };
 
-    // FLOAT VEC4 STRUCTURE
-    struct fvec4 {
-        float x;
-        float y;
-        float z;
-        float w;
-        fvec4() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) {}
-        fvec4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
+    union alignas(32) vec3 {
+
+        __m256d v;
+
+        struct {
+            double x;
+            double y;
+            double z;
+        };
+
+        vec3() : v(_mm256_setzero_pd()) {}
+        explicit vec3(double scalar) : v(_mm256_set_pd(0.0, scalar, scalar, scalar)) {}
+        vec3(double x, double y, double z) : v(_mm256_set_pd(0.0, z, y, x)) {}
+
+        vec3 operator+(const vec3& rhs) const {
+            vec3 result;
+            result.v = _mm256_add_pd(v, rhs.v);
+            return result;
+        }
+
+        vec3 operator-(const vec3& rhs) const {
+            vec3 result;
+            result.v = _mm256_sub_pd(v, rhs.v);
+            return result;
+        }
+
+        vec3 operator*(float scalar) const {
+            vec3 result;
+            result.v = _mm256_mul_pd(v, _mm256_set1_pd(scalar));
+            return result;
+        }
+
+        vec3 operator/(float scalar) const {
+            vec3 result;
+            result.v = _mm256_div_pd(v, _mm256_set1_pd(scalar));
+            return result;
+        }
+
+        vec3& operator+=(const vec3& rhs) {
+            v = _mm256_add_pd(v, rhs.v);
+            return *this;
+        }
+
+        vec3& operator-=(const vec3& rhs) {
+            v = _mm256_sub_pd(v, rhs.v);
+            return *this;
+        }
+
+        vec3& operator*=(float scalar) {
+            v = _mm256_mul_pd(v, _mm256_set1_pd(scalar));
+            return *this;
+        }
+
+        vec3& operator/=(float scalar) {
+            v = _mm256_div_pd(v, _mm256_set1_pd(scalar));
+            return *this;
+        }
+
+        vec3 operator-() const {
+            vec3 result;
+            result.v = _mm256_sub_pd(_mm256_setzero_pd(), v);
+            return result;
+        }
+
+        bool operator==(const vec3& rhs) const {
+            return x == rhs.x && y == rhs.y && z == rhs.z;
+        }
+
+        bool operator!=(const vec3& rhs) const {
+            return !(*this == rhs);
+        }
+
     };
 
-    // FLOAT MAT4 STRUCTURE
-    struct fmat4 {
+    union alignas(32) vec4 {
+
+        __m256d v;
+
+        struct {
+            double x;
+            double y;
+            double z;
+            double w;
+        };
+
+        vec4() : v(_mm256_setzero_pd()) {}
+        explicit vec4(double scalar) : v(_mm256_set_pd(scalar, scalar, scalar, scalar)) {}
+        vec4(double x, double y, double z, double w) : v(_mm256_set_pd(w, z, y, x)) {}
+
+        vec4 operator+(const vec4& rhs) const {
+            vec4 result;
+            result.v = _mm256_add_pd(v, rhs.v);
+            return result;
+        }
+
+        vec4 operator-(const vec4& rhs) const {
+            vec4 result;
+            result.v = _mm256_sub_pd(v, rhs.v);
+            return result;
+        }
+
+        vec4 operator*(float scalar) const {
+            vec4 result;
+            result.v = _mm256_mul_pd(v, _mm256_set1_pd(scalar));
+            return result;
+        }
+
+        vec4 operator/(float scalar) const {
+            vec4 result;
+            result.v = _mm256_div_pd(v, _mm256_set1_pd(scalar));
+            return result;
+        }
+
+        vec4& operator+=(const vec4& rhs) {
+            v = _mm256_add_pd(v, rhs.v);
+            return *this;
+        }
+
+        vec4& operator-=(const vec4& rhs) {
+            v = _mm256_sub_pd(v, rhs.v);
+            return *this;
+        }
+
+        vec4& operator*=(float scalar) {
+            v = _mm256_mul_pd(v, _mm256_set1_pd(scalar));
+            return *this;
+        }
+
+        vec4& operator/=(float scalar) {
+            v = _mm256_div_pd(v, _mm256_set1_pd(scalar));
+            return *this;
+        }
+
+        vec4 operator-() const {
+            vec4 result;
+            result.v = _mm256_sub_pd(_mm256_setzero_pd(), v);
+            return result;
+        }
+
+        bool operator==(const vec4& rhs) const {
+            return x == rhs.x && y == rhs.y && z == rhs.z && w == rhs.w;
+        }
+
+        bool operator!=(const vec4& rhs) const {
+            return !(*this == rhs);
+        }
+
+    };
+
+    // FLOAT MATRIX
+    union alignas(16) fmat4 {
+
         fvec4 col[4];
 
-        fmat4 operator*(const fmat4& other) const {
+        fmat4() : col {
+            fvec4(0.0f),
+            fvec4(0.0f),
+            fvec4(0.0f),
+            fvec4(0.0f)
+        } {}
 
-            fmat4 result{};
+        explicit fmat4(float diagonal) : col {
+            fvec4(diagonal, 0.0f, 0.0f, 0.0f),
+            fvec4(0.0f, diagonal, 0.0f, 0.0f),
+            fvec4(0.0f, 0.0f, diagonal, 0.0f),
+            fvec4(0.0f, 0.0f, 0.0f, diagonal)
+        } {}
 
-            for (int c = 0; c < 4; c++) {
+        fmat4(const fvec4& c0, const fvec4& c1, const fvec4& c2, const fvec4& c3) : col { c0, c1, c2, c3 } {}
 
-                result.col[c].x =
-                    col[0].x * other.col[c].x +
-                    col[1].x * other.col[c].y +
-                    col[2].x * other.col[c].z +
-                    col[3].x * other.col[c].w;
+        fvec4 operator*(const fvec4& rhs) const {
 
-                result.col[c].y =
-                    col[0].y * other.col[c].x +
-                    col[1].y * other.col[c].y +
-                    col[2].y * other.col[c].z +
-                    col[3].y * other.col[c].w;
+            __m128 xxxx = _mm_set1_ps(rhs.x);
+            __m128 yyyy = _mm_set1_ps(rhs.y);
+            __m128 zzzz = _mm_set1_ps(rhs.z);
+            __m128 wwww = _mm_set1_ps(rhs.w);
 
-                result.col[c].z =
-                    col[0].z * other.col[c].x +
-                    col[1].z * other.col[c].y +
-                    col[2].z * other.col[c].z +
-                    col[3].z * other.col[c].w;
+            fvec4 result;
 
-                result.col[c].w =
-                    col[0].w * other.col[c].x +
-                    col[1].w * other.col[c].y +
-                    col[2].w * other.col[c].z +
-                    col[3].w * other.col[c].w;
-
-            }
+            result.v =
+                _mm_add_ps(
+                    _mm_add_ps(
+                        _mm_mul_ps(col[0].v, xxxx),
+                        _mm_mul_ps(col[1].v, yyyy)
+                    ),
+                    _mm_add_ps(
+                        _mm_mul_ps(col[2].v, zzzz),
+                        _mm_mul_ps(col[3].v, wwww)
+                    )
+                );
 
             return result;
         }
-    };
 
-    // DOUBLE VEC2 STRUCTURE
-    struct vec2 {
-        double x;
-        double y;
-        vec2() : x(0.0), y(0.0) {}
-        vec2(double x, double y) : x(x), y(y) {}
+        fmat4 operator*(const fmat4& rhs) const {
 
-        vec2 operator+(const vec2& other) const {
-            return vec2(this->x + other.x, this->y + other.y);
-        }
+            fmat4 result;
 
-        vec2 operator-(const vec2& other) const {
-            return vec2(this->x - other.x, this->y - other.y);
-        }
+            result.col[0] = (*this) * rhs.col[0];
+            result.col[1] = (*this) * rhs.col[1];
+            result.col[2] = (*this) * rhs.col[2];
+            result.col[3] = (*this) * rhs.col[3];
 
-        vec2 operator*(const vec2& other) const {
-            return vec2(this->x * other.x, this->y * other.y);
-        }
-
-        vec2 operator*(double scalar) const {
-            return vec2(this->x * scalar, this->y * scalar);
-        }
-    };
-
-    // DOUBLE VEC3 STRUCTURE
-    struct vec3 {
-        double x;
-        double y;
-        double z;
-        vec3() : x(0.0), y(0.0), z(0.0) {}
-        vec3(double x, double y, double z) : x(x), y(y), z(z) {}
-
-        vec3 operator+(const vec3& other) const {
-            return vec3(this->x + other.x, this->y + other.y, this->z + other.z);
-        }
-
-        vec3 operator-(const vec3& other) const {
-            return vec3(this->x - other.x, this->y - other.y, this->z - other.z);
-        }
-
-        vec3 operator*(const vec3& other) const {
-            return vec3(this->x * other.x, this->y * other.y, this->z * other.z);
-        }
-
-        vec3 operator*(double scalar) const {
-            return vec3(this->x * scalar, this->y * scalar, this->z * scalar);
-        }
-    };
-
-    // DOUBLE VEC4 STRUCTURE
-    struct vec4 {
-        double x;
-        double y;
-        double z;
-        double w;
-        vec4() : x(0.0), y(0.0), z(0.0), w(0.0) {}
-        vec4(double x, double y, double z, double w) : x(x), y(y), z(z), w(w) {}
-
-        vec4 operator+(const vec4& other) const {
-            return vec4(this->x + other.x, this->y + other.y, this->z + other.z, this->w + other.w);
-        }
-
-        vec4 operator-(const vec4& other) const {
-            return vec4(this->x - other.x, this->y - other.y, this->z - other.z, this->w - other.w);
-        }
-
-        vec4 operator*(const vec4& other) const {
-            return vec4(this->x * other.x, this->y * other.y, this->z * other.z, this->w * other.w);
-        }
-
-        vec4 operator*(double scalar) const {
-            return vec4(this->x * scalar, this->y * scalar, this->z * scalar, this->w * scalar);
-        }
-    };
-
-    // DOUBLE MAT4 STRUCTURE
-    struct mat4 {
-
-        vec4 col[4]{};
-
-        mat4() {}
-        explicit mat4(const vec4 *pArray) {
-            col[0] = pArray[0]; col[1] = pArray[1]; col[2] = pArray[2]; col[3] = pArray[3];
-        }
-
-        static mat4 Identity() {
-            mat4 result{};
-            result.col[0].x = 1.0;
-            result.col[1].y = 1.0;
-            result.col[2].z = 1.0;
-            result.col[3].w = 1.0;
             return result;
         }
 
-        mat4 operator+(const mat4& other) const {
-            vec4 v[4];
-            for (int i=0; i<4; ++i) v[i] = this->col[i] + other.col[i];
-            return mat4(v);
+        fmat4& operator*=(const fmat4& rhs) {
+
+            *this = *this * rhs;
+            return *this;
         }
 
-        mat4 operator-(const mat4& other) const {
-            vec4 v[4];
-            for (int i=0; i<4; ++i) v[i] = this->col[i] - other.col[i];
-            return mat4(v);
+        fmat4 operator*(float scalar) const {
+
+            __m128 s = _mm_set1_ps(scalar);
+
+            fmat4 result;
+
+            result.col[0].v = _mm_mul_ps(col[0].v, s);
+            result.col[1].v = _mm_mul_ps(col[1].v, s);
+            result.col[2].v = _mm_mul_ps(col[2].v, s);
+            result.col[3].v = _mm_mul_ps(col[3].v, s);
+
+            return result;
+        }
+
+        fmat4& operator*=(float scalar) {
+
+            __m128 s = _mm_set1_ps(scalar);
+
+            col[0].v = _mm_mul_ps(col[0].v, s);
+            col[1].v = _mm_mul_ps(col[1].v, s);
+            col[2].v = _mm_mul_ps(col[2].v, s);
+            col[3].v = _mm_mul_ps(col[3].v, s);
+
+            return *this;
+        }
+
+
+
+    };
+
+    // DOUBLE MATRIX
+    union alignas(32) mat4 {
+
+        vec4 col[4];
+
+        mat4() : col {
+            vec4(0.0),
+            vec4(0.0),
+            vec4(0.0),
+            vec4(0.0)
+        } {}
+
+        explicit mat4(double diagonal) : col {
+            vec4(diagonal, 0.0, 0.0, 0.0),
+            vec4(0.0, diagonal, 0.0, 0.0),
+            vec4(0.0, 0.0, diagonal, 0.0),
+            vec4(0.0, 0.0, 0.0, diagonal)
+        } {}
+
+        mat4(const vec4& c0, const vec4& c1, const vec4& c2, const vec4& c3) : col { c0, c1, c2, c3 } {}
+
+        vec4 operator*(const vec4& rhs) const {
+
+            __m256d xxxx = _mm256_set1_pd(rhs.x);
+            __m256d yyyy = _mm256_set1_pd(rhs.y);
+            __m256d zzzz = _mm256_set1_pd(rhs.z);
+            __m256d wwww = _mm256_set1_pd(rhs.w);
+
+            vec4 result;
+
+            result.v =
+                _mm256_add_pd(
+                    _mm256_add_pd(
+                        _mm256_mul_pd(col[0].v, xxxx),
+                        _mm256_mul_pd(col[1].v, yyyy)
+                    ),
+                    _mm256_add_pd(
+                        _mm256_mul_pd(col[2].v, zzzz),
+                        _mm256_mul_pd(col[3].v, wwww)
+                    )
+                );
+
+            return result;
+        }
+
+        mat4 operator*(const mat4& rhs) const {
+
+            mat4 result;
+
+            result.col[0] = (*this) * rhs.col[0];
+            result.col[1] = (*this) * rhs.col[1];
+            result.col[2] = (*this) * rhs.col[2];
+            result.col[3] = (*this) * rhs.col[3];
+
+            return result;
+        }
+
+        mat4& operator*=(const mat4& rhs) {
+
+            *this = *this * rhs;
+            return *this;
         }
 
         mat4 operator*(double scalar) const {
-            vec4 v[4];
-            for (int i=0; i<4; ++i) v[i] = this->col[i] * scalar;
-            return mat4(v);
+
+            __m256d s = _mm256_set1_pd(scalar);
+
+            mat4 result;
+
+            result.col[0].v = _mm256_mul_pd(col[0].v, s);
+            result.col[1].v = _mm256_mul_pd(col[1].v, s);
+            result.col[2].v = _mm256_mul_pd(col[2].v, s);
+            result.col[3].v = _mm256_mul_pd(col[3].v, s);
+
+            return result;
         }
 
-        mat4 operator*(const mat4& other) const {
-            simd_mat A = Load(*this);
-            simd_mat B = Load(other);
+        mat4& operator*=(double scalar) {
 
-            simd_mat R;
+            __m256d s = _mm256_set1_pd(scalar);
 
-            __m256d ymm0, ymm1, ymm2, ymm3;
+            col[0].v = _mm256_mul_pd(col[0].v, s);
+            col[1].v = _mm256_mul_pd(col[1].v, s);
+            col[2].v = _mm256_mul_pd(col[2].v, s);
+            col[3].v = _mm256_mul_pd(col[3].v, s);
 
-            // row 0
-            ymm0 = _mm256_permute4x64_pd(A.r[0], _MM_SHUFFLE(0,0,0,0));
-            ymm1 = _mm256_permute4x64_pd(A.r[0], _MM_SHUFFLE(1,1,1,1));
-            ymm2 = _mm256_permute4x64_pd(A.r[0], _MM_SHUFFLE(2,2,2,2));
-            ymm3 = _mm256_permute4x64_pd(A.r[0], _MM_SHUFFLE(3,3,3,3));
-
-            ymm0 = _mm256_mul_pd(ymm0, B.r[0]);
-            ymm1 = _mm256_mul_pd(ymm1, B.r[1]);
-            ymm2 = _mm256_mul_pd(ymm2, B.r[2]);
-            ymm3 = _mm256_mul_pd(ymm3, B.r[3]);
-
-            ymm0 = _mm256_add_pd(ymm0, ymm1);
-            ymm2 = _mm256_add_pd(ymm2, ymm3);
-
-            R.r[0] = _mm256_add_pd(ymm0, ymm2);
-
-            // row 1
-            ymm0 = _mm256_permute4x64_pd(A.r[1], _MM_SHUFFLE(0,0,0,0));
-            ymm1 = _mm256_permute4x64_pd(A.r[1], _MM_SHUFFLE(1,1,1,1));
-            ymm2 = _mm256_permute4x64_pd(A.r[1], _MM_SHUFFLE(2,2,2,2));
-            ymm3 = _mm256_permute4x64_pd(A.r[1], _MM_SHUFFLE(3,3,3,3));
-
-            ymm0 = _mm256_mul_pd(ymm0, B.r[0]);
-            ymm1 = _mm256_mul_pd(ymm1, B.r[1]);
-            ymm2 = _mm256_mul_pd(ymm2, B.r[2]);
-            ymm3 = _mm256_mul_pd(ymm3, B.r[3]);
-
-            ymm0 = _mm256_add_pd(ymm0, ymm1);
-            ymm2 = _mm256_add_pd(ymm2, ymm3);
-
-            R.r[1] = _mm256_add_pd(ymm0, ymm2);
-
-            // row 2
-            ymm0 = _mm256_permute4x64_pd(A.r[2], _MM_SHUFFLE(0,0,0,0));
-            ymm1 = _mm256_permute4x64_pd(A.r[2], _MM_SHUFFLE(1,1,1,1));
-            ymm2 = _mm256_permute4x64_pd(A.r[2], _MM_SHUFFLE(2,2,2,2));
-            ymm3 = _mm256_permute4x64_pd(A.r[2], _MM_SHUFFLE(3,3,3,3));
-
-            ymm0 = _mm256_mul_pd(ymm0, B.r[0]);
-            ymm1 = _mm256_mul_pd(ymm1, B.r[1]);
-            ymm2 = _mm256_mul_pd(ymm2, B.r[2]);
-            ymm3 = _mm256_mul_pd(ymm3, B.r[3]);
-
-            ymm0 = _mm256_add_pd(ymm0, ymm1);
-            ymm2 = _mm256_add_pd(ymm2, ymm3);
-
-            R.r[2] = _mm256_add_pd(ymm0, ymm2);
-
-            // row 3
-            ymm0 = _mm256_permute4x64_pd(A.r[3], _MM_SHUFFLE(0,0,0,0));
-            ymm1 = _mm256_permute4x64_pd(A.r[3], _MM_SHUFFLE(1,1,1,1));
-            ymm2 = _mm256_permute4x64_pd(A.r[3], _MM_SHUFFLE(2,2,2,2));
-            ymm3 = _mm256_permute4x64_pd(A.r[3], _MM_SHUFFLE(3,3,3,3));
-
-            ymm0 = _mm256_mul_pd(ymm0, B.r[0]);
-            ymm1 = _mm256_mul_pd(ymm1, B.r[1]);
-            ymm2 = _mm256_mul_pd(ymm2, B.r[2]);
-            ymm3 = _mm256_mul_pd(ymm3, B.r[3]);
-
-            ymm0 = _mm256_add_pd(ymm0, ymm1);
-            ymm2 = _mm256_add_pd(ymm2, ymm3);
-
-            R.r[3] = _mm256_add_pd(ymm0, ymm2);
-
-            return Store(R);
+            return *this;
         }
 
     };
 
+    // DOT FVEC2/FVEC2
+    inline float Dot(const fvec2& a, const fvec2& b) {
 
-    // VECTORS DOT PRODUCT (ILOCZYN SKALARNY WEKTORÓW)
+        __m128 dot = _mm_dp_ps(a.v, b.v, 0x31);
+
+        return _mm_cvtss_f32(dot);
+    }
+
+
+    // DOT FVEC3/FVEC3
+    inline float Dot(const fvec3& a, const fvec3& b) {
+
+        __m128 dot = _mm_dp_ps(a.v, b.v, 0x71);
+
+        return _mm_cvtss_f32(dot);
+    }
+
+    // DOT FVEC4/FVEC4
+    inline float Dot(const fvec4& a, const fvec4& b) {
+
+        __m128 dot = _mm_dp_ps(a.v, b.v, 0xF1);
+
+        return _mm_cvtss_f32(dot);
+    }
+
+    // DOT VEC2/VEC2
     inline double Dot(const vec2& a, const vec2& b) {
-        simd_vec sa = Load(a);
-        simd_vec sb = Load(b);
-        __m256d mul = _mm256_mul_pd(sa, sb);
-        alignas(32) double temp[4];
-        _mm256_store_pd(temp, mul);
-        return temp[0] + temp[1];
+
+        __m256d mul = _mm256_mul_pd(a.v, b.v);
+
+        alignas(32) double tmp[4];
+        _mm256_store_pd(tmp, mul);
+
+        return tmp[0] + tmp[1];
     }
 
+    // DOT VEC3/VEC3
     inline double Dot(const vec3& a, const vec3& b) {
-        simd_vec sa = Load(a);
-        simd_vec sb = Load(b);
-        __m256d mul = _mm256_mul_pd(sa, sb);
-        alignas(32) double_t temp[4];
-        _mm256_store_pd(temp, mul);
-        return temp[0] + temp[1] + temp[2];
+
+        __m256d mul = _mm256_mul_pd(a.v, b.v);
+
+        alignas(32) double tmp[4];
+        _mm256_store_pd(tmp, mul);
+
+        return tmp[0] + tmp[1] + tmp[2];
     }
 
+    // DOT VEC4/VEC4
     inline double Dot(const vec4& a, const vec4& b) {
-        simd_vec sa = Load(a);
-        simd_vec sb = Load(b);
-        __m256d mul = _mm256_mul_pd(sa, sb);
-        alignas(32) double temp[4];
-        _mm256_store_pd(temp, mul);
-        return temp[0] + temp[1] + temp[2] + temp[3];
+
+        __m256d mul = _mm256_mul_pd(a.v, b.v);
+
+        alignas(32) double tmp[4];
+        _mm256_store_pd(tmp, mul);
+
+        return tmp[0] + tmp[1] + tmp[2] + tmp[3];
     }
 
-    // VECTOR LENGTH (DŁUGOŚĆ WEKTORA)
+    // LENGTH FVEC2
+    inline float Length(const fvec2& v) {
+        return std::sqrt(Dot(v, v));
+    }
+
+    // LENGTH FVEC3
+    inline float Length(const fvec3& v) {
+        return std::sqrt(Dot(v, v));
+    }
+
+    // LENGTH FVEC4
+    inline float Length(const fvec4& v) {
+        return std::sqrt(Dot(v, v));
+    }
+
+    // LENGTH VEC2
     inline double Length(const vec2& v) {
         return std::sqrt(Dot(v, v));
     }
 
+    // LENGTH VEC3
     inline double Length(const vec3& v) {
         return std::sqrt(Dot(v, v));
     }
 
+    // LENGTH VEC4
     inline double Length(const vec4& v) {
         return std::sqrt(Dot(v, v));
     }
 
-    // VECTOR NORMALIZE (NORMALIZACJA WEKTORA)
-    inline vec2 Normalize(const vec2& v) {
-        double len = Length(v);
-        if(len == 0.0) {
-            return vec2();
-        }
-        return v * (1.0 / len);
+    // LENGTHSQUARED FVEC2
+    inline float LengthSquared(const fvec2& v) {
+        return Dot(v, v);
     }
 
-    inline vec3 Normalize(const vec3& v) {
-        double len = Length(v);
-        if(len == 0.0) {
-            return vec3();
-        }
-        return v * (1.0 / len);
+    // LENGTHSQUARED FVEC3
+    inline float LengthSquared(const fvec3& v) {
+        return Dot(v, v);
     }
 
-    inline vec4 Normalize(const vec4& v) {
-        double len = Length(v);
-        if(len == 0.0) {
-            return vec4();
-        }
-        return v * (1.0 / len);
+    // LENGTHSQUARED FVEC4
+    inline float LengthSquared(const fvec4& v) {
+        return Dot(v, v);
     }
 
-    // MNOŻENIE MACIERZY PRZEZ WEKTOR
-    inline vec4 operator*(const vec4& v, const mat4& m) {
-        simd_vec V = Load(v);
-        simd_mat M = Load(m);
-
-        __m256d xxxx = _mm256_permute4x64_pd(V, _MM_SHUFFLE(0,0,0,0));
-        __m256d yyyy = _mm256_permute4x64_pd(V, _MM_SHUFFLE(1,1,1,1));
-        __m256d zzzz = _mm256_permute4x64_pd(V, _MM_SHUFFLE(2,2,2,2));
-        __m256d wwww = _mm256_permute4x64_pd(V, _MM_SHUFFLE(3,3,3,3));
-
-        simd_vec R =
-            _mm256_add_pd(
-                _mm256_add_pd(
-                    _mm256_mul_pd(xxxx, M.r[0]),
-                    _mm256_mul_pd(yyyy, M.r[1])),
-                _mm256_add_pd(
-                    _mm256_mul_pd(zzzz, M.r[2]),
-                    _mm256_mul_pd(wwww, M.r[3]))
-            );
-
-        return Store4(R);
+    // LENGTHSQUARED VEC2
+    inline double LengthSquared(const vec2& v) {
+        return Dot(v, v);
     }
 
-    inline mat4 Transpose(const mat4& m) {
-        simd_mat M = Load(m);
-
-        __m256d t0 = _mm256_unpacklo_pd(M.r[0], M.r[1]);
-        __m256d t1 = _mm256_unpackhi_pd(M.r[0], M.r[1]);
-        __m256d t2 = _mm256_unpacklo_pd(M.r[2], M.r[3]);
-        __m256d t3 = _mm256_unpackhi_pd(M.r[2], M.r[3]);
-
-        simd_mat R;
-
-        R.r[0] = _mm256_permute2f128_pd(t0, t2, 0x20);
-        R.r[1] = _mm256_permute2f128_pd(t1, t3, 0x20);
-        R.r[2] = _mm256_permute2f128_pd(t0, t2, 0x31);
-        R.r[3] = _mm256_permute2f128_pd(t1, t3, 0x31);
-
-        return Store(R);
+    // LENGTHSQUARED VEC3
+    inline double LengthSquared(const vec3& v) {
+        return Dot(v, v);
     }
 
-    inline mat4 Translate(const vec3& translation) {
-        mat4 result = mat4::Identity();
+    // LENGTHSQUARED VEC4
+    inline double LengthSquared(const vec4& v) {
+        return Dot(v, v);
+    }
 
-        result.col[3].x = translation.x;
-        result.col[3].y = translation.y;
-        result.col[3].z = translation.z;
+    // NORMALIZE FVEC2
+    inline fvec2 Normalize(const fvec2& v) {
+
+        float len = Length(v);
+
+        if (len == 0.0f)
+            return fvec2();
+
+        __m128 invLen = _mm_set1_ps(1.0f / len);
+
+        fvec2 result;
+        result.v = _mm_mul_ps(v.v, invLen);
 
         return result;
     }
 
-    inline mat4 Scale(const vec3& scale)
-    {
-        simd_mat R;
+    // NORMALIZE FVEC3
+    inline fvec3 Normalize(const fvec3& v) {
 
-        R.r[0] = _mm256_set_pd(0.0, 0.0, 0.0, scale.x);
-        R.r[1] = _mm256_set_pd(0.0, 0.0, scale.y, 0.0);
-        R.r[2] = _mm256_set_pd(0.0, scale.z, 0.0, 0.0);
-        R.r[3] = _mm256_set_pd(1.0, 0.0, 0.0, 0.0);
+        float len = Length(v);
 
-        return Store(R);
+        if (len == 0.0f)
+            return fvec3();
+
+        __m128 invLen = _mm_set1_ps(1.0f / len);
+
+        fvec3 result;
+        result.v = _mm_mul_ps(v.v, invLen);
+
+        return result;
     }
 
-    inline mat4 Scale(const double scale) {
-        return Scale(vec3(scale, scale, scale));
+    // NORMALIZE FVEC4
+    inline fvec4 Normalize(const fvec4& v) {
+
+        float len = Length(v);
+
+        if (len == 0.0f)
+            return fvec4();
+
+        __m128 invLen = _mm_set1_ps(1.0f / len);
+
+        fvec4 result;
+        result.v = _mm_mul_ps(v.v, invLen);
+
+        return result;
+    }
+
+    // NORMALIZE VEC2
+    inline vec2 Normalize(const vec2& v) {
+
+        double len = Length(v);
+
+        if (len == 0.0)
+            return vec2();
+
+        __m256d invLen = _mm256_set1_pd(1.0 / len);
+
+        vec2 result;
+        result.v = _mm256_mul_pd(v.v, invLen);
+
+        return result;
+    }
+
+    // NORMALIZE VEC3
+    inline vec3 Normalize(const vec3& v) {
+
+        double len = Length(v);
+
+        if (len == 0.0)
+            return vec3();
+
+        __m256d invLen = _mm256_set1_pd(1.0 / len);
+
+        vec3 result;
+        result.v = _mm256_mul_pd(v.v, invLen);
+
+        return result;
+    }
+
+    // NORMALIZE VEC4
+    inline vec4 Normalize(const vec4& v) {
+
+        double len = Length(v);
+
+        if (len == 0.0)
+            return vec4();
+
+        __m256d invLen = _mm256_set1_pd(1.0 / len);
+
+        vec4 result;
+        result.v = _mm256_mul_pd(v.v, invLen);
+
+        return result;
+    }
+
+    // CROSS FVEC3
+    inline fvec3 Cross(const fvec3& a, const fvec3& b) {
+
+        return fvec3(
+            a.y * b.z - a.z * b.y,
+            a.z * b.x - a.x * b.z,
+            a.x * b.y - a.y * b.x
+        );
+    }
+
+    // CROSS VEC3
+    inline vec3 Cross(const vec3& a, const vec3& b) {
+
+        return vec3(
+            a.y * b.z - a.z * b.y,
+            a.z * b.x - a.x * b.z,
+            a.x * b.y - a.y * b.x
+        );
+    }
+
+    // TRANSPOSE FMAT4
+    inline fmat4 Transpose(const fmat4& m) {
+
+        return fmat4(
+            fvec4(
+                m.col[0].x,
+                m.col[1].x,
+                m.col[2].x,
+                m.col[3].x
+            ),
+
+            fvec4(
+                m.col[0].y,
+                m.col[1].y,
+                m.col[2].y,
+                m.col[3].y
+            ),
+
+            fvec4(
+                m.col[0].z,
+                m.col[1].z,
+                m.col[2].z,
+                m.col[3].z
+            ),
+
+            fvec4(
+                m.col[0].w,
+                m.col[1].w,
+                m.col[2].w,
+                m.col[3].w
+            )
+        );
+    }
+
+    // TRANSPOSE MAT4
+    inline mat4 Transpose(const mat4& m) {
+
+        return mat4(
+            vec4(
+                m.col[0].x,
+                m.col[1].x,
+                m.col[2].x,
+                m.col[3].x
+            ),
+
+            vec4(
+                m.col[0].y,
+                m.col[1].y,
+                m.col[2].y,
+                m.col[3].y
+            ),
+
+            vec4(
+                m.col[0].z,
+                m.col[1].z,
+                m.col[2].z,
+                m.col[3].z
+            ),
+
+            vec4(
+                m.col[0].w,
+                m.col[1].w,
+                m.col[2].w,
+                m.col[3].w
+            )
+        );
+    }
+
+    // TRANSLATE FLOAT
+    inline fmat4 Translate(float x, float y, float z) {
+
+        return fmat4(
+            fvec4(1.0f, 0.0f, 0.0f, 0.0f),
+            fvec4(0.0f, 1.0f, 0.0f, 0.0f),
+            fvec4(0.0f, 0.0f, 1.0f, 0.0f),
+            fvec4(x,    y,    z,    1.0f)
+        );
+    }
+
+    // TRANSLATE FVEC3
+    inline fmat4 Translate(const fvec3& t) {
+
+        return Translate(
+            t.x,
+            t.y,
+            t.z
+        );
+    }
+
+    // TRANSLATE DOUBLE
+    inline mat4 Translate(double x, double y, double z) {
+
+        return mat4(
+            vec4(1.0, 0.0, 0.0, 0.0),
+            vec4(0.0, 1.0, 0.0, 0.0),
+            vec4(0.0, 0.0, 1.0, 0.0),
+            vec4(x,   y,   z,   1.0)
+        );
+    }
+
+    // TRANSLATE VEC3
+    inline mat4 Translate(const vec3& t) {
+
+        return Translate(
+            t.x,
+            t.y,
+            t.z
+        );
+    }
+
+    // SCALE FLOAT
+    inline fmat4 Scale(float x, float y, float z) {
+
+        return fmat4(
+            fvec4(x,    0.0f, 0.0f, 0.0f),
+            fvec4(0.0f, y,    0.0f, 0.0f),
+            fvec4(0.0f, 0.0f, z,    0.0f),
+            fvec4(0.0f, 0.0f, 0.0f, 1.0f)
+        );
+    }
+
+    // SCALE FVEC3
+    inline fmat4 Scale(const fvec3& s) {
+
+        return Scale(
+            s.x,
+            s.y,
+            s.z
+        );
+    }
+
+    // SCALE DOUBLE
+    inline mat4 Scale(double x, double y, double z) {
+
+        return mat4(
+            vec4(x,   0.0, 0.0, 0.0),
+            vec4(0.0, y,   0.0, 0.0),
+            vec4(0.0, 0.0, z,   0.0),
+            vec4(0.0, 0.0, 0.0, 1.0)
+        );
+    }
+
+    // SCALE VEC3
+    inline mat4 Scale(const vec3& s) {
+
+        return Scale(
+            s.x,
+            s.y,
+            s.z
+        );
+    }
+
+    // ROTATE X
+    inline fmat4 RotateX(float angle) {
+
+        float c = std::cos(angle);
+        float s = std::sin(angle);
+
+        return fmat4(
+            fvec4(1.0f, 0.0f, 0.0f, 0.0f),
+            fvec4(0.0f, c,    s,    0.0f),
+            fvec4(0.0f,-s,    c,    0.0f),
+            fvec4(0.0f, 0.0f, 0.0f, 1.0f)
+        );
     }
 
     inline mat4 RotateX(double angle) {
+
         double c = std::cos(angle);
         double s = std::sin(angle);
 
-        simd_mat R;
+        return mat4(
+            vec4(1.0, 0.0, 0.0, 0.0),
+            vec4(0.0, c,   s,   0.0),
+            vec4(0.0,-s,   c,   0.0),
+            vec4(0.0, 0.0, 0.0, 1.0)
+        );
+    }
 
-        R.r[0] = _mm256_set_pd(0.0, 0.0, 0.0, 1.0);
-        R.r[1] = _mm256_set_pd(0.0,  s,   c, 0.0);
-        R.r[2] = _mm256_set_pd(0.0,  c,  -s, 0.0);
-        R.r[3] = _mm256_set_pd(1.0, 0.0, 0.0, 0.0);
+    // ROTATE Y
+    inline fmat4 RotateY(float angle) {
 
-        return Store(R);
+        float c = std::cos(angle);
+        float s = std::sin(angle);
+
+        return fmat4(
+            fvec4( c,   0.0f, -s,   0.0f),
+            fvec4(0.0f, 1.0f, 0.0f, 0.0f),
+            fvec4( s,   0.0f,  c,   0.0f),
+            fvec4(0.0f, 0.0f, 0.0f, 1.0f)
+        );
     }
 
     inline mat4 RotateY(double angle) {
+
         double c = std::cos(angle);
         double s = std::sin(angle);
 
-        simd_mat R;
+        return mat4(
+            vec4( c,  0.0, -s,  0.0),
+            vec4(0.0, 1.0, 0.0, 0.0),
+            vec4( s,  0.0,  c,  0.0),
+            vec4(0.0, 0.0, 0.0, 1.0)
+        );
+    }
 
-        R.r[0] = _mm256_set_pd(0.0,  -s, 0.0,  c);
-        R.r[1] = _mm256_set_pd(0.0, 0.0, 1.0, 0.0);
-        R.r[2] = _mm256_set_pd(0.0,  c, 0.0, s);
-        R.r[3] = _mm256_set_pd(1.0, 0.0, 0.0, 0.0);
+    // ROTATE Z
+    inline fmat4 RotateZ(float angle) {
 
-        return Store(R);
+        float c = std::cos(angle);
+        float s = std::sin(angle);
+
+        return fmat4(
+            fvec4( c,   s,   0.0f, 0.0f),
+            fvec4(-s,   c,   0.0f, 0.0f),
+            fvec4(0.0f, 0.0f,1.0f, 0.0f),
+            fvec4(0.0f, 0.0f,0.0f, 1.0f)
+        );
     }
 
     inline mat4 RotateZ(double angle) {
+
         double c = std::cos(angle);
         double s = std::sin(angle);
 
-        simd_mat R;
-
-        R.r[0] = _mm256_set_pd(0.0, 0.0, s,  c);
-        R.r[1] = _mm256_set_pd(0.0, 0.0,  c,  -s);
-        R.r[2] = _mm256_set_pd(0.0, 1.0, 0.0, 0.0);
-        R.r[3] = _mm256_set_pd(1.0, 0.0, 0.0, 0.0);
-
-        return Store(R);
+        return mat4(
+            vec4( c,  s,  0.0, 0.0),
+            vec4(-s,  c,  0.0, 0.0),
+            vec4(0.0, 0.0, 1.0, 0.0),
+            vec4(0.0, 0.0, 0.0, 1.0)
+        );
     }
 
-    inline mat4 RotateXYZ(double pitch, double yaw, double roll) {
-
-        return RotateX(pitch) * RotateY(yaw) * RotateZ(roll);
-
+    // ROTATE XYZ
+    inline fmat4 RotateXYZ(
+        float pitch,
+        float yaw,
+        float roll)
+    {
+        return
+            RotateY(yaw) *
+            RotateX(pitch) *
+            RotateZ(roll);
     }
 
-    inline mat4 Perspective(double fov, double aspect, double nearPlane, double farPlane) {
+    inline mat4 RotateXYZ(
+       double pitch,
+       double yaw,
+       double roll)
+    {
+        return
+            RotateY(yaw) *
+            RotateX(pitch) *
+            RotateZ(roll);
+    }
+
+    // PERSPECTIVE FLOAT
+    inline fmat4 Perspective(
+        float fov,
+        float aspect,
+        float nearPlane,
+        float farPlane)
+    {
+        float f = 1.0f / std::tan(fov * 0.5f);
+
+        fmat4 result;
+
+        result.col[0] = fvec4(
+            f / aspect,
+            0.0f,
+            0.0f,
+            0.0f
+        );
+
+        result.col[1] = fvec4(
+            0.0f,
+            f,
+            0.0f,
+            0.0f
+        );
+
+        result.col[2] = fvec4(
+            0.0f,
+            0.0f,
+            nearPlane / (farPlane - nearPlane),
+            -1.0f
+        );
+
+        result.col[3] = fvec4(
+            0.0f,
+            0.0f,
+            (farPlane * nearPlane) / (farPlane - nearPlane),
+            0.0f
+        );
+
+        return result;
+    }
+
+    // PERSPECTIVE DOUBLE
+    inline mat4 Perspective(
+        double fov,
+        double aspect,
+        double nearPlane,
+        double farPlane)
+    {
         double f = 1.0 / std::tan(fov * 0.5);
 
-        simd_mat R;
+        mat4 result;
 
-        R.r[0] = _mm256_set_pd(0.0, 0.0, 0.0, f / aspect);
-        R.r[1] = _mm256_set_pd(0.0, 0.0, f, 0.0);
-        R.r[2] = _mm256_set_pd(-1.0, farPlane / (nearPlane - farPlane), 0.0, 0.0);
-        R.r[3] = _mm256_set_pd(0.0, (nearPlane * farPlane) / (nearPlane - farPlane), 0.0, 0.0);
+        result.col[0] = vec4(
+            f / aspect,
+            0.0,
+            0.0,
+            0.0
+        );
 
-        return Store(R);
+        result.col[1] = vec4(
+            0.0,
+            f,
+            0.0,
+            0.0
+        );
+
+        result.col[2] = vec4(
+            0.0,
+            0.0,
+            nearPlane / (farPlane - nearPlane),
+            -1.0
+        );
+
+        result.col[3] = vec4(
+            0.0,
+            0.0,
+            (farPlane * nearPlane) / (farPlane - nearPlane),
+            0.0
+        );
+
+        return result;
     }
 
-    inline mat4 PerspectiveReverseZInfinite(double fov, double aspect, double nearPlane) {
-        double f = 1.0 / std::tan(fov * 0.5);
+    // ORTHOGRAPHIC FLOAT
+    inline fmat4 Orthographic(
+        float left,
+        float right,
+        float bottom,
+        float top,
+        float nearPlane,
+        float farPlane)
+    {
+        fmat4 result(1.0f);
 
-        simd_mat R;
+        result.col[0].x = 2.0f / (right - left);
 
-        R.r[0] = _mm256_set_pd(0.0, 0.0, 0.0, f / aspect);
-        R.r[1] = _mm256_set_pd(0.0, 0.0, -f, 0.0);
-        R.r[2] = _mm256_set_pd(-1.0, 0.0, 0.0, 0.0);
-        R.r[3] = _mm256_set_pd(0.0, nearPlane, 0.0, 0.0);
+        result.col[1].y = 2.0f / (top - bottom);
 
-        return Store(R);
+        result.col[2].z = 1.0f / (nearPlane - farPlane);
+
+        result.col[3].x = -(right + left) / (right - left);
+        result.col[3].y = -(top + bottom) / (top - bottom);
+        result.col[3].z = nearPlane / (nearPlane - farPlane);
+
+        return result;
     }
 
-    inline mat4 Orthographic(double left, double right, double bottom, double top, double nearPlane, double farPlane) {
-        double rl = right - left;
-        double tb = bottom - top;
-        double fn = farPlane - nearPlane;
+    // ORTHOGRAPGIC DOUBLE
+    inline mat4 Orthographic(
+        double left,
+        double right,
+        double bottom,
+        double top,
+        double nearPlane,
+        double farPlane)
+    {
+        mat4 result(1.0);
 
-        simd_mat R;
+        result.col[0].x = 2.0 / (right - left);
 
-        R.r[0] = _mm256_set_pd(0.0, 0.0, 0.0, 2.0 / rl);
-        R.r[1] = _mm256_set_pd(0.0, 0.0, 2.0 / tb, 0.0);
-        R.r[2] = _mm256_set_pd(0.0, 1.0 / fn, 0.0, 0.0);
-        R.r[3] = _mm256_set_pd(1.0, -nearPlane / fn, -(top + bottom) / tb, -(right + left) / rl);
+        result.col[1].y = 2.0f / (bottom - top);
 
-        return Store(R);
+        result.col[2].z = 1.0 / (nearPlane - farPlane);
 
+        result.col[3].x = -(right + left) / (right - left);
+        result.col[3].y = -(top + bottom) / (bottom - top);
+        result.col[3].z = nearPlane / (nearPlane - farPlane);
+
+        return result;
     }
 
+    // LOOKAT FLOAT
+    inline fmat4 LookAt(
+        const fvec3& eye,
+        const fvec3& target,
+        const fvec3& up)
+    {
+        fvec3 forward = Normalize(target - eye);
 
+        fvec3 right =
+            Normalize(
+                Cross(forward, up)
+            );
 
+        fvec3 cameraUp =
+            Cross(right, forward);
 
+        fmat4 result(1.0f);
 
-    // HELPERS
-    inline double ToRadians(double degrees) {
-        return degrees * (PI / 180.0);
+        result.col[0] = fvec4(
+            right.x,
+            cameraUp.x,
+            -forward.x,
+            0.0f
+        );
+
+        result.col[1] = fvec4(
+            right.y,
+            cameraUp.y,
+            -forward.y,
+            0.0f
+        );
+
+        result.col[2] = fvec4(
+            right.z,
+            cameraUp.z,
+            -forward.z,
+            0.0f
+        );
+
+        result.col[3] = fvec4(
+            -Dot(right, eye),
+            -Dot(cameraUp, eye),
+             Dot(forward, eye),
+            1.0f
+        );
+
+        return result;
     }
 
+    // LOOKAT DOUBLE
+    inline mat4 LookAt(
+        const vec3& eye,
+        const vec3& target,
+        const vec3& up)
+    {
+        vec3 forward = Normalize(target - eye);
+
+        vec3 right =
+            Normalize(
+                Cross(forward, up)
+            );
+
+        vec3 cameraUp =
+            Cross(right, forward);
+
+        mat4 result(1.0);
+
+        result.col[0] = vec4(
+            right.x,
+            cameraUp.x,
+            -forward.x,
+            0.0
+        );
+
+        result.col[1] = vec4(
+            right.y,
+            cameraUp.y,
+            -forward.y,
+            0.0
+        );
+
+        result.col[2] = vec4(
+            right.z,
+            cameraUp.z,
+            -forward.z,
+            0.0
+        );
+
+        result.col[3] = vec4(
+            -Dot(right, eye),
+            -Dot(cameraUp, eye),
+             Dot(forward, eye),
+            1.0
+        );
+
+        return result;
+    }
+
+    // VEC2 -> FVEC2
+    inline fvec2 ToFloat(const vec2& v) {
+        return fvec2(
+            static_cast<float>(v.x),
+            static_cast<float>(v.y)
+        );
+    }
+
+    // VEC3 -> FVEC3
+    inline fvec3 ToFloat(const vec3& v) {
+        return fvec3(
+            static_cast<float>(v.x),
+            static_cast<float>(v.y),
+            static_cast<float>(v.z)
+        );
+    }
+
+    // VEC4 -> FVEC4
     inline fvec4 ToFloat(const vec4& v) {
-        return {
+        return fvec4(
             static_cast<float>(v.x),
             static_cast<float>(v.y),
             static_cast<float>(v.z),
             static_cast<float>(v.w)
-        };
+        );
     }
 
+    // MAT4 -> FMAT4
     inline fmat4 ToFloat(const mat4& m) {
-        return {
+
+        return fmat4(
             ToFloat(m.col[0]),
             ToFloat(m.col[1]),
             ToFloat(m.col[2]),
             ToFloat(m.col[3])
-        };
+        );
+    }
+
+    inline vec2 ToDouble(const fvec2& v) {
+        return vec2(v.x, v.y);
+    }
+
+    inline vec3 ToDouble(const fvec3& v) {
+        return vec3(v.x, v.y, v.z);
+    }
+
+    inline vec4 ToDouble(const fvec4& v) {
+        return vec4(v.x, v.y, v.z, v.w);
+    }
+
+    inline mat4 ToDouble(const fmat4& m) {
+
+        return mat4(
+            ToDouble(m.col[0]),
+            ToDouble(m.col[1]),
+            ToDouble(m.col[2]),
+            ToDouble(m.col[3])
+        );
+    }
+
+    // TO RADIANS
+    inline constexpr float ToRadians(float degrees) {
+        return degrees * static_cast<float>(PI_F / 180.0);
+    }
+
+    inline constexpr double ToRadians(double degrees) {
+        return degrees * (PI_D / 180.0);
+    }
+
+    // TO DEGREES
+    inline constexpr float ToDegrees(float radians) {
+        return radians * static_cast<float>(180.0 / PI_F);
+    }
+
+    inline constexpr double ToDegrees(double radians) {
+        return radians * (180.0 / PI_D);
     }
 
 
 
 
-    // LOAD
-    inline simd_fvec Load(const fvec2& v) {
-        return _mm_set_ps(0.0f, 0.0f, v.y, v.x);
-    }
-
-    inline simd_fvec Load(const fvec3& v) {
-        return _mm_set_ps(0.0f, v.z, v.y, v.x);
-    }
-
-    inline simd_fvec Load(const fvec4& v) {
-        return _mm_set_ps(v.w, v.z, v.y, v.x);
-    }
-
-    inline simd_fmat Load(const fmat4& m) {
-        simd_fmat result;
-        result.r[0] = _mm_loadu_ps(&m.col[0].x);
-        result.r[1] = _mm_loadu_ps(&m.col[1].x);
-        result.r[2] = _mm_loadu_ps(&m.col[2].x);
-        result.r[3] = _mm_loadu_ps(&m.col[3].x);
-        return result;
-    }
-
-    inline simd_vec Load(const vec2& v) {
-        return {
-            _mm256_set_pd(0.0f, 0.0f, v.y, v.x)
-        };
-    }
-
-    inline simd_vec Load(const vec3& v) {
-        return _mm256_set_pd(0.0f, v.z, v.y, v.x);
-    }
-
-    inline simd_vec Load(const vec4& v) {
-        return {
-            _mm256_set_pd(v.w, v.z, v.y, v.x)
-        };
-    }
-
-    inline simd_mat Load(const mat4& m) {
-        simd_mat result;
-        result.r[0] = _mm256_loadu_pd(&m.col[0].x);
-        result.r[1] = _mm256_loadu_pd(&m.col[1].x);
-        result.r[2] = _mm256_loadu_pd(&m.col[2].x);
-        result.r[3] = _mm256_loadu_pd(&m.col[3].x);
-        return result;
-    }
-
-    // STORE
-    inline fvec2 Store2(const simd_fvec& v) {
-        alignas(16) float tmp[4];
-        _mm_store_ps(tmp, v);
-        return { tmp[0], tmp[1] };
-    }
-
-    inline fvec3 Store3(const simd_fvec& v) {
-        alignas(16) float tmp[4];
-        _mm_store_ps(tmp, v);
-        return { tmp[0], tmp[1], tmp[2] };
-    }
-
-    inline fvec4 Store4(const simd_fvec& v) {
-        alignas(16) float tmp[4];
-        _mm_store_ps(tmp, v);
-        return { tmp[0], tmp[1], tmp[2], tmp[3] };
-    }
-
-    inline fmat4 Store(const simd_fmat& m) {
-        fmat4 result;
-        result.col[0] = Store4(simd_fvec{ m.r[0] });
-        result.col[1] = Store4(simd_fvec{ m.r[1] });
-        result.col[2] = Store4(simd_fvec{ m.r[2] });
-        result.col[3] = Store4(simd_fvec{ m.r[3] });
-        return result;
-    }
-
-    inline vec2 Store2(const simd_vec& v) {
-        alignas(32) double tmp[4];
-        _mm256_store_pd(tmp, v);
-        return { tmp[0], tmp[1] };
-    }
-
-    inline vec3 Store3(const simd_vec& v) {
-        alignas(32) double tmp[4];
-        _mm256_store_pd(tmp, v);
-        return { tmp[0], tmp[1], tmp[2] };
-    }
-
-    inline vec4 Store4(const simd_vec& v) {
-        alignas(32) double tmp[4];
-        _mm256_store_pd(tmp, v);
-        return { tmp[0], tmp[1], tmp[2], tmp[3] };
-    }
-
-    inline mat4 Store(const simd_mat& m) {
-        mat4 result;
-        result.col[0] = Store4(simd_vec{ m.r[0] });
-        result.col[1] = Store4(simd_vec{ m.r[1] });
-        result.col[2] = Store4(simd_vec{ m.r[2] });
-        result.col[3] = Store4(simd_vec{ m.r[3] });
-        return result;
-    }
 
 }
-
-
-

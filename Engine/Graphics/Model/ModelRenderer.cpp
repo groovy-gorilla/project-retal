@@ -42,7 +42,7 @@ void ModelRenderer::Create(VkDevice device, VkFormat colorFormat, VkFormat depth
     m_pDesc.depthWrite = true;
     m_pDesc.blending = false;
     m_pDesc.cullMode = VK_CULL_MODE_BACK_BIT;
-    m_pDesc.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    m_pDesc.frontFace = VK_FRONT_FACE_CLOCKWISE;
     m_pDesc.pushConstants = &push;
 
     m_pipeline.Create(device, m_pDesc);
@@ -59,13 +59,13 @@ void ModelRenderer::Render(VkCommandBuffer commandBuffer, Model& model, const Ca
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.Get());
 
-    static float angle = 1.5f;
+    static float angle = 0.0f;
     angle += 0.01f;
 
     // MACIERZE
-    lina::fmat4 modelMatrix = lina::ToFloat(RotateY(angle));
-    lina::fmat4 viewMatrix = lina::ToFloat(camera.GetView());
-    lina::fmat4 projectionMatrix = lina::ToFloat(camera.GetProjection());
+    fmat4 modelMatrix = RotateY(angle);
+    fmat4 viewMatrix = ToFloat(camera.GetView());
+    fmat4 projectionMatrix = ToFloat(camera.GetProjection());
 
     ModelPushConstants push{};
     push.mvp = projectionMatrix * viewMatrix * modelMatrix;

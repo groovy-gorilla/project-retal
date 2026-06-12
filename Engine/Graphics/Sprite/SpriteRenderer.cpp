@@ -33,8 +33,8 @@ void SpriteRenderer::Create(VkDevice device, VkFormat colorFormat) {
     pdesc.depthTest = false;
     pdesc.blending = true;
     pdesc.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
-    pdesc.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-    pdesc.cullMode = VK_CULL_MODE_NONE;
+    pdesc.cullMode = VK_CULL_MODE_BACK_BIT;
+    pdesc.frontFace = VK_FRONT_FACE_CLOCKWISE;
     pdesc.colorFormat = colorFormat;
 
     m_pipeline.Create(device, pdesc);

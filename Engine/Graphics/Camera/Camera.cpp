@@ -5,8 +5,8 @@ Camera::Camera() {
     m_projectionType = CameraProjection::Perspective;
     m_position = vec3(0.0, 0.0, 0.0);
     m_rotation = vec3(0.0, 0.0, 0.0);
-    m_projection = mat4::Identity();
-    m_view = mat4::Identity();
+    m_projection = mat4(1.0);
+    m_view = mat4(1.0);
 
 }
 
@@ -27,8 +27,7 @@ void Camera::SetRotation(const vec3& rotation) {
 void Camera::SetPerspective(double fov, double aspect, double nearPlane, double farPlane) {
 
     m_projectionType = CameraProjection::Perspective;
-    m_projection = PerspectiveReverseZInfinite(fov, aspect, nearPlane);
-    //m_projection = Perspective(fov, aspect, nearPlane, farPlane);
+    m_projection = Perspective(fov, aspect, nearPlane, farPlane);
 
 }
 

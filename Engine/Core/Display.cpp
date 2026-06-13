@@ -13,7 +13,7 @@ void Display::Initialize() {
     }
 
     // Tworzy listę informacji o monitorze
-    m_currentDisplay = SDL_GetPrimaryDisplay(); //displays[0];                           // Wybiera główny monitor (SDL_GetPrimaryDisplay często nie działa prawidłowo)
+    m_currentDisplay =  SDL_GetPrimaryDisplay();  //displays[0];                        // Wybiera główny monitor (SDL_GetPrimaryDisplay często nie działa prawidłowo)
     m_currentDisplayName = SDL_GetDisplayName(m_currentDisplay);                         // Pobiera nazwę monitora
 
     int count = 0;

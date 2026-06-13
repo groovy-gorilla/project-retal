@@ -1200,14 +1200,14 @@ namespace lina {
         result.col[2] = fvec4(
             0.0f,
             0.0f,
-            farPlane / (nearPlane - farPlane),
+            nearPlane / (farPlane - nearPlane),
             -1.0f
         );
 
         result.col[3] = fvec4(
             0.0f,
             0.0f,
-            (nearPlane * farPlane) / (nearPlane - farPlane),
+            (farPlane * nearPlane) / (farPlane - nearPlane),
             0.0f
         );
 
@@ -1242,14 +1242,14 @@ namespace lina {
         result.col[2] = vec4(
             0.0,
             0.0,
-            farPlane / (nearPlane - farPlane),
+            nearPlane / (farPlane - nearPlane),
             -1.0
         );
 
         result.col[3] = vec4(
             0.0,
             0.0,
-            (nearPlane * farPlane) / (nearPlane - farPlane),
+            (farPlane * nearPlane) / (farPlane - nearPlane),
             0.0
         );
 

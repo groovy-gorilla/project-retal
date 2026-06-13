@@ -20,7 +20,7 @@ void Graphics::Initialize(Display& display, Window& window, Settings& set) {
     m_Text.SetPosition(10, 10);
     m_Text.SetColor(lina::fvec4(1,1,0,1));
 
-    m_model.CreateCube(m_renderer.GetContext().device, m_renderer.GetContext().physicalDevice);
+    m_cube.CreateCube(m_renderer.GetContext().device, m_renderer.GetContext().physicalDevice);
 
     m_camera.SetPosition(vec3(0.0, 0.0, 3.0));
 
@@ -32,7 +32,7 @@ void Graphics::Shutdown() {
     m_textRenderer.Shutdown();
     m_modelRenderer.Destroy();
 
-    m_model.Destroy();
+    m_cube.Destroy();
 
     m_sprite1.Shutdown();
     m_sprite2.Shutdown();
@@ -67,17 +67,17 @@ void Graphics::Render(VkDevice device, Settings& settings, float deltaTime, Inpu
     if (input.IsHeld(Action::Up)) m_camera.MoveUp(moveStep);
     if (input.IsHeld(Action::Down)) m_camera.MoveUp(-moveStep);
 
-
     m_renderer.BeginFrame();
     m_renderer.BeginScene();
 
         // TUTAJ SCENA
         auto extent = m_renderer.GetRenderExtent();
-        m_camera.SetPerspective(120.0, static_cast<double>(extent.width) / static_cast<double>(extent.height), 0.1, 1000.0);
+        m_camera.SetPerspective(120.0, static_cast<double>(extent.width) / static_cast<double>(extent.height), 0.01, 1000000.0);
 
         static Transform cubeTransform;
-        cubeTransform.rotation.y += 0.001;
-        m_modelRenderer.Render(m_renderer.GetCommandBuffer(), m_model, m_camera, cubeTransform);
+        //cubeTransform.rotation.y += 0.01;
+        //cubeTransform.rotation.x += 0.015;
+        m_modelRenderer.Render(m_renderer.GetCommandBuffer(), m_cube, m_camera, cubeTransform);
 
 
 

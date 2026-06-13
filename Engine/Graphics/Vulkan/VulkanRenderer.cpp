@@ -320,7 +320,7 @@ void VulkanRenderer::TakeScreenshot(uint32_t imageIndex) {
 
     VkImage srcImage = m_swapchain.GetImage(imageIndex);
 
-    VkDeviceSize imageSize = static_cast<VkDeviceSize>(m_renderExtent.width) * static_cast<VkDeviceSize>(m_renderExtent.height) * 4;
+    VkDeviceSize imageSize = static_cast<VkDeviceSize>(m_windowExtent.width) * static_cast<VkDeviceSize>(m_windowExtent.height) * 4;
 
     // STAGING BUFFER
     Buffer stagingBuffer;
@@ -354,7 +354,7 @@ void VulkanRenderer::TakeScreenshot(uint32_t imageIndex) {
     region.imageSubresource.baseArrayLayer = 0;
     region.imageSubresource.layerCount = 1;
     region.imageOffset = { 0, 0, 0 };
-    region.imageExtent = { m_renderExtent.width, m_renderExtent.height, 1 };
+    region.imageExtent = { m_windowExtent.width, m_windowExtent.height, 1 };
 
     vkCmdCopyImageToBuffer(commandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, stagingBuffer.Get(), 1, &region);
 
@@ -393,7 +393,7 @@ void VulkanRenderer::TakeScreenshot(uint32_t imageIndex) {
 
     // KONWERSJA Z RGBA NA RGB
     std::vector<uint8_t> rgb;
-    rgb.resize(m_renderExtent.width * m_renderExtent.height * 3);
+    rgb.resize(m_windowExtent.width * m_windowExtent.height * 3);
 
     for (size_t src = 0, dst = 0; src < imageSize; src += 4) {
         rgb[dst++] = pixels[src + 0]; // R
@@ -413,7 +413,7 @@ void VulkanRenderer::TakeScreenshot(uint32_t imageIndex) {
     std::string filename = ss.str();
 
     // WRITE IMAGE TO PNG FILE
-    stbi_write_png(filename.c_str(), m_renderExtent.width, m_renderExtent.height, 3, rgb.data(), m_renderExtent.width * 3);
+    stbi_write_png(filename.c_str(), m_windowExtent.width, m_windowExtent.height, 3, rgb.data(), m_windowExtent.width * 3);
 
     // DESTROY
     stagingBuffer.Unmap();

@@ -100,7 +100,8 @@ void Camera::MoveRight(double distance) {
 
 void Camera::MoveUp(double distance) {
 
-    m_position += GetUp() * distance;
+    //m_position += GetUp() * distance;
+    m_position.y += distance;
 
     UpdateView();
 }

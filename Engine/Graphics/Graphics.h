@@ -35,7 +35,7 @@ private:
     TextRenderer m_textRenderer;
     ModelRenderer m_modelRenderer;
 
-    Model m_model;
+    Model m_cube;
 
     Sprite m_sprite1;
     Sprite m_sprite2;

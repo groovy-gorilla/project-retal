@@ -24,7 +24,7 @@ struct Settings {
     uint32_t WIDTH                      = 800;
     uint32_t HEIGHT                     = 600;
 
-    bool FULLSCREEN                     = false;
+    bool FULLSCREEN                     = true;
     bool ASPECT_RATIO                   = true;
     bool VSYNC                          = true;
     TextureFilter FILTER                = TextureFilter::Nearest;

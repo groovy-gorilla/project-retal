@@ -18,11 +18,13 @@ class Graphics {
 public:
     void Initialize(Display& display, Window& window, Settings& set);
     void Shutdown();
-    void Render(VkDevice device, Settings& settings, float deltaTime, Input& input);
+    void Render(Settings& set, float deltaTime);
 
     VulkanRenderer& GetRenderer();
 
     void Recreate(Display& display, Window& window, Settings& set);
+
+    Camera& GetCamera() { return m_camera; }
 
 private:
     VulkanRenderer m_renderer;

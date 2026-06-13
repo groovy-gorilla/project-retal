@@ -100,7 +100,24 @@ void System::Run() {
         }
 
         // RENDER
-        m_graphics.Render(m_graphics.GetRenderer().GetContext().device, m_desc, m_timer.GetDeltaTime(), m_input);
+        m_graphics.Render(m_desc, m_timer.GetDeltaTime());
+
+        // MOUSE ROTATE CAMERA
+        double sensitivity = 0.002;
+        m_graphics.GetCamera().AddRotation(
+            m_input.GetMouseDelta().y * sensitivity,
+            m_input.GetMouseDelta().x * sensitivity
+        );
+
+        // WSAD
+        double moveSpeed = 5.0;
+        double moveStep = moveSpeed * m_timer.GetDeltaTime();
+        if (m_input.IsHeld(Action::Forward)) m_graphics.GetCamera().MoveForward(moveStep);
+        if (m_input.IsHeld(Action::Backward)) m_graphics.GetCamera().MoveForward(-moveStep);
+        if (m_input.IsHeld(Action::Right)) m_graphics.GetCamera().MoveRight(moveStep);
+        if (m_input.IsHeld(Action::Left)) m_graphics.GetCamera().MoveRight(-moveStep);
+        if (m_input.IsHeld(Action::Up)) m_graphics.GetCamera().MoveUp(moveStep);
+        if (m_input.IsHeld(Action::Down)) m_graphics.GetCamera().MoveUp(-moveStep);
 
         // HDR ON/OFF
         if (m_input.IsPressed(Action::HDR)) {

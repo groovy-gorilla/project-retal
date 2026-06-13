@@ -45,27 +45,10 @@ void Graphics::Shutdown() {
 
 }
 
-void Graphics::Render(VkDevice device, Settings& settings, float deltaTime, Input& input) {
+void Graphics::Render(Settings& set, float deltaTime) {
 
-    m_renderer.Update(deltaTime, settings.HDR);
+    m_renderer.Update(deltaTime, set.HDR);
     m_fps.Update(deltaTime);
-
-    // MOUSE ROTATE CAMERA
-    double sensitivity = 0.002;
-    m_camera.AddRotation(
-        input.GetMouseDelta().y * sensitivity,
-         input.GetMouseDelta().x * sensitivity
-    );
-
-    // WSAD
-    double moveSpeed = 5.0;
-    double moveStep = moveSpeed * deltaTime;
-    if (input.IsHeld(Action::Forward)) m_camera.MoveForward(moveStep);
-    if (input.IsHeld(Action::Backward)) m_camera.MoveForward(-moveStep);
-    if (input.IsHeld(Action::Right)) m_camera.MoveRight(moveStep);
-    if (input.IsHeld(Action::Left)) m_camera.MoveRight(-moveStep);
-    if (input.IsHeld(Action::Up)) m_camera.MoveUp(moveStep);
-    if (input.IsHeld(Action::Down)) m_camera.MoveUp(-moveStep);
 
     m_renderer.BeginFrame();
     m_renderer.BeginScene();
@@ -79,11 +62,8 @@ void Graphics::Render(VkDevice device, Settings& settings, float deltaTime, Inpu
         //cubeTransform.rotation.x += 0.015;
         m_modelRenderer.Render(m_renderer.GetCommandBuffer(), m_cube, m_camera, cubeTransform);
 
-
-
     m_renderer.EndScene();
-    m_renderer.BeginOverlay(settings);
-
+    m_renderer.BeginOverlay(set);
 
         // TUTAJ OVERLAY
 
@@ -108,10 +88,9 @@ void Graphics::Render(VkDevice device, Settings& settings, float deltaTime, Inpu
         m_Text.SetText(ss.str());
         m_textRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_Text, m_camera);
 
-
     m_renderer.EndOverlay();
-    m_renderer.RenderPresent(settings);
-    m_renderer.EndFrame(settings);
+    m_renderer.RenderPresent(set);
+    m_renderer.EndFrame(set);
 
 }
 

@@ -4,6 +4,7 @@
 #include "Fps/Fps.h"
 #include "Input/Input.h"
 #include "Model/ModelRenderer.h"
+#include "Skydome/SkydomeRenderer.h"
 #include "Sprite/Sprite.h"
 #include "Sprite/SpriteRenderer.h"
 #include "Text/Text.h"
@@ -36,6 +37,9 @@ private:
     SpriteRenderer m_spriteRenderer;
     TextRenderer m_textRenderer;
     ModelRenderer m_modelRenderer;
+    SkydomeRenderer m_skydomeRenderer;
+
+    Skydome m_skydome;
 
     Model m_cube;
 

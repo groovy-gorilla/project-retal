@@ -1,6 +1,4 @@
 #include "ModelRenderer.h"
-
-#include "Core/Display.h"
 #include "Graphics/Model/Model.h"
 #include "Graphics/Camera/Camera.h"
 
@@ -10,7 +8,7 @@ void ModelRenderer::Create(VkDevice device, VkFormat colorFormat, VkFormat depth
 
     static VkVertexInputBindingDescription binding{};
     binding.binding = 0;
-    binding.stride = sizeof(Vertex);
+    binding.stride = sizeof(ModelVertex);
     binding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
     static VkVertexInputAttributeDescription attributes[2];
@@ -18,12 +16,12 @@ void ModelRenderer::Create(VkDevice device, VkFormat colorFormat, VkFormat depth
     attributes[0].binding = 0;
     attributes[0].location = 0;
     attributes[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributes[0].offset = offsetof(Vertex, position);
+    attributes[0].offset = offsetof(ModelVertex, position);
 
     attributes[1].binding = 0;
     attributes[1].location = 1;
     attributes[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-    attributes[1].offset = offsetof(Vertex, color);
+    attributes[1].offset = offsetof(ModelVertex, color);
 
     static VkPushConstantRange push{};
     push.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
@@ -89,7 +87,7 @@ void ModelRenderer::RecreatePipeline(VkDevice device, VkSampleCountFlagBits samp
 
     static VkVertexInputBindingDescription binding{};
     binding.binding = 0;
-    binding.stride = sizeof(Vertex);
+    binding.stride = sizeof(ModelVertex);
     binding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
     static VkPushConstantRange push{};

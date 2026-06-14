@@ -10,6 +10,10 @@ void Graphics::Initialize(Display& display, Window& window, Settings& set) {
     m_spriteRenderer.Create(m_renderer.GetContext().device, m_renderer.GetOverlayRenderPass().GetColorFormat());
     m_textRenderer.Create(m_renderer.GetContext().device, m_renderer.GetOverlayRenderPass().GetColorFormat());
     m_modelRenderer.Create(m_renderer.GetContext().device, m_renderer.GetSceneRenderPass().GetColorFormat(), m_renderer.GetSceneRenderPass().GetDepthFormat(), set.MSAA_SAMPLES);
+    m_skydomeRenderer.Create(m_renderer.GetContext().device, m_renderer.GetContext().physicalDevice, m_renderer.GetSceneRenderPass().GetColorFormat(), m_renderer.GetSceneRenderPass().GetDepthFormat(), VK_SAMPLE_COUNT_1_BIT);
+
+    m_skydome.Create(m_renderer.GetContext().device, m_renderer.GetContext().physicalDevice);
+    m_skydome.SetSkyColors(SkyPreset::SOMALIA_DAWN);
 
     m_sprite1.Create(m_renderer.GetContext(), "gruvbox.ktx", set.MAX_FRAMES_IN_FLIGHT);
     m_sprite2.Create(m_renderer.GetContext(), "smile.ktx", set.MAX_FRAMES_IN_FLIGHT);
@@ -31,6 +35,9 @@ void Graphics::Shutdown() {
     m_spriteRenderer.Shutdown();
     m_textRenderer.Shutdown();
     m_modelRenderer.Destroy();
+    m_skydomeRenderer.Destroy();
+
+    m_skydome.Destroy();
 
     m_cube.Destroy();
 
@@ -57,10 +64,19 @@ void Graphics::Render(Settings& set, float deltaTime) {
         auto extent = m_renderer.GetRenderExtent();
         m_camera.SetPerspective(120.0, static_cast<double>(extent.width) / static_cast<double>(extent.height), 0.01, 1000000.0);
 
+        // POSZERZANIE HORYZONTU
+        m_skydome.HorizonBroadening(m_camera.GetPosition().y);
+
+        // SKYDOME
+        m_skydomeRenderer.Render(m_renderer.GetCommandBuffer(), m_skydome, m_camera);
+
+        // CUBE
         static Transform cubeTransform;
         //cubeTransform.rotation.y += 0.01;
         //cubeTransform.rotation.x += 0.015;
         m_modelRenderer.Render(m_renderer.GetCommandBuffer(), m_cube, m_camera, cubeTransform);
+
+
 
     m_renderer.EndScene();
     m_renderer.BeginOverlay(set);

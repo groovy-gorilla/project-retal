@@ -105,12 +105,12 @@ void System::Run() {
         // MOUSE ROTATE CAMERA
         double sensitivity = 0.002;
         m_graphics.GetCamera().AddRotation(
-            m_input.GetMouseDelta().y * sensitivity,
-            m_input.GetMouseDelta().x * sensitivity
+            -m_input.GetMouseDelta().y * sensitivity,
+            -m_input.GetMouseDelta().x * sensitivity
         );
 
         // WSAD
-        double moveSpeed = 5.0;
+        double moveSpeed = 50.0;
         double moveStep = moveSpeed * m_timer.GetDeltaTime();
         if (m_input.IsHeld(Action::Forward)) m_graphics.GetCamera().MoveForward(moveStep);
         if (m_input.IsHeld(Action::Backward)) m_graphics.GetCamera().MoveForward(-moveStep);

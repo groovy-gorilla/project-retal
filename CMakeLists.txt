@@ -107,6 +107,10 @@ add_executable(IndigoEngine main.cpp
         Engine/Graphics/Model/Model.cpp
         Engine/Graphics/Model/ModelRenderer.h
         Engine/Graphics/Model/ModelRenderer.cpp
+        Engine/Graphics/Skydome/Skydome.h
+        Engine/Graphics/Skydome/Skydome.cpp
+        Engine/Graphics/Skydome/SkydomeRenderer.h
+        Engine/Graphics/Skydome/SkydomeRenderer.cpp
 )
 
 

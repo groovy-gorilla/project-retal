@@ -25,8 +25,8 @@ void Input::Initialize() {
     m_bindings[Action::Left]            = SDL_SCANCODE_A;
     m_bindings[Action::Right]           = SDL_SCANCODE_D;
 
-    m_bindings[Action::Up]              = SDL_SCANCODE_E;
-    m_bindings[Action::Down]            = SDL_SCANCODE_Q;
+    m_bindings[Action::Up]              = SDL_SCANCODE_Q;
+    m_bindings[Action::Down]            = SDL_SCANCODE_E;
 
 }
 

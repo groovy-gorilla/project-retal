@@ -68,8 +68,9 @@ vec3 Camera::GetRight() const {
 
     return Normalize(
         Cross(
-            GetForward(),
-            vec3(0.0, 1.0, 0.0)
+            vec3(0.0, 1.0, 0.0),
+            GetForward()
+
         )
     );
 }
@@ -88,6 +89,8 @@ void Camera::MoveForward(double distance) {
 
     m_position += GetForward() * distance;
 
+    ClampPosition();
+
     UpdateView();
 }
 
@@ -95,18 +98,22 @@ void Camera::MoveRight(double distance) {
 
     m_position += GetRight() * distance;
 
+    ClampPosition();
+
     UpdateView();
 }
 
 void Camera::MoveUp(double distance) {
 
-    //m_position += GetUp() * distance;
     m_position.y += distance;
+
+    ClampPosition();
 
     UpdateView();
 }
 
 void Camera::AddRotation(double pitch, double yaw, double roll) {
+
     m_rotation.x += pitch;
     m_rotation.y += yaw;
     m_rotation.z += roll;
@@ -124,14 +131,15 @@ void Camera::AddPosition(const vec3& delta) {
 
     m_position += delta;
 
+    ClampPosition();
+
     UpdateView();
 }
 
+void Camera::ClampPosition() {
 
-
-
-
-
+    m_position.y = std::max(0.0, m_position.y);
+}
 
 
 

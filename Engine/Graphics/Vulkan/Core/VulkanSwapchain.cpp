@@ -67,11 +67,11 @@ void VulkanSwapchain::Create(VkPhysicalDevice physicalDevice, VkDevice device, V
 VkSurfaceFormatKHR VulkanSwapchain::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& formats) {
 
     // 1. Najlepszy wybór (sRGB)
-    for (const auto& f : formats) {
-        if (f.format == VK_FORMAT_B8G8R8A8_SRGB && f.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
-            return f;
-        }
-    }
+    //for (const auto& f : formats) {
+    //    if (f.format == VK_FORMAT_B8G8R8A8_SRGB && f.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+    //        return f;
+    //    }
+    //}
 
     // 2. Drugi wybór (UNORM + sRGB colorspace)
     for (const auto& f : formats) {

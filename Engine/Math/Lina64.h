@@ -1314,7 +1314,7 @@ namespace lina {
 
         fvec3 right =
             Normalize(
-                Cross(forward, up)
+                Cross(up, forward)
             );
 
         fvec3 cameraUp =
@@ -1363,7 +1363,7 @@ namespace lina {
 
         vec3 right =
             Normalize(
-                Cross(forward, up)
+                Cross(up, forward)
             );
 
         vec3 cameraUp =
@@ -1480,7 +1480,14 @@ namespace lina {
         return radians * (180.0 / PI_D);
     }
 
+    // LERP
+    inline float Lerp(float a, float b, float t) {
+        return a + (b - a) * t;
+    }
 
+    inline double Lerp(double a, double b, double t) {
+        return a + (b - a) * t;
+    }
 
 
 }

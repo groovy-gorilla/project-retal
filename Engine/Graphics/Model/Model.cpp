@@ -2,7 +2,7 @@
 
 void Model::CreateCube(VkDevice device, VkPhysicalDevice physicalDevice) {
 
-    std::vector<Vertex> vertices = {
+    std::vector<ModelVertex> vertices = {
 
         // Front
         {{-0.5f, -0.5f,  0.5f}, {1,0,0}},
@@ -56,14 +56,14 @@ void Model::CreateCube(VkDevice device, VkPhysicalDevice physicalDevice) {
     m_vertexBuffer.Create(
         device,
         physicalDevice,
-        sizeof(Vertex) * vertices.size(),
+        sizeof(ModelVertex) * vertices.size(),
         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
         VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
     );
 
-    auto* vertexData = static_cast<Vertex*>(m_vertexBuffer.Map());
-    memcpy(vertexData, vertices.data(), sizeof(Vertex) * vertices.size());
+    auto* vertexData = static_cast<ModelVertex*>(m_vertexBuffer.Map());
+    memcpy(vertexData, vertices.data(), sizeof(ModelVertex) * vertices.size());
     m_vertexBuffer.Unmap();
 
     m_indexBuffer.Create(

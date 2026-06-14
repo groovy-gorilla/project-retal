@@ -3,7 +3,7 @@
 #include "Graphics/Vulkan/Wrappers/Buffer.h"
 #include "Math/Lina64.h"
 
-struct Vertex {
+struct ModelVertex {
     lina::fvec3 position;
     lina::fvec3 color;
 };

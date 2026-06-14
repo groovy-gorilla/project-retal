@@ -53,6 +53,8 @@ public:
     void AddRotation(double pitch, double yaw, double roll = 0.0);
     void AddPosition(const vec3& delta);
 
+    void ClampPosition();
+
 private:
 
     CameraProjection m_projectionType;

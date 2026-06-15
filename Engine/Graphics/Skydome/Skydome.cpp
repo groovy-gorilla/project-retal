@@ -10,9 +10,9 @@ void Skydome::Create(VkDevice device, VkPhysicalDevice physicalDevice) {
         throw std::runtime_error("Cannot open skydome file: " + filename);
     }
 
-    Header header{};
+    SkydomeHeader header{};
 
-    in.read(reinterpret_cast<char*>(&header), sizeof(Header));
+    in.read(reinterpret_cast<char*>(&header), sizeof(SkydomeHeader));
 
     std::vector<SkydomeVertex> vertices(header.vertexCount);
     std::vector<uint32_t> indices(header.indexCount);

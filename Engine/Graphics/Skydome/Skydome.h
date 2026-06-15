@@ -3,7 +3,7 @@
 #include "Graphics/Vulkan/Wrappers/Buffer.h"
 #include "Math/Lina64.h"
 
-struct Header {
+struct SkydomeHeader {
     uint32_t vertexCount;
     uint32_t indexCount;
 };

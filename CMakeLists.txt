@@ -111,6 +111,10 @@ add_executable(IndigoEngine main.cpp
         Engine/Graphics/Skydome/Skydome.cpp
         Engine/Graphics/Skydome/SkydomeRenderer.h
         Engine/Graphics/Skydome/SkydomeRenderer.cpp
+        Engine/Graphics/Terrain/Terrain.h
+        Engine/Graphics/Terrain/Terrain.cpp
+        Engine/Graphics/Terrain/TerrainChunk.h
+        Engine/Graphics/Terrain/TerrainChunk.cpp
 )
 
 

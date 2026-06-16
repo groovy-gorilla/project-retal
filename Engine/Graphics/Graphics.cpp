@@ -11,6 +11,9 @@ void Graphics::Initialize(Display& display, Window& window, Settings& set) {
     m_textRenderer.Create(m_renderer.GetContext().device, m_renderer.GetOverlayRenderPass().GetColorFormat());
     m_modelRenderer.Create(m_renderer.GetContext().device, m_renderer.GetSceneRenderPass().GetColorFormat(), m_renderer.GetSceneRenderPass().GetDepthFormat(), set.MSAA_SAMPLES);
     m_skydomeRenderer.Create(m_renderer.GetContext().device, m_renderer.GetContext().physicalDevice, m_renderer.GetSceneRenderPass().GetColorFormat(), m_renderer.GetSceneRenderPass().GetDepthFormat(), VK_SAMPLE_COUNT_1_BIT);
+    m_terrainRenderer.Create(m_renderer.GetContext().device, m_renderer.GetSceneRenderPass().GetColorFormat(), m_renderer.GetSceneRenderPass().GetDepthFormat(),set.MSAA_SAMPLES);
+
+    m_terrain.Create(m_renderer.GetContext().device, m_renderer.GetContext().physicalDevice, TerrainPreset::SOMALIA);
 
     m_skydome.Create(m_renderer.GetContext().device, m_renderer.GetContext().physicalDevice);
     m_skydome.SetSkyColors(SkyPreset::SOMALIA_DAWN);
@@ -36,6 +39,9 @@ void Graphics::Shutdown() {
     m_textRenderer.Shutdown();
     m_modelRenderer.Destroy();
     m_skydomeRenderer.Destroy();
+    m_terrainRenderer.Destroy();
+
+    m_terrain.Destroy();
 
     m_skydome.Destroy();
 
@@ -70,11 +76,17 @@ void Graphics::Render(Settings& set, float deltaTime) {
         // SKYDOME
         m_skydomeRenderer.Render(m_renderer.GetCommandBuffer(), m_skydome, m_camera);
 
+        // TERRAIN
+        static Transform terrainTransform;
+        terrainTransform.scale.x = 1000;
+        terrainTransform.scale.z = 1000;
+        m_terrainRenderer.Render(m_renderer.GetCommandBuffer(), m_terrain, m_camera, terrainTransform);
+
         // CUBE
         static Transform cubeTransform;
         //cubeTransform.rotation.y += 0.01;
         //cubeTransform.rotation.x += 0.015;
-        m_modelRenderer.Render(m_renderer.GetCommandBuffer(), m_cube, m_camera, cubeTransform);
+        //m_modelRenderer.Render(m_renderer.GetCommandBuffer(), m_cube, m_camera, cubeTransform);
 
 
 

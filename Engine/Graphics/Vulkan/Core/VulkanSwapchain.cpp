@@ -66,22 +66,22 @@ void VulkanSwapchain::Create(VkPhysicalDevice physicalDevice, VkDevice device, V
 
 VkSurfaceFormatKHR VulkanSwapchain::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& formats) {
 
-    // 1. Najlepszy wybór (sRGB)
-    //for (const auto& f : formats) {
-    //    if (f.format == VK_FORMAT_B8G8R8A8_SRGB && f.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
-    //        return f;
-    //    }
-    //}
-
-    // 2. Drugi wybór (UNORM + sRGB colorspace)
+    // Format BGRA_UNORM
     for (const auto& f : formats) {
         if (f.format == VK_FORMAT_B8G8R8A8_UNORM && f.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
             return f;
         }
     }
 
-    // 3. Ostateczność
-    return formats[0];
+    // lub RGBA_UNORM
+    for (const auto& f : formats) {
+        if (f.format == VK_FORMAT_R8G8B8A8_UNORM && f.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+            return f;
+        }
+    }
+
+    // inaczej błąd
+    throw std::runtime_error("Your GPU does not support B8G8R8A8_UNORM or R8G8B8A_UNORM format.");
 
 }
 

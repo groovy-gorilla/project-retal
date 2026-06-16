@@ -1,9 +1,14 @@
 #pragma once
 
-#include "Graphics/Vulkan/Wrappers/Buffer.h"
+#include "../TerrainChunk/TerrainChunk.h"
 #include "Math/Lina64.h"
 
-enum TerrainPreset {
+struct TerrainChunkInstance {
+    TerrainChunk* chunk;
+    lina::vec2 position;
+};
+
+enum class TerrainPreset {
     SOMALIA,
     COLUMBIA,
     LIBIA,
@@ -11,18 +16,23 @@ enum TerrainPreset {
     SEA // sprawdź te nazwy
 };
 
-struct TerrainTile {
-    uint32_t tileId;
-    Tile tileModel;
-};
-
-
 class Terrain {
 public:
+    void Create(
+        VkDevice device,
+        VkPhysicalDevice physicalDevice,
+        TerrainPreset region);
 
+    void Destroy();
+
+    std::vector<TerrainChunk> GetChunks() const { return m_chunks; }
 
 private:
-    LoadSector();
+    VkDevice m_device = VK_NULL_HANDLE;
+    VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
 
+    std::vector<TerrainChunk> m_chunks;
+
+    void LoadChunks(TerrainPreset region);
 
 };

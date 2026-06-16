@@ -7,6 +7,7 @@
 #include "Skydome/SkydomeRenderer.h"
 #include "Sprite/Sprite.h"
 #include "Sprite/SpriteRenderer.h"
+#include "Terrain/TerrainRenderer.h"
 #include "Text/Text.h"
 #include "Text/TextRenderer.h"
 #include "Vulkan/VulkanRenderer.h"
@@ -38,6 +39,9 @@ private:
     TextRenderer m_textRenderer;
     ModelRenderer m_modelRenderer;
     SkydomeRenderer m_skydomeRenderer;
+    TerrainRenderer m_terrainRenderer;
+
+    Terrain m_terrain;
 
     Skydome m_skydome;
 

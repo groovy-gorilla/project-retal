@@ -9,9 +9,9 @@ struct ChunkHeader {
 };
 
 struct ChunkVertex {
-    lina::fvec3 position;
-    lina::fvec3 normal;
-    lina::fvec3 color;
+    float x, y, z;
+    float xn, yn, zn;
+    float r, g, b;
 };
 
 class TerrainChunk {

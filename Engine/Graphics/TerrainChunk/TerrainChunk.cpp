@@ -1,11 +1,13 @@
 #include "TerrainChunk.h"
 
+#include <cfloat>
+
 void TerrainChunk::Create(VkDevice device, VkPhysicalDevice physicalDevice, const std::filesystem::path& path) {
 
     std::ifstream in(path, std::ios::binary);
 
     if (!in) {
-        throw std::runtime_error("Cannot open skydome file: " + path.string());
+        throw std::runtime_error("Cannot open chunk file: " + path.string());
     }
 
     ChunkHeader header{};

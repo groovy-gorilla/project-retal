@@ -4,6 +4,8 @@
 
 Retal Engine is a custom 3D graphics engine written from scratch in C++ and powered by the Vulkan API. The project is being developed as the technological foundation for a modern remake of TFX (1993), one of the most influential combat flight simulators of the golden age of PC gaming.
 
+![Retal Engine Logo](retal-logo.png)
+
 The engine focuses on modern rendering techniques while maintaining the spirit of classic polygon-based 3D graphics that defined flight simulators of the 1990s. Indigo Engine aims to combine contemporary visual quality, performance, and scalability with the gameplay depth and atmosphere that made the genre memorable.
 
 ## Project Goals

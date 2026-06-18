@@ -6,17 +6,17 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -fno-omit
 set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fsanitize=address")
 
 cmake_minimum_required(VERSION 3.30)
-project(IndigoEngine)
+project(ProjectRetal)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
-set(EXECUTABLE_NAME IndigoEngine)
+set(EXECUTABLE_NAME ProjectRetal)
 
 find_package(Vulkan REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(SDL3 REQUIRED)
 
-add_executable(IndigoEngine main.cpp
+add_executable(ProjectRetal main.cpp
         Engine/Input/Input.h
         Engine/Input/Input.cpp
         Engine/Platform/SDL/SDLInput.h
@@ -121,29 +121,29 @@ add_executable(IndigoEngine main.cpp
 
 
 # include
-target_include_directories(IndigoEngine PRIVATE
+target_include_directories(ProjectRetal PRIVATE
     ${CMAKE_SOURCE_DIR}/Engine
     ${CMAKE_SOURCE_DIR}/
 )
 
 # link dirs
-target_link_directories(IndigoEngine PRIVATE
+target_link_directories(ProjectRetal PRIVATE
 
 )
 
 # link libs
-target_link_libraries(IndigoEngine PRIVATE
+target_link_libraries(ProjectRetal PRIVATE
         Vulkan::Vulkan
         SDL3::SDL3
         ktx
         udev
 )
 
-target_precompile_headers(IndigoEngine PRIVATE
+target_precompile_headers(ProjectRetal PRIVATE
     Engine/pch.h
 )
 
 # compile flags
-target_compile_options(IndigoEngine PRIVATE -g -O0 -mavx2 -mfma)
+target_compile_options(ProjectRetal PRIVATE -g -O0 -mavx2 -mfma)
 
 

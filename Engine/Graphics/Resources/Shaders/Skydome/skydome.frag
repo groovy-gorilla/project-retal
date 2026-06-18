@@ -40,12 +40,14 @@ void main() {
 
     vec3 color;
 
-    if (y > skyY) {
+    /*if (y > skyY) {
         float t = (y - skyY) / (zenithY - skyY);
         color = mix(skyColor, zenithColor, t);
-    } else if (y > upperHorizonY) {
-        float t = (y - upperHorizonY) / (skyY - upperHorizonY);
-        color = mix(upperHorizonColor, skyColor, t);
+    } else */
+
+    if (y > upperHorizonY) {
+        float t = (y - upperHorizonY) / (zenithY - upperHorizonY);
+        color = mix(upperHorizonColor, zenithColor, t);
     } else if (y > horizonY) {
         float t = (y - horizonY) / (upperHorizonY - horizonY);
         color = mix(horizonColor, upperHorizonColor, t);

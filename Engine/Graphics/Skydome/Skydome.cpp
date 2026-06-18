@@ -61,7 +61,7 @@ void Skydome::SetSkyColors(SkyPreset preset) {
 
     if (preset == SkyPreset::SOMALIA_DAWN) {
         m_skyColors.zenith          = {0.302, 0.318, 0.525, 1.0 };
-        m_skyColors.sky             = {0.302, 0.318, 0.525, 0.5 };
+        m_skyColors.sky             = {0.302, 0.318, 0.525, 0.4 };
         m_skyColors.upperHorizon    = {0.475, 0.475, 0.475, 0.05 };
         m_skyColors.horizon         = {0.573, 0.490, 0.380, 0.0 };
         m_skyColors.groundHorizon   = {0.443, 0.412, 0.365, -0.001 };

@@ -22,7 +22,7 @@ void Graphics::Initialize(Display& display, Window& window, Settings& set) {
     m_sprite2.Create(m_renderer.GetContext(), "smile.ktx", set.MAX_FRAMES_IN_FLIGHT);
 
     m_Font.Initialize(m_renderer.GetContext(), "Fonts/JetBrains.ktx", "Fonts/JetBrains.fda", TextureFilter::Linear, set);
-    m_Text.Initialize(m_renderer.GetContext(), m_Font, 32);
+    m_Text.Initialize(m_renderer.GetContext(), m_Font, 64);
     m_Text.SetSize(15.0f);
     m_Text.SetPosition(10, 10);
     m_Text.SetColor(lina::fvec4(1,1,0,1));
@@ -78,9 +78,7 @@ void Graphics::Render(Settings& set, float deltaTime) {
 
         // TERRAIN
         static Transform terrainTransform;
-        terrainTransform.scale.x = 1000;
-        terrainTransform.scale.z = 1000;
-        m_terrainRenderer.Render(m_renderer.GetCommandBuffer(), m_terrain, m_camera, terrainTransform);
+        //m_terrainRenderer.Render(m_renderer.GetCommandBuffer(), m_terrain, m_camera, terrainTransform);
 
         // CUBE
         static Transform cubeTransform;
@@ -112,7 +110,8 @@ void Graphics::Render(Settings& set, float deltaTime) {
            << std::fixed
            << std::setprecision(1)
            << m_fps.GetFrameTime()
-           << " ms";
+           << " ms\n\nAlt: "
+           << m_camera.GetPosition().y * 3.2808;
         m_Text.SetText(ss.str());
         m_textRenderer.Render(m_renderer.GetSync().GetCurrentFrame(), m_renderer.GetCommandBuffer(), m_Text, m_camera);
 
@@ -130,5 +129,7 @@ void Graphics::Recreate(Display& display, Window& window, Settings& set) {
 
     m_renderer.RecreateRenderer(display, window, set);
     m_modelRenderer.RecreatePipeline(m_renderer.GetContext().device, set.MSAA_SAMPLES);
+    m_skydomeRenderer.RecreatePipeline(m_renderer.GetContext().device, set.MSAA_SAMPLES);
+    m_terrainRenderer.RecreatePipeline(m_renderer.GetContext().device, set.MSAA_SAMPLES);
 
 }

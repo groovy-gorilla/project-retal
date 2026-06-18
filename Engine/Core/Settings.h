@@ -21,8 +21,8 @@ struct Settings {
     const char* TITLE                   = "IndigoEngine";
     std::string VERSION                 = "0.1.23";
 
-    uint32_t WIDTH                      = 1600;
-    uint32_t HEIGHT                     = 1200;
+    uint32_t WIDTH                      = 1200;
+    uint32_t HEIGHT                     = 900;
 
     bool FULLSCREEN                     = false;
     bool ASPECT_RATIO                   = true;

@@ -60,11 +60,12 @@ void Skydome::HorizonBroadening(float altitude) {
 void Skydome::SetSkyColors(SkyPreset preset) {
 
     if (preset == SkyPreset::SOMALIA_DAWN) {
-        m_skyColors.zenith          = {0.30, 0.31, 0.52, 1.0 };
-        m_skyColors.sky             = {0.30, 0.31, 0.52, 0.423 };
-        m_skyColors.horizon         = {0.57, 0.49, 0.38, 0.0 };
-        m_skyColors.groundHorizon   = {0.36, 0.33, 0.33, -0.005 };
-        m_skyColors.ground          = {0.34, 0.31, 0.30, -1.0 };
+        m_skyColors.zenith          = {0.302, 0.318, 0.525, 1.0 };
+        m_skyColors.sky             = {0.302, 0.318, 0.525, 0.5 };
+        m_skyColors.upperHorizon    = {0.475, 0.475, 0.475, 0.05 };
+        m_skyColors.horizon         = {0.573, 0.490, 0.380, 0.0 };
+        m_skyColors.groundHorizon   = {0.443, 0.412, 0.365, -0.001 };
+        m_skyColors.ground          = {0.349, 0.318, 0.302, -1.0 };
     }
 
 }

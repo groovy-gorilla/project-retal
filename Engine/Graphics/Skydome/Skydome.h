@@ -15,11 +15,12 @@ struct SkydomeVertex {
 };
 
 struct SkyColors {  // DOMYŚLNIE SOMALIA DAWN
-    lina::fvec4 zenith          = {0.30, 0.31, 0.52, 1.0 };
-    lina::fvec4 sky             = {0.30, 0.31, 0.52, 0.423 };
-    lina::fvec4 horizon         = {0.57, 0.49, 0.38, 0.0 };
-    lina::fvec4 groundHorizon   = {0.36, 0.33, 0.33, -0.005 };
-    lina::fvec4 ground          = {0.34, 0.31, 0.30, -1.0 };
+    lina::fvec4 zenith          = {};
+    lina::fvec4 sky             = {};
+    lina::fvec4 upperHorizon    = {};
+    lina::fvec4 horizon         = {};
+    lina::fvec4 groundHorizon   = {};
+    lina::fvec4 ground          = {};
 
     float horizonOffset         = 0.0f;
 

@@ -110,7 +110,7 @@ void System::Run() {
         );
 
         // WSAD
-        double moveSpeed = 50.0;
+        double moveSpeed = 300.0;
         double moveStep = moveSpeed * m_timer.GetDeltaTime();
         if (m_input.IsHeld(Action::Forward)) m_graphics.GetCamera().MoveForward(moveStep);
         if (m_input.IsHeld(Action::Backward)) m_graphics.GetCamera().MoveForward(-moveStep);

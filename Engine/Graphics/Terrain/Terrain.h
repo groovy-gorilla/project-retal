@@ -5,7 +5,8 @@
 
 struct TerrainChunkInstance {
     TerrainChunk* chunk;
-    lina::vec2 position;
+    lina::fvec3 position;
+    float rotation;
 };
 
 enum class TerrainPreset {
@@ -26,13 +27,16 @@ public:
     void Destroy();
 
     std::vector<TerrainChunk> GetChunks() const { return m_chunks; }
+    std::vector<TerrainChunkInstance> GetInstances() const { return m_instances; }
 
 private:
     VkDevice m_device = VK_NULL_HANDLE;
     VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
 
     std::vector<TerrainChunk> m_chunks;
+    std::vector<TerrainChunkInstance> m_instances;
 
     void LoadChunks(TerrainPreset region);
+    void Generate(uint32_t width, uint32_t height);
 
 };

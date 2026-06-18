@@ -13,5 +13,5 @@ layout(location = 0) out vec3 outColor;
 void main()
 {
     gl_Position = pushData.mvp * vec4(inPosition, 1.0);
-    outColor = inColor;
+    outColor = inColor * vec3(0.5, 0.5, 0.5);
 }

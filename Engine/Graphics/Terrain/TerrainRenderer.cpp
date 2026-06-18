@@ -63,29 +63,27 @@ void TerrainRenderer::Render(VkCommandBuffer commandBuffer, Terrain& terrain, co
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.Get());
 
     // MACIERZE
-    fmat4 modelMatrix = ToFloat(transform.GetLocalMatrix());
     fmat4 viewMatrix = ToFloat(camera.GetView());
     fmat4 projectionMatrix = ToFloat(camera.GetProjection());
 
-    TerrainPushConstants push{};
-    push.mvp = projectionMatrix * viewMatrix * modelMatrix;
+    for (const auto& instance : terrain.GetInstances()) {
 
-    vkCmdPushConstants(commandBuffer, m_pipeline.GetLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(TerrainPushConstants), &push);
+        fmat4 model = lina::Translate(instance.position) * lina::RotateY(lina::ToRadians(instance.rotation)) * lina::Scale(2700.0f, 0.0f, 2700.0f);
 
-    // ****************************
+        TerrainPushConstants push{};
+        push.mvp = projectionMatrix * viewMatrix * model;
 
-    for (auto& chunk : terrain.GetChunks()) {
+        vkCmdPushConstants(commandBuffer, m_pipeline.GetLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(TerrainPushConstants), &push);
 
-        VkBuffer vertexBuffer = chunk.GetVertexBuffer().Get();
+        VkBuffer vb = instance.chunk->GetVertexBuffer().Get();
 
         VkDeviceSize offset = 0;
 
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, &offset);
+        vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vb, &offset);
 
-        vkCmdBindIndexBuffer(commandBuffer, chunk.GetIndexBuffer().Get(), 0, VK_INDEX_TYPE_UINT32);
+        vkCmdBindIndexBuffer(commandBuffer, instance.chunk->GetIndexBuffer().Get(), 0, VK_INDEX_TYPE_UINT32);
 
-        vkCmdDrawIndexed(commandBuffer, chunk.GetIndexCount(), 1, 0, 0, 0);
-
+        vkCmdDrawIndexed(commandBuffer,instance.chunk->GetIndexCount(), 1, 0, 0, 0);
     }
 
 }

@@ -99,6 +99,7 @@ void Graphics::Render(Settings& set, float deltaTime) {
         time = 0.0f;
         seed = deltaTime;
     }
+
     m_renderer.BeginOverlay(set, seed);
 
         // TUTAJ OVERLAY

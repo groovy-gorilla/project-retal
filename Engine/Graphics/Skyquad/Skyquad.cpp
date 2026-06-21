@@ -28,10 +28,10 @@ void Skyquad::SetSkyColors(SkyquadPreset preset) {
     if (preset == SkyquadPreset::SOMALIA_DAWN) {
         m_skyColors.zenith          = {0.302, 0.318, 0.525, 1.0 };
         m_skyColors.sky             = {0.302, 0.318, 0.525, 0.5 };
-        m_skyColors.upperHorizon    = {0.475, 0.475, 0.475, 0.01 };
+        m_skyColors.upperHorizon    = {0.475, 0.475, 0.475, 0.02 };
         m_skyColors.horizon         = {0.573, 0.490, 0.380, 0.0 };
         m_skyColors.groundHorizon   = {0.443, 0.412, 0.365, -0.01 };
-        m_skyColors.ground          = {0.349, 0.318, 0.302, -0.5 };
+        m_skyColors.ground          = {0.349, 0.318, 0.302, -0.3 };
     }
 
 }

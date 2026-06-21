@@ -31,8 +31,8 @@ void ModelRenderer::Create(VkDevice device, VkFormat colorFormat, VkFormat depth
     m_pDesc.colorFormat = colorFormat;
     m_pDesc.depthFormat = depthFormat;
     m_pDesc.samples = samples;
-    m_pDesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Model/model_vert.spv";
-    m_pDesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/Model/model_frag.spv";
+    m_pDesc.vertexShader = "../Engine/Graphics/Model/Shaders/model_vert.spv";
+    m_pDesc.fragmentShader = "../Engine/Graphics/Model/Shaders/model_frag.spv";
     m_pDesc.bindingDescription = &binding;
     m_pDesc.attributeDescriptions = attributes;
     m_pDesc.attributeCount = 2;

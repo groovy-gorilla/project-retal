@@ -43,8 +43,8 @@ void TextRenderer::Create(VkDevice device, VkFormat colorFormat) {
     PipelineDesc pdesc;
     pdesc.descriptorLayout = m_descriptorLayout;
     pdesc.pushConstants = &pushConstants;
-    pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Text/text_vert.spv";
-    pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/Text/text_frag.spv";
+    pdesc.vertexShader = "../Engine/Graphics/Text/Shaders/text_vert.spv";
+    pdesc.fragmentShader = "../Engine/Graphics/Text/Shaders/text_frag.spv";
     pdesc.depthTest = false;
     pdesc.blending = true;
     pdesc.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;

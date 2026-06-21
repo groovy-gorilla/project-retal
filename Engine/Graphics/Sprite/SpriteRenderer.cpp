@@ -28,8 +28,8 @@ void SpriteRenderer::Create(VkDevice device, VkFormat colorFormat) {
     PipelineDesc pdesc;
     pdesc.descriptorLayout = m_descriptorLayout;
     pdesc.pushConstants = &pushConstants;
-    pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Sprite/sprite_vert.spv";
-    pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/Sprite/sprite_frag.spv";
+    pdesc.vertexShader = "../Engine/Graphics/Sprite/Shaders/sprite_vert.spv";
+    pdesc.fragmentShader = "../Engine/Graphics/Sprite/Shaders/sprite_frag.spv";
     pdesc.depthTest = false;
     pdesc.blending = true;
     pdesc.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;

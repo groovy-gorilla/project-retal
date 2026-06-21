@@ -1,10 +1,10 @@
-#include "SkydomeRenderer.h"
+#include "SkyquadRenderer.h"
 
 #include "Debug/ErrorDialog.h"
 #include "Graphics/Skydome/Skydome.h"
 #include "Graphics/Camera/Camera.h"
 
-void SkydomeRenderer::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkFormat colorFormat, VkFormat depthFormat, VkSampleCountFlagBits samples) {
+void SkyquadRenderer::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkFormat colorFormat, VkFormat depthFormat, VkSampleCountFlagBits samples) {
 
     m_device = device;
 
@@ -60,36 +60,23 @@ void SkydomeRenderer::Create(VkDevice device, VkPhysicalDevice physicalDevice, V
 
     vkUpdateDescriptorSets(device,1, &write, 0, nullptr);
 
-
-
-    static VkVertexInputBindingDescription binding{};
-    binding.binding = 0;
-    binding.stride = sizeof(SkydomeVertex);
-    binding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-    static VkVertexInputAttributeDescription attribute;
-    attribute.binding = 0;
-    attribute.location = 0;
-    attribute.format = VK_FORMAT_R32G32B32_SFLOAT;
-    attribute.offset = offsetof(SkydomeVertex, x);
-
     static VkPushConstantRange push{};
     push.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     push.offset = 0;
-    push.size = sizeof(SkydomePushConstants);
+    push.size = sizeof(SkyquadPushConstants);
 
     m_pDesc.colorFormat = colorFormat;
     m_pDesc.depthFormat = depthFormat;
     m_pDesc.samples = samples;
-    m_pDesc.vertexShader = "../Engine/Graphics/Skydome/Shaders/skydome_vert.spv";
-    m_pDesc.fragmentShader = "../Engine/Graphics/Skydome/Shaders/skydome_frag.spv";
-    m_pDesc.bindingDescription = &binding;
-    m_pDesc.attributeDescriptions = &attribute;
-    m_pDesc.attributeCount = 1;
-    m_pDesc.depthTest = true;
+    m_pDesc.vertexShader = "../Engine/Graphics/Skyquad/Shaders/skyquad_vert.spv";
+    m_pDesc.fragmentShader = "../Engine/Graphics/Skyquad/Shaders/skyquad_frag.spv";
+    m_pDesc.bindingDescription = nullptr;
+    m_pDesc.attributeDescriptions = nullptr;
+    m_pDesc.attributeCount = 0;
+    m_pDesc.depthTest = false;
     m_pDesc.depthWrite = false;
     m_pDesc.blending = false;
-    m_pDesc.cullMode = VK_CULL_MODE_FRONT_BIT;
+    m_pDesc.cullMode = VK_CULL_MODE_BACK_BIT;
     m_pDesc.frontFace = VK_FRONT_FACE_CLOCKWISE;
     m_pDesc.pushConstants = &push;
     m_pDesc.descriptorLayout = m_descriptorLayout;
@@ -100,7 +87,7 @@ void SkydomeRenderer::Create(VkDevice device, VkPhysicalDevice physicalDevice, V
 
 }
 
-void SkydomeRenderer::Destroy() {
+void SkyquadRenderer::Destroy() {
 
     m_skyBuffer.Destroy();
 
@@ -120,43 +107,30 @@ void SkydomeRenderer::Destroy() {
 
 }
 
-void SkydomeRenderer::Render(VkCommandBuffer commandBuffer, Skydome& skydome, const Camera& camera) {
+void SkyquadRenderer::Render(VkCommandBuffer commandBuffer, Skyquad& skyquad, const Camera& camera) {
 
     // MAPOWANIE KOLORÓW SKYDOME
-    auto* data = static_cast<SkyColors*>(m_skyBuffer.Map());
-    *data = skydome.GetSkyColors();
+    auto* data = static_cast<SkyquadColors*>(m_skyBuffer.Map());
+    *data = skyquad.GetSkyColors();
     m_skyBuffer.Unmap();
 
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.GetLayout(), 0, 1, &m_descriptorSet, 0, nullptr);
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.Get());
 
-    // MACIERZE
-    fmat4 modelMatrix = ToFloat(lina::Translate(camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z));
-    fmat4 viewMatrix = ToFloat(camera.GetView());
-    fmat4 projectionMatrix = ToFloat(camera.GetProjection());
-
-    SkydomePushConstants push{};
-    push.mvp = projectionMatrix * viewMatrix * modelMatrix;
+    SkyquadPushConstants push{};
     push.altitude = camera.GetPosition().y;
+    push.pitch = camera.GetRotation().x;
+    push.roll = camera.GetRotation().z;
+    push.fov = static_cast<float>(camera.GetFov());
 
-    vkCmdPushConstants(commandBuffer, m_pipeline.GetLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SkydomePushConstants), &push);
+    vkCmdPushConstants(commandBuffer, m_pipeline.GetLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SkyquadPushConstants), &push);
 
-    // ****************************
-
-    VkBuffer vertexBuffer = skydome.GetVertexBuffer().Get();
-
-    VkDeviceSize offset = 0;
-
-    vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, &offset);
-
-    vkCmdBindIndexBuffer(commandBuffer, skydome.GetIndexBuffer().Get(), 0, VK_INDEX_TYPE_UINT32);
-
-    vkCmdDrawIndexed(commandBuffer, skydome.GetIndexCount(), 1, 0, 0, 0);
+    vkCmdDraw(commandBuffer, 3, 1, 0 ,0);
 
 }
 
-void SkydomeRenderer::RecreatePipeline(VkDevice device, VkSampleCountFlagBits samples) {
+void SkyquadRenderer::RecreatePipeline(VkDevice device, VkSampleCountFlagBits samples) {
 
     m_pipeline.Destroy(device);
 
@@ -168,7 +142,7 @@ void SkydomeRenderer::RecreatePipeline(VkDevice device, VkSampleCountFlagBits sa
     static VkPushConstantRange push{};
     push.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     push.offset = 0;
-    push.size = sizeof(SkydomePushConstants);
+    push.size = sizeof(SkyquadPushConstants);
 
     m_pDesc.samples = samples;
     m_pDesc.bindingDescription = &binding;

@@ -28,8 +28,8 @@ void OverlayPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExt
     pdesc.colorFormat = colorFormat;
     pdesc.depthFormat = VK_FORMAT_UNDEFINED;
     pdesc.descriptorLayout = m_descriptor.GetLayout();
-    pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Overlay/overlay_vert.spv";
-    pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/Overlay/overlay_frag.spv";
+    pdesc.vertexShader = "../Engine/Graphics/Vulkan/OverlayPass/Shaders/overlay_vert.spv";
+    pdesc.fragmentShader = "../Engine/Graphics/Vulkan/OverlayPass/Shaders/overlay_frag.spv";
     pdesc.depthTest = false;
     pdesc.blending = false;
 

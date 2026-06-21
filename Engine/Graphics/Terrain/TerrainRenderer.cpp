@@ -36,8 +36,8 @@ void TerrainRenderer::Create(VkDevice device, VkFormat colorFormat, VkFormat dep
     m_pDesc.colorFormat = colorFormat;
     m_pDesc.depthFormat = depthFormat;
     m_pDesc.samples = samples;
-    m_pDesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Terrain/terrain_vert.spv";
-    m_pDesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/Terrain/terrain_frag.spv";
+    m_pDesc.vertexShader = "../Engine/Graphics/Terrain/Shaders/terrain_vert.spv";
+    m_pDesc.fragmentShader = "../Engine/Graphics/Terrain/Shaders/terrain_frag.spv";
     m_pDesc.bindingDescription = &binding;
     m_pDesc.attributeDescriptions = attributes;
     m_pDesc.attributeCount = 3;

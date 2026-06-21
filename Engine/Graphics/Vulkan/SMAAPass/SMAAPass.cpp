@@ -312,8 +312,8 @@ void SMAAPass::CreateEdgePipeline(VkDevice device, VkExtent2D extent) {
     pdesc.colorFormat = m_edgeColor.GetFormat();
     pdesc.depthFormat = VK_FORMAT_UNDEFINED;
     pdesc.descriptorLayout = m_edgeDescriptorLayout;
-    pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/SMAA/smaa_edge_vert.spv";
-    pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/SMAA/smaa_edge_frag.spv";
+    pdesc.vertexShader = "../Engine/Graphics/Vulkan/SMAAPass/Shaders/smaa_edge_vert.spv";
+    pdesc.fragmentShader = "../Engine/Graphics/Vulkan/SMAAPass/Shaders/smaa_edge_frag.spv";
     pdesc.depthTest = false;
     pdesc.blending = false;
     pdesc.vertSpec = &specializationInfo;
@@ -407,8 +407,8 @@ void SMAAPass::CreateBlendPipeline(VkDevice device, VkExtent2D extent) {
     pdesc.colorFormat = m_blendColor.GetFormat();
     pdesc.depthFormat = VK_FORMAT_UNDEFINED;
     pdesc.descriptorLayout = m_blendDescriptorLayout;
-    pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/SMAA/smaa_blend_vert.spv";
-    pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/SMAA/smaa_blend_frag.spv";
+    pdesc.vertexShader = "../Engine/Graphics/Vulkan/SMAAPass/Shaders/smaa_blend_vert.spv";
+    pdesc.fragmentShader = "../Engine/Graphics/Vulkan/SMAAPass/Shaders/smaa_blend_frag.spv";
     pdesc.depthTest = false;
     pdesc.blending = false;
     pdesc.vertSpec = &specializationInfo;
@@ -495,8 +495,8 @@ void SMAAPass::CreateNeighborhoodPipeline(VkDevice device, VkExtent2D extent) {
     pdesc.colorFormat = m_color.GetFormat();
     pdesc.depthFormat = VK_FORMAT_UNDEFINED;
     pdesc.descriptorLayout = m_neighborhoodDescriptorLayout;
-    pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/SMAA/smaa_neighborhood_vert.spv";
-    pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/SMAA/smaa_neighborhood_frag.spv";
+    pdesc.vertexShader = "../Engine/Graphics/Vulkan/SMAAPass/Shaders/smaa_neighborhood_vert.spv";
+    pdesc.fragmentShader = "../Engine/Graphics/Vulkan/SMAAPass/Shaders/smaa_neighborhood_frag.spv";
     pdesc.depthTest = false;
     pdesc.blending = false;
     pdesc.vertSpec = &specializationInfo;

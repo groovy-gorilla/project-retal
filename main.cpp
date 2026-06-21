@@ -4,6 +4,8 @@
 
 int main() {
 
+    srand(time(NULL));
+
     System app;
 
     try {

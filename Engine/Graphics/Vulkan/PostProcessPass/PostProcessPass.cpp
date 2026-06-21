@@ -39,8 +39,8 @@ void PostProcessPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, V
     pdesc.depthFormat = VK_FORMAT_UNDEFINED;
     pdesc.descriptorLayout = m_descriptor.GetLayout();
     pdesc.pushConstants = &pushConstant;
-    pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Post/post_vert.spv";
-    pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/Post/post_frag.spv";
+    pdesc.vertexShader = "../Engine/Graphics/Vulkan/PostProcessPass/Shaders/post_vert.spv";
+    pdesc.fragmentShader = "../Engine/Graphics/Vulkan/PostProcessPass/Shaders/post_frag.spv";
     pdesc.depthTest = false;
     pdesc.blending = false;
 
@@ -51,7 +51,7 @@ void PostProcessPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, V
 
 }
 
-void PostProcessPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VkExtent2D extent, Settings& settings, float exposure) {
+void PostProcessPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer, RenderTarget& inputColor, VkExtent2D extent, Settings& settings, float exposure, float time) {
 
     // UPDATE DESCRIPTOR
     VkSampler sampler = settings.FILTER == TextureFilter::Nearest ? inputColor.GetNearestSampler() : inputColor.GetLinearSampler();
@@ -101,6 +101,8 @@ void PostProcessPass::Render(uint32_t frameIndex, VkCommandBuffer commandBuffer,
     PC.hdrEnable = settings.HDR;
     PC.exposure = exposure;
     PC.dithering = settings.DITHERING;
+    PC.vga = settings.VGA_MODE;
+    PC.time = time;
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline.Get());
     vkCmdPushConstants(commandBuffer, m_pipeline.GetLayout(), VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PostPushConstants), &PC);

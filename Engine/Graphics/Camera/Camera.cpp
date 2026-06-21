@@ -7,6 +7,7 @@ Camera::Camera() {
     m_rotation = vec3(0.0, 0.0, 0.0);
     m_projection = mat4(1.0);
     m_view = mat4(1.0);
+    m_fov = ToRadians(45.0);
 
     UpdateView();
 
@@ -27,6 +28,8 @@ void Camera::SetRotation(const vec3& rotation) {
 }
 
 void Camera::SetPerspective(double fov, double aspect, double nearPlane, double farPlane) {
+
+    m_fov = fov;
 
     m_projectionType = CameraProjection::Perspective;
     m_projection = Perspective(fov, aspect, nearPlane, farPlane);

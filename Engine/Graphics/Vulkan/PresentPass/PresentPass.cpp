@@ -24,8 +24,8 @@ void PresentPass::Create(VkDevice device, VkFormat swapchainFormat, Settings& se
     pdesc.colorFormat = swapchainFormat;
     pdesc.depthFormat = VK_FORMAT_UNDEFINED;
     pdesc.descriptorLayout = m_descriptor.GetLayout();
-    pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/Present/present_vert.spv";
-    pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/Present/present_frag.spv";
+    pdesc.vertexShader = "../Engine/Graphics/Vulkan/PresentPass/Shaders/present_vert.spv";
+    pdesc.fragmentShader = "../Engine/Graphics/Vulkan/PresentPass/Shaders/present_frag.spv";
     pdesc.depthTest = false;
     pdesc.blending = false;
 

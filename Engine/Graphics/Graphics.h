@@ -5,6 +5,8 @@
 #include "Input/Input.h"
 #include "Model/ModelRenderer.h"
 #include "Skydome/SkydomeRenderer.h"
+#include "Skyquad/Skyquad.h"
+#include "Skyquad/SkyquadRenderer.h"
 #include "Sprite/Sprite.h"
 #include "Sprite/SpriteRenderer.h"
 #include "Terrain/TerrainRenderer.h"
@@ -38,12 +40,12 @@ private:
     SpriteRenderer m_spriteRenderer;
     TextRenderer m_textRenderer;
     ModelRenderer m_modelRenderer;
-    SkydomeRenderer m_skydomeRenderer;
+    SkyquadRenderer m_skyquadRenderer;
     TerrainRenderer m_terrainRenderer;
 
     Terrain m_terrain;
 
-    Skydome m_skydome;
+    Skyquad m_skyquad;
 
     Model m_cube;
 

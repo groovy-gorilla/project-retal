@@ -16,6 +16,7 @@ void Input::Initialize() {
     m_bindings[Action::Exposure]        = SDL_SCANCODE_X;
     m_bindings[Action::HDR]             = SDL_SCANCODE_H;
     m_bindings[Action::Dithering]       = SDL_SCANCODE_C;
+    m_bindings[Action::Vga]             = SDL_SCANCODE_K;
     m_bindings[Action::ResolutionUp]    = SDL_SCANCODE_EQUALS;
     m_bindings[Action::ResolutionDown]  = SDL_SCANCODE_MINUS;
     m_bindings[Action::ToggleMouse]     = SDL_SCANCODE_1;

@@ -3,6 +3,7 @@
 #include "Graphics/Vulkan/Wrappers/Descriptor.h"
 #include "Graphics/Vulkan/Wrappers/Pipeline.h"
 #include "Graphics/Vulkan/Wrappers/RenderTarget.h"
+#include "Math/Lina64.h"
 
 struct Settings;
 
@@ -10,6 +11,8 @@ struct PostPushConstants {
     int hdrEnable;
     float exposure;
     int dithering;
+    int vga;
+    float time;
 };
 
 class PostProcessPass {
@@ -29,7 +32,8 @@ public:
         RenderTarget& inputColor,
         VkExtent2D extent,
         Settings& settings,
-        float exposure);
+        float exposure,
+        float time);
 
     RenderTarget& GetColor() { return m_color; }
 

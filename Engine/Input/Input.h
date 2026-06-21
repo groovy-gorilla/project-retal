@@ -12,6 +12,7 @@ enum class Action {
     Exposure,
     HDR,
     Dithering,
+    Vga,
     ResolutionUp,
     ResolutionDown,
     ToggleMouse,

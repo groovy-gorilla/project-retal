@@ -1,7 +1,7 @@
 #version 450
 
 layout(location = 0) in vec3 worldPos;
-layout(location = 1) in vec3 direction;
+layout(location = 1) in float altitude;
 
 layout(location = 0) out vec4 fragColor;
 
@@ -35,33 +35,50 @@ void main() {
     float groundHorizonY  = skyData.groundHorizon.w;
     float groundY         = skyData.ground.w;
 
-    vec3 dir = normalize(worldPos);
-    float y = dir.y + skyData.horizonOffset;
+
+    float y = normalize(worldPos).y + skyData.horizonOffset;
 
     vec3 color;
 
-    /*if (y > skyY) {
-        float t = (y - skyY) / (zenithY - skyY);
-        color = mix(skyColor, zenithColor, t);
-    } else */
+    // ZENITH
+    if (y > skyY) {
+        color = zenithColor;
+    }
 
-    if (y > upperHorizonY) {
-        float t = (y - upperHorizonY) / (zenithY - upperHorizonY);
-        color = mix(upperHorizonColor, zenithColor, t);
-    } else if (y > horizonY) {
+    // SKY -> ZENITH
+    else if (y > upperHorizonY) {
+        float t = (y - upperHorizonY) / (skyY - upperHorizonY);
+        t = 1.0 - pow(1.0 - t, 2.5);
+        color = mix(upperHorizonColor, skyColor, t);
+    }
+
+    // HORIZON -> SKY
+    else if (y > horizonY) {
         float t = (y - horizonY) / (upperHorizonY - horizonY);
         color = mix(horizonColor, upperHorizonColor, t);
-    } else if (y > groundHorizonY) {
+    }
+
+    // GROUND HORIZON -> HORIZON
+    else if (y > groundHorizonY) {
         float t = (y - groundHorizonY) / (horizonY - groundHorizonY);
         color = mix(groundHorizonColor, horizonColor, t);
-    } else {
+    }
+
+    // GROUND -> GROUND HORIZON
+    else if (y > groundY){
         float t = (y - groundY) / (groundHorizonY - groundY);
+
+        float h = clamp(altitude / 20000.0f, 0.0f, 1.0f);
+        float exponent = 8.0f - 6.0f * sqrt(h);
+
+        t = pow(t, exponent);
         color = mix(groundColor, groundHorizonColor, t);
     }
 
-
-    float noise = rand(direction * 1000);
-    color += (noise - 0.5) / 256.0;
+    // NADIR
+    else {
+        color = groundColor;
+    }
 
     fragColor = vec4(color, 1.0);
 }

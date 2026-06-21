@@ -121,7 +121,7 @@ void VulkanRenderer::EndScene() {
 
 }
 
-void VulkanRenderer::BeginOverlay(Settings& set) {
+void VulkanRenderer::BeginOverlay(Settings& set, float time) {
 
     // ANTIALIASING LOGIC
     switch(set.AA_MODE) {
@@ -162,7 +162,7 @@ void VulkanRenderer::BeginOverlay(Settings& set) {
     }
 
     // POST PASS
-    m_postRenderPass.Render(m_sync.GetCurrentFrame(), m_currentCommandBuffer, *m_currentColor, m_renderExtent, set, m_exposure);
+    m_postRenderPass.Render(m_sync.GetCurrentFrame(), m_currentCommandBuffer, *m_currentColor, m_renderExtent, set, m_exposure, time);
     m_currentColor = &m_postRenderPass.GetColor();
 
     // OVERLAY PASS

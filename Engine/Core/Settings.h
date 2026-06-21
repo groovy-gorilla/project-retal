@@ -37,6 +37,9 @@ struct Settings {
     // DITHERING
     bool DITHERING                      = false;
 
+    // VGA MODE
+    bool VGA_MODE                       = false;
+
     // ANTIALIASING
     AntiAliasing AA_MODE                = AntiAliasing::None;
 

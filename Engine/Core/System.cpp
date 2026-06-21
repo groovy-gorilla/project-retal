@@ -141,6 +141,11 @@ void System::Run() {
             m_desc.DITHERING = !m_desc.DITHERING;
         }
 
+        // VGA MODE
+        if (m_input.IsPressed(Action::Vga)) {
+            m_desc.VGA_MODE = !m_desc.VGA_MODE;
+        }
+
         // ASPECT RATIO
         if (m_input.IsPressed(Action::Aspect)) {
             m_desc.ASPECT_RATIO = !m_desc.ASPECT_RATIO;

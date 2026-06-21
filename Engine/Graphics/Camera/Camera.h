@@ -47,6 +47,7 @@ public:
     vec3 GetForward() const;
     vec3 GetRight() const;
     vec3 GetUp() const;
+    double GetFov() const { return m_fov; }
     void MoveForward(double distance);
     void MoveRight(double distance);
     void MoveUp(double distance);
@@ -64,5 +65,7 @@ private:
 
     mat4 m_projection;
     mat4 m_view;
+
+    double m_fov;
 
 };

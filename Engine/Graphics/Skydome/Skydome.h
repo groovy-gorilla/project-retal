@@ -29,7 +29,7 @@ struct SkyColors {  // DOMYŚLNIE SOMALIA DAWN
     float pad2;
 };
 
-enum SkyPreset {
+enum class SkyPreset {
     SOMALIA_DAWN,
     SOMALIA_DAYTIME_CLEAR_SKY,
     SOMALIA_DAYTIME_CLOUD,

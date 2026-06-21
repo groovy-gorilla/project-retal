@@ -44,7 +44,7 @@ public:
     void BeginFrame();
     void BeginScene();
     void EndScene();
-    void BeginOverlay(Settings& set);
+    void BeginOverlay(Settings& set, float time);
     void EndOverlay();
     void RenderPresent(Settings& settings);
     void EndFrame(Settings& settings);

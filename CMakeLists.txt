@@ -117,6 +117,10 @@ add_executable(ProjectRetal main.cpp
         Engine/Graphics/TerrainChunk/TerrainChunk.cpp
         Engine/Graphics/Terrain/TerrainRenderer.h
         Engine/Graphics/Terrain/TerrainRenderer.cpp
+        Engine/Graphics/Skyquad/SkyquadRenderer.h
+        Engine/Graphics/Skyquad/Skyquad.h
+        Engine/Graphics/Skyquad/Skyquad.cpp
+        Engine/Graphics/Skyquad/SkyquadRenderer.cpp
 )
 
 

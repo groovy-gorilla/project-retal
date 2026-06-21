@@ -30,8 +30,8 @@ void SSAAPass::Create(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent
     pdesc.colorFormat = m_color.GetFormat();
     pdesc.depthFormat = VK_FORMAT_UNDEFINED;
     pdesc.descriptorLayout = m_descriptor.GetLayout();
-    pdesc.vertexShader = "../Engine/Graphics/Resources/Shaders/SSAA/ssaa_vert.spv";
-    pdesc.fragmentShader = "../Engine/Graphics/Resources/Shaders/SSAA/ssaa_frag.spv";
+    pdesc.vertexShader = "../Engine/Graphics/Vulkan/SSAAPass/Shaders/ssaa_vert.spv";
+    pdesc.fragmentShader = "../Engine/Graphics/Vulkan/SSAAPass/Shaders/ssaa_frag.spv";
     pdesc.depthTest = false;
     pdesc.blending = false;
 

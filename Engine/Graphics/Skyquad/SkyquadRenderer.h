@@ -1,14 +1,17 @@
 #pragma once
-#include "Skydome.h"
+#include "Skyquad.h"
 #include "Graphics/Camera/Camera.h"
 #include "Graphics/Vulkan/Wrappers/Pipeline.h"
+#include "Graphics/Vulkan/Wrappers/Buffer.h"
 
-struct SkydomePushConstants {
-    lina::fmat4 mvp;
+struct SkyquadPushConstants {
     float altitude;
+    float pitch;
+    float roll;
+    float fov;
 };
 
-class SkydomeRenderer {
+class SkyquadRenderer {
 public:
     void Create(
         VkDevice device,
@@ -22,7 +25,7 @@ public:
 
     void Render(
         VkCommandBuffer commandBuffer,
-        Skydome& skydome,
+        Skyquad& skyquad,
         const Camera& camera
     );
 
